@@ -1,0 +1,23 @@
+{
+  "name": "rogalia",
+  "version": "1.0.0",
+  "description": "Rogalia: html5 sandbox mmorpg http://rogalia.ru",
+  "main": " ",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TatriX/rogalia.git"
+  },
+  "author": "TatriX",
+  "bugs": {
+    "url": "https://github.com/TatriX/rogalia/issues"
+  },
+  "homepage": "http://rogalia.ru",
+  "devDependencies": {
+    "webpack": "^1.12.11"
+  }
+}
