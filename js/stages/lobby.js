@@ -7,8 +7,7 @@ var dom = require('../dom.js')
 var cnf = require('../config.js')
 var Character = require('../character.js')
 
-window.lobbyStage = lobbyStage
-Stage.add(lobbyStage);
+Stage.add(module, lobbyStage)
 
 function lobbyStage(data) {
     /*jshint validthis:true */
@@ -113,7 +112,7 @@ function lobbyStage(data) {
         contents.push(quit);
     }
 
-    var panel = new Panel("lobby", "", contents);
+    var panel = this.panel = new Panel("lobby", "", contents);
     panel.hideCloseButton();
     panel.show(cnf.LOBBY_X + game.offset.x, cnf.LOBBY_Y + game.offset.y);
 
@@ -124,14 +123,15 @@ function lobbyStage(data) {
         if (avatars.length > 0)
             avatars[0].click();
     }
+    this.fastenter = fastenter
 
     window.addEventListener("keypress", fastenter);
+}
 
-    this.end = function() {
-        window.removeEventListener("keypress", fastenter);
-        panel.close();
-    };
-    this.sync = function(data) {
-        game.setStage("loading", data);
-    };
+lobbyStage.prototype.end = function() {
+    window.removeEventListener("keypress", this.fastenter);
+    this.panel.close();
+}
+lobbyStage.prototype.sync = function(data) {
+    game.setStage("loading", data);
 }

@@ -5,8 +5,7 @@ var Character = require('../character.js')
 var Entity = require('../entity.js')
 var cnf = require('../config.js')
 
-Stage.add(loadingStage);
-window.loadingStage = loadingStage
+Stage.add(module, loadingStage)
 
 function loadingStage(data) {
     /*jshint validthis:true */
@@ -29,43 +28,43 @@ function loadingStage(data) {
     Entity.recipes = data.Recipes;
     Entity.metaGroups = data.MetaGroups;
     game.initTime(data.Time, data.Tick);
+}
 
-    this.sync = function(data) {
-        //TODO: don't send them!
-        // ignore non init packets
-        if (!("Location" in data))
-            return;
-        game.setTime(data.Time);
-        loader.ready(function() {
-            Entity.sync(data.Entities);
-            Character.sync(data.Players);
-            Character.sync(data.Mobs);
-            Character.sync(data.NPCs);
-            game.map.sync(data.Location);
+loadingStage.prototype.sync = function(data) {
+    //TODO: don't send them!
+    // ignore non init packets
+    if (!("Location" in data))
+        return;
+    game.setTime(data.Time);
+    loader.ready(function() {
+        Entity.sync(data.Entities);
+        Character.sync(data.Players);
+        Character.sync(data.Mobs);
+        Character.sync(data.NPCs);
+        game.map.sync(data.Location);
 
-            var wait = setInterval(function() {
-                if (!game.map.ready)
-                    return;
-                var ready = game.entities.every(function(e) {
-                    return e.sprite.ready;
-                });
+        var wait = setInterval(function() {
+            if (!game.map.ready)
+                return;
+            var ready = game.entities.every(function(e) {
+                return e.sprite.ready;
+            });
 
-                if (!ready)
-                    return;
+            if (!ready)
+                return;
 
-                clearInterval(wait);
-                game.setStage("main", data);
-            }, 100);
-        });
-    };
+            clearInterval(wait);
+            game.setStage("main", data);
+        }, 100);
+    });
+}
 
-    this.draw = function() {
-        game.ctx.clear();
-        game.ctx.fillStyle = "#fff";
-        game.forceDrawStrokedText(
-            game.loader.status,
-            cnf.CELL_SIZE,
-            cnf.CELL_SIZE
-        );
-    };
+loadingStage.prototype.draw = function() {
+    game.ctx.clear();
+    game.ctx.fillStyle = "#fff";
+    game.forceDrawStrokedText(
+        game.loader.status,
+        cnf.CELL_SIZE,
+        cnf.CELL_SIZE
+    );
 }

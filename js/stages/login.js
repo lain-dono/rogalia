@@ -6,15 +6,14 @@ var Panel = require('../panel.js')
 var cnf = require('../config.js')
 var util = require('../util.js')
 
-Stage.add(loginStage);
-window.loginStage = loginStage
+Stage.add(module, loginStage);
 
 function loginStage() {
     /*jshint validthis:true */
 
     var signing = false;
     var registering = false;
-    var autoLogin = false;
+    this.autoLogin = false;
     var error = false;
     // var captcha = null;
     var invite = null;
@@ -58,7 +57,7 @@ function loginStage() {
 
 
     if(login && password && !game.inVK()) {
-        autoLogin = true;
+        this.autoLogin = true;
         signin();
     }
 
@@ -137,7 +136,7 @@ function loginStage() {
         signupButton,
         lang,
     ]);
-    var panel = new Panel("login-panel", "", [form]);
+    var panel = this.panel = new Panel("login-panel", "", [form]);
 
     panel.hideCloseButton();
     panel.show(cnf.LOBBY_X + game.offset.x, cnf.LOBBY_Y + game.offset.y);
@@ -177,18 +176,18 @@ function loginStage() {
             panel.show();
         };
     }
+}
 
-    this.sync = function (data) {
-        if (data.Warning) {
-            localStorage.removeItem("password");
-            if (!autoLogin)
-                game.alert(data.Warning);
-            panel.show();
-            autoLogin = false;
-        }
-    };
+loginStage.prototype.sync = function (data) {
+    if (data.Warning) {
+        localStorage.removeItem("password");
+        if (!this.autoLogin)
+            game.alert(data.Warning);
+        this.panel.show();
+        this.autoLogin = false;
+    }
+}
 
-    this.end = function() {
-        panel.close();
-    };
+loginStage.prototype.end = function() {
+    this.panel.close();
 }

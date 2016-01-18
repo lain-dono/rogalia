@@ -2,12 +2,12 @@
 
 var Stage = require('./stage.js')
 
-Stage.add(connectingStage);
-window.connectingStage = connectingStage
+Stage.add(module, connectingStage);
 
 function connectingStage() {
     /*jshint validthis:true */
 
     game.network.run();
-    this.draw = Stage.makeEllipsisDrawer();
 }
+
+connectingStage.prototype.draw = Stage.makeEllipsisDrawer();

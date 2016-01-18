@@ -1,27 +1,32 @@
 'use strict'
 
+var PIXI = require('pixi.js')
+
 var cnf = require('../config.js')
 
-function Stage() {}
+function Stage() {
+    PIXI.Container.call(this)
+}
 
-module.exports = Stage
+Stage.prototype = Object.create(PIXI.Container.prototype);
+Stage.prototype.constructor = Stage;
+module.exports = Stage;
 
-Stage.prototype = {
-    name: "",
-    start: function(){},
-    end: function(){},
-    update: function(){},
-    draw: function(){},
-    sync: function(data) {},
-
-};
+//Stage.prototype.name   = ""
+Stage.prototype.start  = function() {}
+Stage.prototype.end    = function() {}
+Stage.prototype.update = function() {}
+Stage.prototype.draw   = function() {}
+Stage.prototype.sync   = function(data) {}
 
 Stage.makeEllipsisDrawer = function() {
-    var ellipsis = 0;
-    var ellipsisMax = 5;
-    var period = 300;
-    var start = Date.now() - (period - 100) ;
+    var ellipsis = 0
+    var ellipsisMax = 5
+    var period = 30
+    var start
     return function() {
+        if (start === undefined)
+            start = Date.now() - (period - 100);
         var now = Date.now();
         if (now - start < period)
             return;
@@ -36,6 +41,8 @@ Stage.makeEllipsisDrawer = function() {
     };
 };
 
-Stage.add = function(stage) {
+Stage.add = function(module, stage) {
     stage.prototype = Object.create(Stage.prototype);
+    stage.prototype.constructor = stage;
+    module.exports = window[stage.name] = stage
 };

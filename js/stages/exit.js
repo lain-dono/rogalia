@@ -3,8 +3,7 @@
 var Stage = require('./stage.js')
 var cnf = require('../config.js')
 
-Stage.add(exitStage);
-window.exitStage = exitStage
+Stage.add(module, exitStage)
 
 function exitStage(message) {
     message = message || T("Refresh page...");
@@ -35,3 +34,4 @@ function exitStage(message) {
     help.appendChild(reload);
     game.world.appendChild(help);
 }
+

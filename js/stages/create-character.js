@@ -5,8 +5,7 @@ var dom = require('../dom.js')
 var Panel = require('../panel.js')
 var cnf = require('../config.js')
 
-window.createCharacterStage = createCharacterStage
-Stage.add(createCharacterStage);
+Stage.add(module, createCharacterStage);
 
 function createCharacterStage () {
     /*jshint validthis:true */
@@ -182,18 +181,18 @@ function createCharacterStage () {
         submit,
         back,
     ]);
-    var panel = new Panel("create-character", "Create character", [form]);
+    var panel = this.panel = new Panel("create-character", "Create character", [form]);
     panel.hideCloseButton();
     panel.show(cnf.LOBBY_X + game.offset.x, cnf.LOBBY_Y + game.offset.y);
     name.focus();
+}
 
-    this.sync = function(data) {
-        if (data.Warning)
-            game.alert(data.Warning);
-        else
-            game.setStage("loading", data);
-    };
-    this.end = function() {
-        panel.close();
-    };
+createCharacterStage.prototype.sync = function(data) {
+    if (data.Warning)
+        game.alert(data.Warning);
+    else
+        game.setStage("loading", data);
+}
+createCharacterStage.prototype.end = function() {
+    this.panel.close();
 }
