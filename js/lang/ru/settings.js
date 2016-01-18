@@ -1,4 +1,7 @@
-﻿Settings.descriptions = {
+﻿'use strict'
+
+//Settings.descriptions = {
+module.exports = {
     character: {
         pathfinding: [
             "Поиск пути",

@@ -1,4 +1,6 @@
-var dom = {
+'use strict'
+
+var dom = module.exports = {
     tag: function(tag, classOrId, cfg) {
         var elem = document.createElement(tag);
 
@@ -72,7 +74,7 @@ var dom = {
         var select = this.tag("select", classOrId);
         options && options.forEach(function(option) {
             select.appendChild(option);
-        });
+        }); // jshint ignore:line
         return select;
     },
     option: function(text) {

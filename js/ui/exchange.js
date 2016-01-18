@@ -1,4 +1,10 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var Vendor = require('./vendor.js')
+
+module.exports = Exchange
 
 function Exchange() {
     game.network.send("get-exchange-info", {}, function callback(data) {
@@ -12,14 +18,14 @@ function Exchange() {
             "</tr>";
         Object.keys(data.Rates).forEach(function(assignation) {
             var rate = data.Rates[assignation];
+            var name, rateBuy, rateSell, ingots
             {
-                var name = document.createElement("td");
+                name = document.createElement("td");
                 name.textContent = TS(assignation);
                 name.title = T("Sold") + ": " + rate.Stats.Sold + "\n" +
                     T("Bought") + ": " + rate.Stats.Bought;
             }
             {
-
                 var inputBuy = dom.input();
                 var buttonBuy = dom.button(T("Buy"));
                 buttonBuy.onclick = function() {
@@ -27,7 +33,7 @@ function Exchange() {
                         "exchange", {Assignation: assignation, Amount: +inputBuy.value}
                     );
                 };
-                var rateBuy = dom.make("td", [
+                rateBuy = dom.make("td", [
                     Vendor.createPrice(rate.Buy),
                     inputBuy,
                     buttonBuy,
@@ -41,7 +47,7 @@ function Exchange() {
                         "exchange", {Assignation: assignation, Amount: -inputSell.value}
                     );
                 };
-                var rateSell = dom.make("td", [
+                rateSell = dom.make("td", [
                     Vendor.createPrice(rate.Sell),
                     inputSell,
                     buttonSell,
@@ -60,7 +66,7 @@ function Exchange() {
                         }
                     );
                 };
-                var ingots = document.createElement("td");
+                ingots = document.createElement("td");
                 ingots.appendChild(inputIngots);
                 ingots.appendChild(buttonIngots);
             }

@@ -1,4 +1,10 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+
+module.exports = Help
+
 function Help() {
     var help = this;
     var addMessage = this.addMessage.bind(this);
@@ -345,6 +351,7 @@ Help.prototype = {
         this.disableHelp();
         return;
 
+        /* XXX
         var i = localStorage.getItem("help.step") || 0;
         i = this.steps.length;
         if (i >= 0 && i < this.steps.length)
@@ -359,6 +366,7 @@ Help.prototype = {
         var runned =  localStorage.getItem("help.runnedHooks");
         if (runned)
             this.runnedHooks = JSON.parse(runned);
+        */
     },
     save: function() {
         localStorage.setItem("help.step", this.steps.indexOf(this.step));
@@ -401,12 +409,13 @@ Help.prototype = {
                     step.lastCheck = Date.now();
                 break;
             }
+            /* falls through */
         case "wait":
             break;
         default:
             step.highlight && step.highlight.forEach(function(what) {
                 game.controller.highlight(what, true);
-            });
+            }); // jshint ignore:line
 
             this.addStepText(step);
             this.showHelp();

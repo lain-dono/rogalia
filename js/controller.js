@@ -1,5 +1,31 @@
-"use strict";
-function Controller(game) {
+'use strict'
+
+var Point = require('./point.js')
+var Panel = require('./panel.js')
+
+var Fight = require('./ui/fight.js')
+var Skills = require('./ui/skills.js')
+var Stats = require('./ui/stats.js')
+var Craft = require('./ui/craft.js')
+var Chat = require('./ui/chat/chat.js')
+var Minimap = require('./ui/minimap.js')
+var Journal = require('./ui/quests/journal.js')
+var System = require('./ui/system.js')
+var Wiki = require('./ui/wiki.js')
+var Auction = require('./ui/auction.js')
+var Vendor = require('./ui/vendor.js')
+var Mail = require('./ui/mail.js')
+
+var Container = require('./container/container.js')
+var Entity = require('./entity.js')
+var Character = require('./character.js')
+
+var dom = require('./dom.js')
+var cnf = require('./config.js')
+var config = cnf.config
+var CELL_SIZE = cnf.CELL_SIZE
+
+module.exports = function Controller(game) {
     var controller = this;
     this.ready = false;
 
@@ -74,7 +100,7 @@ function Controller(game) {
         element: document.getElementById("cursor"),
         entity: null,
         isActive: function() {
-            return this.entity != null;
+            return this.entity !== null;
         },
         clear: function() {
             this.entity = null;
@@ -452,7 +478,7 @@ function Controller(game) {
         function disableEvent(e) {
             e.preventDefault();
             return false;
-        };
+        }
 
         window.addEventListener('mousedown', this.on.mousedown);
         window.addEventListener('mouseup', this.on.mouseup);
@@ -518,7 +544,7 @@ function Controller(game) {
                     game.help.runHook({type: button.id});
                 panel.toggle();
             };
-        };
+        }
         buttonName = buttonName || panel.name;
         var button = document.getElementById(buttonName + "-button");
         button.style.display = "block";
@@ -638,7 +664,7 @@ function Controller(game) {
 
             var pushToQueue = !!game.controller.modifier.shift;
             if (pushToQueue) {
-                if (game.controller.actionQueue.length == 0 && !game.player.Action.Duration) {
+                if (game.controller.actionQueue.length === 0 && !game.player.Action.Duration) {
                     game.network.send(command, args, game.controller.processActionQueue);
                 } else {
                     game.controller.actionQueue.push({command: command, args: args});
@@ -675,7 +701,7 @@ function Controller(game) {
     this.hideUnnecessaryPanels = function() {
         ["fishing"].forEach(function(name) {
             var panel = game.panels[name];
-            panel && panel.hide();
+            panel && panel.hide(); // jshint ignore:line
         });
     };
 
@@ -700,7 +726,7 @@ function Controller(game) {
             var x = e.pageX - game.offset.x + game.camera.x;
             var y = e.pageY - game.offset.y + game.camera.y;
 
-            if (this.callback[e.button] != null) { // if callback for button is set
+            if (this.callback[e.button] !== null) { // if callback for button is set
                 if(!this.callback[e.button].call(this, e)) //if callback didn't handled click
                     return false; //skip this click
                 this.clearCursors();
@@ -904,7 +930,7 @@ function Controller(game) {
     this.drawItemsMenu = function() {
         var items = game.findItemsNear(this.world.x, this.world.y);
         items.push.apply(items, game.findCharsNear(this.world.x, this.world.y));
-        if (items.length == 0)
+        if (items.length === 0)
             return;
 
         var actions = {};

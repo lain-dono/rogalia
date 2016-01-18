@@ -1,4 +1,14 @@
-"use strict";
+'use strict'
+
+var Entity = require('../entity.js')
+var Panel = require('../panel.js')
+var Container = require('../container/container.js')
+var Stats = require('./stats.js')
+var dom = require('../dom.js')
+var util = require('../util.js')
+
+module.exports = Craft
+
 function Craft() {
     this.visibleGroups = {};
     this.buildButton = null;
@@ -69,10 +79,11 @@ function Craft() {
         this.panel.hide();
     }.bind(this);
 
-    if (this.searchInput.value != "")
+    if (this.searchInput.value !== "")
         this.search(this.searchInput.value, true);
 }
 
+Craft.help = require('../lang/ru/craft.js')
 
 Craft.prototype = {
     visibleGroups: null,
@@ -110,6 +121,7 @@ Craft.prototype = {
         //TODO: we ignore stats updates; fix this
         return;
         //TODO: this is ugly; refactor
+        /* XXX
         var list = this.createList();
         var st = this.list.scrollTop;
         dom.replace(this.list, list);
@@ -118,6 +130,7 @@ Craft.prototype = {
         if (this.current.recipe) {
             this.renderRequirements(this.current.recipe);
         }
+        */
     },
     open: function(blank, burden) {
         this.blank.entity = blank;
@@ -141,14 +154,13 @@ Craft.prototype = {
             this.auto(function(item) {
                 items.push(item.entity);
             });
+            var fn = function(item) { return item.is(group); }
             for (var group in blank.Props.Ingredients) {
                 var has = blank.Props.Ingredients[group];
                 var required = recipe.Ingredients[group];
                 var ok = true;
                 while (has < required && ok) {
-                    var i = items.findIndex(function(item) {
-                        return item.is(group);
-                    });
+                    var i = items.findIndex(fn);
                     if (i != -1) {
                         list.push(items[i].Id);
                         items.splice(i, 1);
@@ -229,7 +241,8 @@ Craft.prototype = {
         var list = document.createElement("ul");
         list.className = "recipe-list no-drag";
         var groups = {};
-        for (var group in game.player.Skills) {
+        var group
+        for (group in game.player.Skills) {
             groups[group] = {};
         }
         Entity.getSortedRecipeTuples().forEach(function(tuple) {
@@ -238,7 +251,12 @@ Craft.prototype = {
             groups[recipe.Skill][type] = recipe;
         });
 
-        for (var group in groups) {
+        var fn = function() {
+            dom.toggle(this);
+            visibleGroups[this.group] = !this.classList.contains("hidden");
+        }
+
+        for (group in groups) {
             var recipes = groups[group];
             var subtree = document.createElement("ul");
             subtree.className =  (this.visibleGroups[group]) ? "" : "hidden";
@@ -266,7 +284,7 @@ Craft.prototype = {
                 this.recipes[type] = item;
             }
 
-            if (subtree.children.length == 0)
+            if (subtree.children.length === 0)
                 continue;
 
             var subtreeLi = document.createElement("li");
@@ -275,10 +293,7 @@ Craft.prototype = {
             groupToggle.className = "group-toggle";
             groupToggle.textContent = T(group);
             groupToggle.subtree = subtree;
-            groupToggle.onclick = function() {
-                dom.toggle(this);
-                visibleGroups[this.group] = !this.classList.contains("hidden");
-            }.bind(subtree);
+            groupToggle.onclick = fn.bind(subtree);
 
             var icon = new Image();
             icon.src = "assets/icons/skills/" + group.toLowerCase() + ".png";
@@ -289,7 +304,7 @@ Craft.prototype = {
             list.appendChild(subtreeLi);
         }
 
-        if (list.children.length == 0)
+        if (list.children.length === 0)
             list.textContent = "You have no recipes";
 
         return list;
@@ -348,7 +363,7 @@ Craft.prototype = {
                 }
             }
             dom.forEach(".recipe-list > .found", function() {
-                if (this.querySelector(".found") == null)
+                if (this.querySelector(".found") === null)
                     this.classList.remove("found");
             });
             return true;
@@ -403,7 +418,7 @@ Craft.prototype = {
         var id = "#" + this.panel.name + " ";
         dom.removeClass(id + ".recipe-list .found", "found");
         if (!pattern) {
-            this.list.classList.remove("searching");;
+            this.list.classList.remove("searching");
             if (this.searchSlot.entity) {
                 this.searchSlot.use(this.searchSlot.entity);
             }
@@ -504,6 +519,13 @@ Craft.prototype = {
         var ingredients = document.createElement("ul");
         var slots = [];
 
+        var fn = function() {
+            if (game.controller.cursor.isActive() || slot.firstChild.id)
+                return;
+            var panel = new Panel("craft-help", T("Help"), [this]);
+            panel.show();
+        }
+
         for(var group in recipe.Ingredients) {
             var groupTitle = TS(group);
             var required = T(recipe.Ingredients[group]);
@@ -515,12 +537,7 @@ Craft.prototype = {
                 slot.className = "slot";
                 if (group in Craft.help) {
                     var help = dom.span(Craft.help[group]);
-                    slot.onclick = function() {
-                        if (game.controller.cursor.isActive() || slot.firstChild.id)
-                            return;
-                        var panel = new Panel("craft-help", T("Help"), [this]);
-                        panel.show();
-                    }.bind(help);
+                    slot.onclick = fn.bind(help);
                 } else {
                     slot.onclick = self.makeSearch(slot);
                 }
@@ -624,7 +641,7 @@ Craft.prototype = {
         this.renderBackButton();
     },
     renderBackButton: function() {
-        if (this.history.length == 0)
+        if (this.history.length === 0)
             return;
 
         var button = dom.button(T("Back"), "craft-history-back");
@@ -681,7 +698,7 @@ Craft.prototype = {
         var index = this.slots.indexOf(to);
         var slot = this.slots[index];
         slot.used = false;
-        slot.unlock && slot.unlock();
+        slot.unlock && slot.unlock(); // jshint ignore:line
         dom.clear(to);
         to.appendChild(to.image);
     },

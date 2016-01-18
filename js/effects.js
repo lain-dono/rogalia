@@ -1,3 +1,9 @@
+'use strict'
+
+var dom = require('./dom.js')
+
+module.exports = EffectDesc
+
 function EffectDesc(name) {
     var effect = EffectDesc.effects[name];
     if (!effect) {
@@ -19,6 +25,8 @@ function EffectDesc(name) {
     dom.append(desc, contents);
     return desc;
 }
+
+EffectDesc.effects = require('./lang/ru/effects.js')
 
 EffectDesc.className = function(name) {
     var effect = EffectDesc.effects[name];

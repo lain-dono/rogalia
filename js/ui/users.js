@@ -1,5 +1,9 @@
-"use strict";
-function Users() {
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+
+module.exports = function Users() {
     var lists = {};
 
     function renderList(content, list, empty) {

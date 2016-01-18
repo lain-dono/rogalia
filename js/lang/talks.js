@@ -1,5 +1,6 @@
-"use strict";
-function Talks() {
+'use strict'
+
+module.exports = function Talks() {
     this.npcs = {
         "charles": {
             "default": {
@@ -288,13 +289,13 @@ function Talks() {
         if (!typeData)
             return result;
 
-        result.actions = typeData["actions"] || {};
+        result.actions = typeData["actions"] || {}; // jshint ignore:line
 
-        var factionData = typeData[faction] || typeData["default"];
+        var factionData = typeData[faction] || typeData["default"]; // jshint ignore:line
         if (!factionData)
             return result;
 
-        result.talks = factionData[sex] || factionData["male"];
+        result.talks = factionData[sex] || factionData["male"]; // jshint ignore:line
         return result;
     };
 }

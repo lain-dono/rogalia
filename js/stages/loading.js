@@ -1,5 +1,16 @@
-"use strict";
+'use strict'
+
+var Stage = require('./stage.js')
+var Character = require('../character.js')
+var Entity = require('../entity.js')
+var cnf = require('../config.js')
+
+Stage.add(loadingStage);
+window.loadingStage = loadingStage
+
 function loadingStage(data) {
+    /*jshint validthis:true */
+
     game.addEventListeners();
 
     var forceUpdate = ("Version" in data);
@@ -53,9 +64,8 @@ function loadingStage(data) {
         game.ctx.fillStyle = "#fff";
         game.forceDrawStrokedText(
             game.loader.status,
-            CELL_SIZE,
-            CELL_SIZE
+            cnf.CELL_SIZE,
+            cnf.CELL_SIZE
         );
     };
 }
-Stage.add(loadingStage);

@@ -1,4 +1,13 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var util = require('../util.js')
+var Panel = require('../panel.js')
+var Entity = require('../entity.js')
+var Container = require('../container/container.js')
+var Vendor = require('./vendor.js')
+
+module.exports = Bank
 
 function Bank() {
     var balance = document.createElement("label");
@@ -93,7 +102,7 @@ function Bank() {
                     var cost = Math.pow(100, i);
                     if (confirm(TT("Buy slot {cost} gold?", {cost: cost}))) {
                         game.network.send("buy-bank-vault-slot", {}, callback);
-                    };
+                    }
                 };
             }
             vault.appendChild(slot);
@@ -103,5 +112,5 @@ function Bank() {
 
 
         panel.show();
-    };
+    }
 }

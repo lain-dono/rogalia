@@ -1,6 +1,12 @@
-"use strict";
+'use strict'
+
+var config = require('./config.js').config
+var Settings = require('./ui/settings.js')
+
 //TODO: make playlist shuffle
-function Sound() {
+module.exports = function Sound() {
+    /*jshint validthis:true */
+
     var self = this;
     var soundDir = "assets/sound/";
     var musicDir = "assets/music/";
@@ -11,11 +17,11 @@ function Sound() {
     var lastTrackLsKey = "last-track";
     function loadLastTrack() {
         return +localStorage.getItem(lastTrackLsKey) || firstTrackId;
-    };
+    }
 
     function saveLastTrack() {
         localStorage.setItem(lastTrackLsKey, trackId);
-    };
+    }
 
     var volume = 0.3;
     var currentTrack = null;
@@ -76,7 +82,7 @@ function Sound() {
 
     function loadTrack(trackId) {
         return new Audio(musicDir + trackId + ".webm");
-    };
+    }
 
     function playNextTrack() {
         currentTrack = nextTrack;

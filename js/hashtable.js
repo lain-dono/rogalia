@@ -1,4 +1,5 @@
-"use strict";
+'use strict'
+
 function HashTable(data) {
     this.hash = {};
     this.array = [];
@@ -9,6 +10,8 @@ function HashTable(data) {
     }
 }
 
+module.exports = HashTable
+
 HashTable.prototype = {
     hash: null,
     array: null,
@@ -16,7 +19,7 @@ HashTable.prototype = {
         return this.array.length;
     },
     has: function(key) {
-        return this.get(key) != undefined;
+        return this.get(key) !== undefined;
     },
     get: function(key) {
         return this.hash[key];

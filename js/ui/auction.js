@@ -1,4 +1,11 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var Vendor = require('./vendor.js')
+var Entity = require('../entity.js')
+
+module.exports = Auction
 
 function Auction() {
     var self = this;
@@ -86,7 +93,7 @@ Auction.prototype = {
             type,
             0,
             dom.table(
-                [T("Vendor"), T("Quality"), T("Cost"), , ""],
+                [T("Vendor"), T("Quality"), T("Cost"), undefined, ""],
                 lots.sort(Vendor.sort.byQuality).map(function(lot) {
                     return [
                         lot.Vendor,
@@ -134,7 +141,7 @@ Auction.prototype = {
                     };
                     slot.cleanup = function() {
                         slot.entity = null;
-                        button.disabled = (canBeSold.length == 0);
+                        button.disabled = (canBeSold.length === 0);
                         dom.clear(slot);
                     };
                     slot.addEventListener("mousedown", slot.cleanup, true);
@@ -143,7 +150,7 @@ Auction.prototype = {
                     function cleanup(_, sold) {
                         self.backContents = null;
                         lot.Quantity -= sold;
-                        if (lot.Quantity == 0)
+                        if (lot.Quantity === 0)
                             dom.remove(slot.parentNode.parentNode);
                         else
                             quantity.textContent = lot.Quantity;
@@ -168,7 +175,7 @@ Auction.prototype = {
                             cleanup
                         );
                     });
-                    button.disabled = (canBeSold.length == 0);
+                    button.disabled = (canBeSold.length === 0);
                     return [
                         lot.Vendor,
                         quantity,

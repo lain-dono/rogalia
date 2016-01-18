@@ -1,12 +1,16 @@
-"use strict";
+'use strict'
+
+var util = require('./util')
+var Panel = require('./panel')
+
 //TODO: use panel methods!
-function Menu() {
+module.exports = function Menu() {
     this.container = null;
     this.visible = false;
     this.length = 0;
 };
 
-Menu.prototype = {
+module.exports.prototype = {
     activate: function(index) {
         //TODO: use internal array;
         var item = document.getElementById("menu-item-" + index);
@@ -38,7 +42,7 @@ Menu.prototype = {
             actions = [actions];
 
         if (defaultAction)
-            actions[0]["Use"] = object.defaultAction;
+            actions[0]["Use"] = object.defaultAction; // jshint ignore:line
 
         this.length = 0;
         var contents = actions.filter(function(actions) {
@@ -75,8 +79,9 @@ Menu.prototype = {
         var item_a = document.createElement("a");
         item_a.textContent = index + ". " + TS(util.stringToSymbol(title));
         item_a.className = "action";
+        var callback
         if (action instanceof Function) {
-            var callback = action.bind(object);
+            callback = action.bind(object);
         } else {
             item_a.item = action.item;
             item_a.addEventListener("mousemove", this.mouseover);

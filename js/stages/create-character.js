@@ -1,5 +1,16 @@
-"use strict";
-function createCharacterStage() {
+'use strict'
+
+var Stage = require('./stage.js')
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var cnf = require('../config.js')
+
+window.createCharacterStage = createCharacterStage
+Stage.add(createCharacterStage);
+
+function createCharacterStage () {
+    /*jshint validthis:true */
+
     var account = document.createElement("div");
     account.className = "lobby-account";
     account.textContent = game.login;
@@ -173,7 +184,7 @@ function createCharacterStage() {
     ]);
     var panel = new Panel("create-character", "Create character", [form]);
     panel.hideCloseButton();
-    panel.show(LOBBY_X + game.offset.x, LOBBY_Y + game.offset.y);
+    panel.show(cnf.LOBBY_X + game.offset.x, cnf.LOBBY_Y + game.offset.y);
     name.focus();
 
     this.sync = function(data) {
@@ -186,4 +197,3 @@ function createCharacterStage() {
         panel.close();
     };
 }
-Stage.add(createCharacterStage);

@@ -1,4 +1,22 @@
-"use strict";
+'use strict'
+
+var Point = require('./point.js')
+// FIXME circular dependencies
+var Entity = require('./entity.js')
+var Panel = require('./panel.js')
+var EffectDesc = require('./effects.js')
+var Sprite = require('./sprite.js')
+var Exchange = require('./ui/exchange.js')
+var Vendor = require('./ui/vendor.js')
+var Info = require('./info.js')
+var util = require('./util.js')
+var dom = require('./dom.js')
+var cnf = require('./config.js')
+var config = cnf.config
+var debug = cnf.debug
+
+module.exports = Character
+
 function Character(id, name) {
     this.Id = id;
     this.Name = name;
@@ -33,7 +51,7 @@ function Character(id, name) {
 
     this.Dx =  0;
     this.Dy = 0;
-    this.Radius = CELL_SIZE / 4;
+    this.Radius = cnf.CELL_SIZE / 4;
     this.isMoving = false;
     this.Speed = {Current: 0};
     this.Equip = [];
@@ -87,7 +105,7 @@ Character.prototype = {
     set X(x) {
         if (this.x == x)
             return;
-        if (this.Dx == 0 || this.Settings.Pathfinding || Math.abs(this.x - x) > CELL_SIZE) {
+        if (this.Dx === 0 || this.Settings.Pathfinding || Math.abs(this.x - x) > cnf.CELL_SIZE) {
             game.sortedEntities.remove(this);
             this.x = x;
             game.sortedEntities.add(this);
@@ -96,7 +114,7 @@ Character.prototype = {
     set Y(y) {
         if (this.y == y)
             return;
-        if (this.Dy == 0 || this.Settings.Pathfinding || Math.abs(this.y - y) > CELL_SIZE) {
+        if (this.Dy === 0 || this.Settings.Pathfinding || Math.abs(this.y - y) > cnf.CELL_SIZE) {
             game.sortedEntities.remove(this);
             this.y = y;
             game.sortedEntities.add(this);
@@ -119,9 +137,10 @@ Character.prototype = {
             game.sortedEntities.add(this);
     },
     screen: function() {
+        var x, y
         if (this.mount) {
-            var x = this.mount.X;
-            var y = this.mount.Y;
+            x = this.mount.X;
+            y = this.mount.Y;
         } else {
             x = this.X;
             y = this.Y;
@@ -169,8 +188,9 @@ Character.prototype = {
             if (name == game.player.Name)
                 return;
             var member = game.characters.get(name);
+            var avatar
             if (member) {
-                var avatar = loader.loadImage("avatars/" + member.sex() + ".png");
+                avatar = loader.loadImage("avatars/" + member.sex() + ".png");
             } else {
                 avatar = dom.div(".character-avatar-not-available", {text: "?"});
                 avatar.title = T("Out of sight");
@@ -178,7 +198,7 @@ Character.prototype = {
             }
             var cnt = dom.div(".character-avatar-container");
             cnt.appendChild(avatar);
-            var prefix = (i == 0 && party[0] != game.player.Name) ? "★" : "";
+            var prefix = (i === 0 && party[0] != game.player.Name) ? "★" : "";
             cnt.appendChild(dom.span(prefix + name, "party-member-name"));
             cnt.onmousedown = function(e) {
                 return game.chat.nameMenu(e, name);
@@ -668,7 +688,7 @@ Character.prototype = {
                 ap.style.width = progress * 100 + "%";
             } else {
                 var w = 64;
-                var h = FONT_SIZE * 0.5;
+                var h = cnf.FONT_SIZE * 0.5;
                 var p = this.screen();
                 var x = p.x - w/2;
                 var y = p.y - this.sprite.nameOffset + h + 1;
@@ -770,7 +790,7 @@ Character.prototype = {
             );
             down.draw(downPoint);
             down.animate();
-            if (down.frame == 0) { //finished
+            if (down.frame === 0) { //finished
                 this.animation.down = null;
             }
         }
@@ -788,7 +808,7 @@ Character.prototype = {
             );
             up.draw(upPoint);
             up.animate();
-            if (up.frame == 0) { //finished
+            if (up.frame === 0) { //finished
                 this.animation.up = null;
             }
         }
@@ -799,7 +819,7 @@ Character.prototype = {
             this.drawHovered(true);
     },
     drawCorpsePointer: function() {
-        if (!this.Corpse || (this.Corpse.X == 0 && this.Corpse.Y == 0))
+        if (!this.Corpse || (this.Corpse.X === 0 && this.Corpse.Y === 0))
             return;
         var p = new Point(this.Corpse);
         var X = this.X - p.x;
@@ -888,7 +908,7 @@ Character.prototype = {
         var height = width * marker.height / marker.width;
         var p = this.screen();
         p.x -= width / 2;
-        p.y -= this.sprite.nameOffset + height + FONT_SIZE;
+        p.y -= this.sprite.nameOffset + height + cnf.FONT_SIZE;
 
         game.ctx.drawImage(marker, p.x, p.y, width, height);
     },
@@ -907,13 +927,13 @@ Character.prototype = {
             if (quest.End != this.Name)
                 continue;
             if (questLog.State == "ready")
-                return game.questMarkers["ready"];
+                return game.questMarkers.ready;
             active = active || questLog.State == "active";
         }
         if (this.getAvailableQuests().length > 0)
-            return game.questMarkers["available"];
+            return game.questMarkers.available;
         if (active)
-            return game.questMarkers["active"];
+            return game.questMarkers.active;
         return null;
     },
     drawDst: function() {
@@ -985,7 +1005,7 @@ Character.prototype = {
 
         var p = this.screen();
         var y = p.y - this.sprite.nameOffset;
-        var dy = FONT_SIZE * 0.5;
+        var dy = cnf.FONT_SIZE * 0.5;
 
         if (this.isInteractive())
             drawHp = false;
@@ -1044,9 +1064,8 @@ Character.prototype = {
             dy = 0;
         }
         if (drawName) {
-            game.ctx.fillStyle = (this.Karma < 0 || this.Aggressive)
-                ? "#f00"
-                : ((this == game.player) ? "#ff0" : "#fff");
+            game.ctx.fillStyle = (this.Karma < 0 || this.Aggressive) ?
+                "#f00" : ((this == game.player) ? "#ff0" : "#fff");
             game.drawStrokedText(name, x, y - dy / 2);
             if (this.Citizenship) {
                 var flag = Character.flags[this.Citizenship.Faction];
@@ -1056,7 +1075,7 @@ Character.prototype = {
         }
     },
     idle: function() {
-        return this.Dx == 0 && this.Dy == 0 && this.Action.Name == "";
+        return this.Dx === 0 && this.Dy === 0 && this.Action.Name === '';
     },
     animate: function() {
         var simpleSprite = this.isSimpleSprite();
@@ -1068,7 +1087,7 @@ Character.prototype = {
             position = (position / 2)<<0;
         }
 
-        if (this.sprite.angle == 0) {
+        if (this.sprite.angle === 0) {
             position = 0; //omsk hack
         } else if (self.Dx || self.Dy) {
             animation = "run";
@@ -1134,8 +1153,8 @@ Character.prototype = {
             this.sprite.lastUpdate = now;
         }
 
+        var start = 0, end = 0;
         if (simpleSprite) {
-            var start = 0, end = 0;
             var current = this.sprite.frames[animation];
             if (Array.isArray(current)) {
                 start = current[0];
@@ -1150,7 +1169,8 @@ Character.prototype = {
                 }
             }
         } else {
-            var start = 0, end = this.sprite.image.width / this.sprite.width;
+            start = 0
+            end = this.sprite.image.width / this.sprite.width;
         }
 
         if (this.sprite.frame < start || this.sprite.frame >= end) {
@@ -1162,10 +1182,10 @@ Character.prototype = {
     drawAttackRadius: function() {
         var p = new Point(this);
         var sector = (this.sprite.position - 1);
-        var offset = new Point(CELL_SIZE, 0).rotate(2*Math.PI - sector * Math.PI/4);
+        var offset = new Point(cnf.CELL_SIZE, 0).rotate(2*Math.PI - sector * Math.PI/4);
         p.add(offset);
         game.ctx.fillStyle = (this.isPlayer) ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 0, 0, 0.2)";
-        game.iso.fillCircle(p.x, p.y, CELL_SIZE);
+        game.iso.fillCircle(p.x, p.y, cnf.CELL_SIZE);
     },
     toggleActionSound: function() {
         if (this.action.name)
@@ -1272,8 +1292,9 @@ Character.prototype = {
             var param = this[name];
             var value = Math.round(param.Current / param.Max * 100);
             strip.firstChild.style.width = Math.min(100, value) + '%';
-            strip.title = name + ": "
-                + util.toFixed(this[name].Current) + " / " + util.toFixed(this[name].Max);
+            strip.title = name +
+                ": " + util.toFixed(this[name].Current) +
+                " / " + util.toFixed(this[name].Max);
             strip.lastChild.style.width = Math.max(0, value - 100) + '%';
         }.bind(this));
 
@@ -1333,13 +1354,13 @@ Character.prototype = {
                     done = this.fish.bind(this);
                     break;
                 default:
-                    var align = {X: CELL_SIZE, Y: CELL_SIZE};
+                    var align = {X: cnf.CELL_SIZE, Y: cnf.CELL_SIZE};
                 }
                 var cursor = new Entity(tool.Type);
                 cursor.initSprite();
                 var icon = tool._icon || tool.icon();
-                cursor.Width = CELL_SIZE;
-                cursor.Height = CELL_SIZE;
+                cursor.Width = cnf.CELL_SIZE;
+                cursor.Height = cnf.CELL_SIZE;
                 cursor.Sprite.Dx = 6;
                 cursor.Sprite.Dy = 56;
                 cursor.sprite.image = icon;
@@ -1357,7 +1378,7 @@ Character.prototype = {
     },
     fish: function fish(data) {
         var repeat = fish.bind(this);
-        var panel = game.panels["fishing"];
+        var panel = game.panels.fishing
         if (!panel) {
             var rating = document.createElement("div");
             rating.className = "rating";
@@ -1474,18 +1495,19 @@ Character.prototype = {
         delete this.shownEffects[name];
     },
     updateEffects: function() {
-        for(var name in this.shownEffects) {
+        var name
+        for(name in this.shownEffects) {
             if (!this.Effects[name]) {
                 this.removeEffect(name);
             }
         }
 
-        for (var name in this.Effects) {
+        for (name in this.Effects) {
             this.updateEffect(name, this.Effects[name]);
         }
     },
     updatePosition: function(k) {
-        if (this.Dx == 0 && this.Dy == 0) {
+        if (this.Dx === 0 && this.Dy === 0) {
             return;
         }
         k *= this.Speed.Current;
@@ -1620,9 +1642,11 @@ Character.prototype = {
     },
     willCollide: function(new_x, new_y) {
         return false; //TODO: fix StandUp problems
+        /* XXX
         return game.entities.some(function(e) {
             return (e instanceof Entity && e.collides(new_x, new_y, this.Radius));
         }.bind(this));
+        */
     },
     stop: function() {
         this.Dx = 0;
@@ -1667,7 +1691,7 @@ Character.prototype = {
     },
     intersects: Entity.prototype.intersects,
     canIntersect: function() {
-        return this.sprite.outline != null && (config.ui.allowSelfSelection || this != game.player);
+        return this.sprite.outline !== null && (config.ui.allowSelfSelection || this != game.player);
     },
     bag: function() {
         return Entity.get(this.Equip[0]);
@@ -1707,7 +1731,7 @@ Character.prototype = {
     },
     equippedWith: function(group) {
         return this.Equip.filter(function(eid) {
-            return (eid != 0);
+            return (eid !== 0);
         }).map(function(eid) {
             return Entity.get(eid);
         }).filter(function(item) {
@@ -1746,7 +1770,7 @@ Character.prototype = {
         game.player.interactTarget = this;
         game.network.send("follow", {Id: this.Id}, function interact() {
             // TODO: remove margo hack
-            if (self.Type == "vendor" && self.Owner != 0 && self.Name != "Margo") {
+            if (self.Type == "vendor" && self.Owner !== 0 && self.Name != "Margo") {
                 game.controller.vendor.open(self);
                 return;
             }
@@ -1833,7 +1857,7 @@ Character.prototype = {
     },
     canUse: function(entity) {
         if (entity instanceof Character)
-            return this.distanceTo(entity) < 2*CELL_SIZE;
+            return this.distanceTo(entity) < 2*cnf.CELL_SIZE;
 
         switch (entity.Group) {
         case "shit":
@@ -1868,7 +1892,7 @@ Character.prototype = {
     // available anims: {up: {...}, down: {...}}
     playAnimation: function(anims) {
         for (var type in anims) {
-            if (this.animation[type] == null)
+            if (this.animation[type] === null)
                 this.loadAnimation(type, anims[type]);
         }
     },
@@ -1891,7 +1915,7 @@ Character.prototype = {
     },
     selectNextTarget: function() {
         var self = this;
-        var list = game.findCharsNear(this.X, this.Y, 5*CELL_SIZE).filter(function(c) {
+        var list = game.findCharsNear(this.X, this.Y, 5*cnf.CELL_SIZE).filter(function(c) {
             return c != self && c != self.target && c.IsNpc;
         }).sort(function(a, b) {
             return a.distanceTo(self) - b.distanceTo(self);

@@ -1,4 +1,17 @@
-"use strict";
+'use strict'
+
+var dom = require('../../dom.js')
+var dict = require('../../lang/ru/dict.js')
+var Panel = require('../../panel.js')
+var Entity = require('../../entity.js')
+var Character = require('../../character.js')
+var cnf = require('../../config.js')
+var config = cnf.config
+var ChatRing = require('./ring.js')
+var Vendor = require('../vendor.js')
+
+module.exports = Chat
+
 function Chat() {
     var self = this;
     this.useNotifications = false;
@@ -99,7 +112,7 @@ function Chat() {
 
         var privateIndex = name.indexOf(privateSymbol);
         if (privateIndex != -1) {
-            var fromName = name.substring(0, privateIndex);;
+            var fromName = name.substring(0, privateIndex);
             if (fromName == game.player.Name)
                 name = name.substring(privateIndex + privateSymbol.length);
             else
@@ -121,7 +134,7 @@ function Chat() {
             if (privateIndex != -1 || e.ctrlKey) {
                 self.preparePrivate(name);
             } else {
-                if (self.newMessageElement.value.length == 0)
+                if (self.newMessageElement.value.length === 0)
                     name += ", ";
                 self.append(name);
                 self.activate();
@@ -229,7 +242,7 @@ function Chat() {
         default:
             return true;
         }
-        if (message.length == 0)
+        if (message.length === 0)
             return true;
 
         myMessages.push(message);
@@ -260,6 +273,7 @@ function Chat() {
                     e.target.blur();
                     break;
                 }
+                /* falls through */
             case "clear-equip-slot":
                 var args = message.split(" ");
                 args[2] = Character.equipSlots.indexOf(args[2]);
@@ -278,7 +292,7 @@ function Chat() {
                 new Panel(
                     "terra-bar",
                     "Terraforming",
-                    game.map.bioms.map(function(biom, i) {
+                    game.map.bioms.map(function(biom, i) { // jshint ignore:line
                         return dom.wrap(
                             "slot",
                             game.map.tiles[i],
@@ -355,7 +369,7 @@ function Chat() {
     alwaysVisible.label.title = T("Always visible");
 
     var savedValue = localStorage.getItem("chat.alwaysVisible");
-    if (savedValue == null)
+    if (savedValue === null)
         alwaysVisible.checked = true;
     else
         alwaysVisible.checked = (savedValue == "true");
@@ -553,7 +567,7 @@ function Chat() {
         content.appendChild(element);
 
         return body.substr(index + match.length);
-    };
+    }
 
     var complexHandlers = {
         "https://": makeLinkParser("https"),
@@ -645,7 +659,7 @@ function Chat() {
         }
 
         return cnt;
-    };
+    }
 
     function fromMe(message) {
         return !message.From || message.From == game.player.Name;
@@ -694,7 +708,7 @@ function Chat() {
             dom.remove(messagesElement.firstChild);
             messagesElement.scrollTop -= height;
         }
-    };
+    }
 
 
     this.append = function(text) {
@@ -790,8 +804,9 @@ function Chat() {
             icon : "assets/rogalik-64.png",
             tag: "chat-msg"
         };
+        var subject
         if (message.From != SERVER || message.Body.search(/.* logged in/) == -1) {
-            var subject = message.From;
+            subject = message.From;
             config.body = message.Body;
         } else {
             subject = message.Body;
@@ -870,7 +885,7 @@ function Chat() {
         ballon.update();
 
         setTimeout(function() {
-            character.ballon && character.ballon.remove();
+            character.ballon && character.ballon.remove(); // jshint ignore:line
         }, 3000);
     };
 

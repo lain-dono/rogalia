@@ -1,4 +1,11 @@
-"use strict";
+'use strict'
+
+var Vendor = require('../vendor.js')
+var Entity = require('../../entity.js')
+var dom = require('../../dom.js')
+
+module.exports = Quest
+
 function Quest(q) {
     for (var i in q) {
         this[i] = q[i];

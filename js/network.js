@@ -1,5 +1,10 @@
-"use strict";
-function Network() {
+'use strict'
+
+var util = require('./util.js')
+
+module.exports = function Network() {
+    /*jshint validthis:true */
+
     this.proto = "ws://";
     this.host = "rogalik.tatrix.org";
     this.port = 49000;
@@ -80,7 +85,7 @@ function Network() {
 
         game.stage.sync(data);
 
-        if (this.queue.length == 0)
+        if (this.queue.length === 0)
             return;
 
         if (data.Ok) {

@@ -1,5 +1,18 @@
-"use strict";
+'use strict'
+
+var Stage = require('./stage.js')
+var Panel = require('../panel.js')
+var util = require('../util.js')
+var dom = require('../dom.js')
+var cnf = require('../config.js')
+var Character = require('../character.js')
+
+window.lobbyStage = lobbyStage
+Stage.add(lobbyStage);
+
 function lobbyStage(data) {
+    /*jshint validthis:true */
+
     util.ajax("build-warning.html", function(warn) {
         if (!warn) {
             return;
@@ -75,13 +88,12 @@ function lobbyStage(data) {
         });
     });
 
+    var fn = function() { game.setStage("createCharacter"); }
     for (var i = maxChars - characters.length; i > 0; i--) {
         var create = loader.loadImage("avatars/new.png").cloneNode();
         create.className = "create";
-        add(T("Create"), create, function() {
-            game.setStage("createCharacter");
-        });
-    };
+        add(T("Create"), create, fn);
+    }
 
     var contents = [
         account,
@@ -103,7 +115,7 @@ function lobbyStage(data) {
 
     var panel = new Panel("lobby", "", contents);
     panel.hideCloseButton();
-    panel.show(LOBBY_X + game.offset.x, LOBBY_Y + game.offset.y);
+    panel.show(cnf.LOBBY_X + game.offset.x, cnf.LOBBY_Y + game.offset.y);
 
     function fastenter(e) {
         if (e.keyCode != 13) // enter
@@ -122,5 +134,4 @@ function lobbyStage(data) {
     this.sync = function(data) {
         game.setStage("loading", data);
     };
-};
-Stage.add(lobbyStage);
+}

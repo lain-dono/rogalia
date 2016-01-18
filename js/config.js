@@ -1,12 +1,20 @@
-"use strict";
-var CELL_SIZE = 32;
-var FONT_SIZE = 14;
-var DEFAULT_CLIENT_WIDTH = 1280;
-var DEFAULT_CLIENT_HEIGHT = 720;
-var LOBBY_X = 85;
-var LOBBY_Y = 15;
+'use strict'
 
-var config = {
+module.exports.CELL_SIZE = 32;
+module.exports.FONT_SIZE = 14;
+module.exports.DEFAULT_CLIENT_WIDTH = 1280;
+module.exports.DEFAULT_CLIENT_HEIGHT = 720;
+module.exports.LOBBY_X = 85;
+module.exports.LOBBY_Y = 15;
+
+// global
+for(var k in module.exports) { 
+   if (module.exports.hasOwnProperty(k)) {
+       window[k] = module.exports[k];
+   }
+}
+
+module.exports.config = {
     character: {
         pathfinding: function() { return game.player.Settings.Pathfinding; },
         hideHelmet: function() { return game.player.Style.HideHelmet; },
@@ -41,7 +49,8 @@ var config = {
         jukebox: true,
     },
 };
-var debug = {
+
+module.exports.debug = {
     map: {
         world: true,
         darkness: false,

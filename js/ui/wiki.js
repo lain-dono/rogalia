@@ -1,5 +1,8 @@
-"use strict";
-function Wiki() {
+'use strict'
+
+var Panel = require('../panel.js')
+
+module.exports = function Wiki() {
     var iframe = document.createElement("iframe");
     iframe.resize = true;
     this.panel = new Panel("wiki", "Wiki", [iframe]);

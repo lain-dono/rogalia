@@ -1,5 +1,10 @@
-"use strict";
+'use strict'
+
+var cnf = require('../config.js')
+
 function Stage() {}
+
+module.exports = Stage
 
 Stage.prototype = {
     name: "",
@@ -26,7 +31,8 @@ Stage.makeEllipsisDrawer = function() {
             ellipsis = 0;
         game.ctx.clear();
         game.ctx.fillStyle = "#fff";
-        game.forceDrawStrokedText(T("Connecting") + " " + "|".repeat(ellipsis), CELL_SIZE, CELL_SIZE);
+        game.forceDrawStrokedText(T("Connecting") + " " + "|".repeat(ellipsis),
+                cnf.CELL_SIZE, cnf.CELL_SIZE);
     };
 };
 

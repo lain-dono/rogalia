@@ -1,5 +1,50 @@
-"use strict";
-function Game() {
+'use strict';
+
+require('./polyfill.js')
+
+require('./entities.js')
+var Entity = require('./entity.js')
+
+require('./stages/connecting.js')
+require('./stages/create-character.js')
+require('./stages/exit.js')
+require('./stages/loading.js')
+require('./stages/lobby.js')
+require('./stages/login.js')
+require('./stages/main.js')
+var Stage = require('./stages/stage.js')
+
+var Settings = require('./ui/settings.js')
+var Quests = require('./ui/quests/quests.js')
+
+var Loader = require('./loader.js')
+var cnf = require('./config.js')
+var CELL_SIZE = cnf.CELL_SIZE
+var config = cnf.config
+var debug = cnf.debug
+
+require('./lang/ru/settings.js')
+require('./lang/dict.js')
+var dict = require('./lang/ru/dict.js')
+var Talks = require('./lang/talks.js')
+var Sound = require('./sound.js')
+var Menu = require('./menu.js')
+var Character = require('./character.js')
+require('./characters.js')
+var Controller = require('./controller.js')
+var Network = require('./network.js')
+var HashTable = require('./hashtable.js')
+var Point = require('./point.js')
+var Alert = require('./alert.js')
+var Panel = require('./panel.js')
+var Container = require('./container/container.js')
+var dom = require('./dom.js')
+var util = require('./util.js')
+
+
+var Map = require('./ui/map.js')
+
+module.exports = function Game() {
     window.game = this;
 
     this.world = document.getElementById("world");
@@ -10,7 +55,7 @@ function Game() {
         game.ctx.clearRect(0, 0, game.canvas.width, game.canvas.height);
     };
     this.setFontSize = function(size) {
-        this.ctx.font = (size || FONT_SIZE) + "px Dejavu Sans";
+        this.ctx.font = (size || cnf.FONT_SIZE) + "px Dejavu Sans";
     };
     this.setFontSize();
 
@@ -26,10 +71,10 @@ function Game() {
                 this.width = window.innerWidth;
                 this.height = window.innerHeight;
             } else {
-                this.width = (window.innerWidth > DEFAULT_CLIENT_WIDTH) ?
-                    DEFAULT_CLIENT_WIDTH : window.innerWidth;
-                this.height = (window.innerHeight > DEFAULT_CLIENT_HEIGHT) ?
-                    DEFAULT_CLIENT_HEIGHT : window.innerHeight;
+                this.width = (window.innerWidth > cnf.DEFAULT_CLIENT_WIDTH) ?
+                    cnf.DEFAULT_CLIENT_WIDTH : window.innerWidth;
+                this.height = (window.innerHeight > cnf.DEFAULT_CLIENT_HEIGHT) ?
+                    cnf.DEFAULT_CLIENT_HEIGHT : window.innerHeight;
             }
 
             this.cells_x = this.width / CELL_SIZE;
@@ -141,53 +186,52 @@ function Game() {
         game.ctx.lineJoin = lineJoin;
     };
 
-    this.iso = new function() {
-        var k = Math.sqrt(2);
-
-        function draw(x, y, callback) {
-            var p = new Point(x, y).toScreen();
-            game.ctx.save();
-            if (game.ctx.lineWidth < 2)
-                game.ctx.lineWidth = 2;
-            game.ctx.translate(p.x, p.y);
-            game.ctx.scale(1, 0.5);
-            game.ctx.rotate(Math.PI / 4);
-            callback();
-            game.ctx.restore();
-        }
-        this.strokeRect = function(x, y, w, h) {
+    function draw(x, y, callback) {
+        var p = new Point(x, y).toScreen();
+        game.ctx.save();
+        if (game.ctx.lineWidth < 2)
+            game.ctx.lineWidth = 2;
+        game.ctx.translate(p.x, p.y);
+        game.ctx.scale(1, 0.5);
+        game.ctx.rotate(Math.PI / 4);
+        callback();
+        game.ctx.restore();
+    }
+    var k = Math.sqrt(2);
+    this.iso = Object.create({
+        strokeRect: function(x, y, w, h) {
             draw(x, y, function() {
                 game.ctx.strokeRect(0, 0, w * k, h * k);
             });
-        };
-        this.fillRect = function(x, y, w, h) {
+        },
+        fillRect: function(x, y, w, h) {
             draw(x, y, function() {
                 game.ctx.fillRect(0, 0, w * k, h * k);
             });
-        };
-        this.fillCircle = function(x, y, r) {
+        },
+        fillCircle: function(x, y, r) {
             draw(x, y, function() {
                 game.ctx.beginPath();
                 game.ctx.arc(0, 0, r * k, 0, Math.PI * 2);
                 game.ctx.fill();
             });
-        };
-        this.strokeCircle = function(x, y, r) {
+        },
+        strokeCircle: function(x, y, r) {
             draw(x, y, function() {
                 game.ctx.beginPath();
                 game.ctx.arc(0, 0, r * k, 0, Math.PI * 2);
                 game.ctx.stroke();
             });
-        };
-        this.fillStrokedCircle = function(x, y, r) {
+        },
+        fillStrokedCircle: function(x, y, r) {
             this.fillCircle(x, y, r);
             this.strokeCircle(x, y, r);
-        };
-        this.fillStrokedRect = function(x, y, w, h) {
+        },
+        fillStrokedRect: function(x, y, w, h) {
             this.fillRect(x, y, w, h);
             this.strokeRect(x, y, w, h);
-        };
-    };
+        },
+    })
 
     this.save = function() {
         // on exit stage all panels are hidden
@@ -197,8 +241,8 @@ function Game() {
             return;
         Panel.save();
         Container.save();
-        game.controller.craft && game.controller.craft.save();
-        game.chat && game.chat.save();
+        game.controller.craft && game.controller.craft.save(); // jshint ignore:line
+        game.chat && game.chat.save(); // jshint ignore:line
         if (game.help)
             game.help.save();
     };
@@ -349,7 +393,7 @@ function Game() {
     };
 
     this.inVK = function() {
-        return (window.name.indexOf('fXD') == 0);
+        return (window.name.indexOf('fXD') === 0);
     };
 
     var siteUrl = "http://rogalia.ru";
@@ -465,7 +509,7 @@ function Game() {
         throw "Fatal error";
     };
 
-    this.jukebox = new function() {
+    this.jukebox = new (function() { // jshint ignore:line
         this.iframe = dom.tag("iframe");
         this.panel = new Panel("jukebox", "Jukebox", [this.iframe]);
         this.panel.temporary = true;
@@ -508,7 +552,7 @@ function Game() {
         this.open = function() {
             this.panel.show();
         }.bind(this);
-    };
+    })()
 
     var maximize = document.getElementById("maximize");
     maximize.onclick = function() {
@@ -541,7 +585,7 @@ function Game() {
         game.controller.fpsStatsEnd();
 
         requestAnimationFrame(tick);
-    };
+    }
 
     tick();
 };

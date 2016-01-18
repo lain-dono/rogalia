@@ -1,5 +1,13 @@
-"use strict";
-function System() {
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+
+var Users = require('./users.js')
+var Help = require('./help.js')
+var Settings = require('./settings.js')
+
+module.exports = function System() {
     this.fps = new FpsStats();
 
     var fps = document.createElement("div");

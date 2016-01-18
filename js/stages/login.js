@@ -1,5 +1,17 @@
-"use strict";
+'use strict'
+
+var Stage = require('./stage.js')
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var cnf = require('../config.js')
+var util = require('../util.js')
+
+Stage.add(loginStage);
+window.loginStage = loginStage
+
 function loginStage() {
+    /*jshint validthis:true */
+
     var signing = false;
     var registering = false;
     var autoLogin = false;
@@ -82,7 +94,6 @@ function loginStage() {
             emailInput.focus();
         return false;
     };
-;
 
     var en = dom.option("en");
     var ru = dom.option("ru");
@@ -98,18 +109,18 @@ function loginStage() {
     var form = dom.tag("form", "#login-form");
     form.onsubmit = function () {
         login = loginInput.value;
-        if (!util.validateInput(loginInput, login != "", "Please enter login"))
+        if (!util.validateInput(loginInput, login !== "", "Please enter login"))
             return false;
 
         password = passwordInput.value;
-        if (!util.validateInput(passwordInput, password != "", "Please enter password"))
+        if (!util.validateInput(passwordInput, password !== "", "Please enter password"))
             return false;
 
         game.setLogin(login);
 
         if (registering) {
             email = emailInput.value;
-            if (!util.validateInput(emailInput, email != "", "Please enter email"))
+            if (!util.validateInput(emailInput, email !== "", "Please enter email"))
                 return false;
             signup();
         } else {
@@ -129,7 +140,7 @@ function loginStage() {
     var panel = new Panel("login-panel", "", [form]);
 
     panel.hideCloseButton();
-    panel.show(LOBBY_X + game.offset.x, LOBBY_Y + game.offset.y);
+    panel.show(cnf.LOBBY_X + game.offset.x, cnf.LOBBY_Y + game.offset.y);
 
     if (login)
         passwordInput.focus();
@@ -181,4 +192,3 @@ function loginStage() {
         panel.close();
     };
 }
-Stage.add(loginStage);

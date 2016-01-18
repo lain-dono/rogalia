@@ -1,4 +1,11 @@
-"use strict";
+'use strict'
+
+var dom = require('../../dom.js')
+var Panel = require('../../panel.js')
+var Quest = require('./quest.js')
+
+module.exports = Journal
+
 function Journal() {
     this.list = document.createElement("ol");
     this.list.id = "quest-list";
@@ -25,7 +32,7 @@ Journal.prototype = {
             return;
         this.hash = hash;
 
-        if (Object.keys(game.player.ActiveQuests).length == 0) {
+        if (Object.keys(game.player.ActiveQuests).length === 0) {
             this.list.innerHTML = T("No quests") ;
             return;
         }

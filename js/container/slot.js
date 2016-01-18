@@ -1,4 +1,11 @@
-"use strict";
+'use strict'
+
+var Container = require('./container.js')
+var dom = require('../dom.js')
+var util = require('../util.js')
+
+module.exports = ContainerSlot
+
 function ContainerSlot(container, index) {
     this.container = container;
     this.index = index;
@@ -72,7 +79,7 @@ ContainerSlot.prototype = {
         this.update();
     },
     setSub: function(text) {
-        if (this.sub == null) {
+        if (this.sub === null) {
             this.sub = document.createElement("sub");
             this.element.appendChild(this.sub);
         }
@@ -86,7 +93,7 @@ ContainerSlot.prototype = {
     updateProgress: function() {
         if ("Readiness" in this.entity && "Fuel" in this.container.entity) {
             var rd = this.entity.Readiness;
-            if (rd.Max != 0)
+            if (rd.Max !== 0)
                 this.setSub(util.toFixed(100*rd.Current / rd.Max) + "%");
             return;
         }

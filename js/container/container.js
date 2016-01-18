@@ -1,4 +1,12 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var ContainerSlot = require('./slot.js')
+var Entity = require('../entity.js')
+
+module.exports = Container
+
 function Container(entity) {
     this.entity = entity;
     this.id = +entity.Id;
@@ -20,7 +28,7 @@ function Container(entity) {
     this.update();
 
     this._syncReq = false;
-};
+}
 
 Container.SLOT_SIZE = 52; // .slot:width + 2*slot:margin
 
@@ -267,7 +275,7 @@ Container.prototype = {
         this.slots.forEach(function(slot, i) {
             var id = this._slots[i];
             // slot is empty
-            if (id == 0) {
+            if (id === 0) {
                 slot.clear();
                 return;
             }
@@ -319,14 +327,14 @@ Container.prototype = {
         this.fuel.appendChild(slot);
     },
     hasSpace: function() {
-        return this._slots.find(function(id) { return id == 0; }) !== undefined;
+        return this._slots.find(function(id) { return id === 0; }) !== undefined;
     },
     getTopExcept: function(except) {
         for (var i = Panel.stack.length-1; i >= 0; i--) {
             var panel = Panel.stack[i];
             if (panel.visible && panel.container && panel.container.id != except && panel.container.hasSpace())
                 return panel.container;
-        };
+        }
         return null;
     },
 };

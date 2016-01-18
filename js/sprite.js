@@ -1,4 +1,5 @@
-"use strict";
+'use strict'
+
 function Sprite(path, width, height, speed) {
     this.name = "";
     this.image = null;
@@ -29,7 +30,10 @@ function Sprite(path, width, height, speed) {
         this.load(path);
 }
 
+module.exports = Sprite
+
 Sprite.prototype = {
+    get onload() { return this._onload },
     set onload(callback) {
         this._onload = callback;
         if (this.ready)
@@ -42,9 +46,9 @@ Sprite.prototype = {
         this.loading = true;
         this.image = loader.loadImage(path);
         loader.ready(function() {
-            if (this.width == 0)
+            if (this.width === 0)
                 this.width = this.image.width;
-            if (this.height == 0)
+            if (this.height === 0)
                 this.height = this.image.height;
 
             this.makeOutline();
@@ -52,7 +56,7 @@ Sprite.prototype = {
             this.loading = false;
 
             var canvas = null;
-            while (canvas = this.pending.pop()) {
+            while ((canvas = this.pending.pop()) !== null) {
                 this.renderIcon(canvas);
             }
             if (this._onload) {
@@ -86,7 +90,7 @@ Sprite.prototype = {
         game.ctx.globalAlpha = 1;
     },
     draw: function(p) {
-        if (this.image.width == 0 || this.frame * this.width + this.width > this.image.width) {
+        if (this.image.width === 0 || this.frame * this.width + this.width > this.image.width) {
             return;
         }
         // try {

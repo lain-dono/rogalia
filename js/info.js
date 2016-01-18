@@ -1,4 +1,15 @@
-"use strict";
+'use strict'
+
+var dom = require('./dom.js')
+var Panel = require('./panel.js')
+var Entity = require('./entity.js')
+var Container = require('./container/container.js')
+var dom = require('./dom.js')
+var util = require('./util.js')
+var cnf = require('./config.js')
+
+module.exports = Info
+
 function Info(message, character) {
     this.data = message.Data;
     this.character = character;
@@ -54,6 +65,7 @@ function Info(message, character) {
             game.sound.playSound("hit");
         else
             game.sound.playSound("punch");
+        /* falls through */
     case "damage":
         this.value = this.data.Value;
         break;
@@ -151,7 +163,7 @@ function Info(message, character) {
             dom.remove(record);
         }, this.duration);
     }
-};
+}
 
 Info.prototype = {
     update: function(k) {
@@ -256,7 +268,7 @@ Info.prototype = {
         game.ctx.fillStyle = color;
 
         var p = target.screen();
-        p.y -= target.sprite.nameOffset + 2*FONT_SIZE;
+        p.y -= target.sprite.nameOffset + 2*cnf.FONT_SIZE;
         p.x += this.x - game.ctx.measureText(text).width / 2;
 
         if (size) {

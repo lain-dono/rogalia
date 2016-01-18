@@ -1,4 +1,9 @@
-function Alert() {
+'use strict'
+
+var dom = require('./dom.js')
+var Panel = require('./panel.js')
+
+module.exports = function Alert() {
     var overlay = dom.div("alert-overlay");
     dom.insert(overlay);
     dom.hide(overlay);

@@ -1,5 +1,9 @@
-"use strict";
-function Fight() {
+'use strict'
+
+var util = require('../util.js')
+var Character = require('../character.js')
+
+module.exports = function Fight() {
     var target = null;
 
     var GCD = 500;

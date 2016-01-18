@@ -1,4 +1,5 @@
-"use strict";
+'use strict'
+
 function Point(x, y) {
     switch(arguments.length) {
     case 0:
@@ -25,7 +26,9 @@ function Point(x, y) {
     }
 }
 
-['fromEvent', 'fromPoint'].forEach(function(method) {
+module.exports = Point
+
+;['fromEvent', 'fromPoint'].forEach(function(method) {
     Point[method] = function(arg) {
         return new Point()[method](arg);
     };
@@ -140,10 +143,10 @@ Point.prototype = {
         return this;
     },
     align: function(to) {
-        if (to.x != 0) {
+        if (to.x !== 0) {
             this.x = to.x * Math.floor((this.x + to.x/2) / to.x);
         }
-        if (to.y != 0) {
+        if (to.y !== 0) {
             this.y = to.x * Math.floor((this.y + to.y/2) / to.y);
         }
         return this;

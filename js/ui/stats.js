@@ -1,4 +1,15 @@
-"use strict";
+'use strict'
+
+var util = require('../util.js')
+var ContainerEquip = require('../container/equip.js')
+var dom = require('../dom.js')
+var Character = require('../character.js')
+var Panel = require('../panel.js')
+var cnf = require('../config.js')
+var config = cnf.config
+
+module.exports = Stats
+
 function Stats() {
     this.equipContainer = new ContainerEquip();
     var contents = this.initSections();
@@ -13,7 +24,7 @@ function Stats() {
 }
 
 Stats.formatParam = function(param, digits) {
-    var current = (param.Current == 0) ? "0" : util.toFixed(param.Current, digits);
+    var current = (param.Current === 0) ? "0" : util.toFixed(param.Current, digits);
     var max = util.toFixed(param.Max, 0);
     return current + ' / ' + max;
 };
@@ -28,7 +39,7 @@ Stats.prototype = {
             meter.high = 0.75*max;
             meter.optimum = max;
         }
-        meter.max = (max == 0) ? 100 : max;
+        meter.max = (max === 0) ? 100 : max;
         meter.value = util.toFixed(param.Current, digits);
         meter.title = text;
         meter.textContent = text;

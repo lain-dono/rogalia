@@ -1,4 +1,4 @@
-"use strict";
+'use strict'
 if ( !window.requestAnimationFrame ) {
      window.requestAnimationFrame = ( function() {
          return window.webkitRequestAnimationFrame ||
@@ -14,14 +14,14 @@ if ( !window.requestAnimationFrame ) {
 
 function Util() {}
 
-var util = new function() {
+var util = module.exports = new (function() { // jshint ignore:line
     this.ajax = function(url, callback) {
 	var oReq = new XMLHttpRequest();
 	oReq.open("GET", url, true);
 	oReq.onreadystatechange = function (oEvent) {
 	    if (oReq.readyState === 4) {
 		if (oReq.status === 200) {
-		    callback && callback(oReq.responseText);
+		    callback && callback(oReq.responseText); // jshint ignore:line
 		} else {
 		    console.log("Error", oReq.statusText);
 		}
@@ -125,10 +125,10 @@ var util = new function() {
     };
 
     this.hash = function(string) {
-        var hash = 0, i, char;
-        if (string.length == 0) return hash;
+        var hash = 0;
+        if (string.length === 0) return hash;
         for (var i = 0, l = string.length; i < l; i++) {
-            char  = string.charCodeAt(i);
+            var char  = string.charCodeAt(i);
             hash  = ((hash<<5)-hash)+char;
             hash |= 0; // Convert to 32bit integer
         }
@@ -144,23 +144,23 @@ var util = new function() {
         var fromCharCode = String.fromCharCode;
         switch(cccc.length) {
         case 4:
-            var cp = ((0x07 & cccc.charCodeAt(0)) << 18)
-                |    ((0x3f & cccc.charCodeAt(1)) << 12)
-                |    ((0x3f & cccc.charCodeAt(2)) <<  6)
-                |     (0x3f & cccc.charCodeAt(3)),
+            var cp = ((0x07 & cccc.charCodeAt(0)) << 18) |
+                     ((0x3f & cccc.charCodeAt(1)) << 12) |
+                     ((0x3f & cccc.charCodeAt(2)) <<  6) |
+                     (0x3f & cccc.charCodeAt(3)),
             offset = cp - 0x10000;
-            return (fromCharCode((offset  >>> 10) + 0xD800)
-                    + fromCharCode((offset & 0x3FF) + 0xDC00));
+            return (fromCharCode((offset  >>> 10) + 0xD800) +
+                    fromCharCode((offset & 0x3FF) + 0xDC00));
         case 3:
             return fromCharCode(
-                ((0x0f & cccc.charCodeAt(0)) << 12)
-                    | ((0x3f & cccc.charCodeAt(1)) << 6)
-                    |  (0x3f & cccc.charCodeAt(2))
+                ((0x0f & cccc.charCodeAt(0)) << 12) |
+                     ((0x3f & cccc.charCodeAt(1)) << 6) |
+                      (0x3f & cccc.charCodeAt(2))
             );
         default:
             return  fromCharCode(
-                ((0x1f & cccc.charCodeAt(0)) << 6)
-                    |  (0x3f & cccc.charCodeAt(1))
+                ((0x1f & cccc.charCodeAt(0)) << 6) |
+                      (0x3f & cccc.charCodeAt(1))
             );
         }
     };
@@ -288,7 +288,7 @@ var util = new function() {
                 if (util.dragIgnore(checking))
                     return;
 	        checking = checking.parentNode;
-	    };
+	    }
 
 	    drag = {
 	        dx: e.pageX - element.offsetLeft,
@@ -365,7 +365,7 @@ var util = new function() {
     this.dotimes = function(n, callback) {
         return Array.apply(null, Array(n)).map(callback);
     };
-};
+})()
 
 if (!Math.hypot) {
     Math.hypot = function hypot() {

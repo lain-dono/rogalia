@@ -1,4 +1,12 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var Container = require('../container/container.js')
+var Entity = require('../entity.js')
+
+module.exports = Vendor
+
 function Vendor() {
 }
 
@@ -77,7 +85,7 @@ Vendor.createPriceInput = function() {
     return price;
 };
 
-Vendor.sort = new function() {
+Vendor.sort = new (function() { // jshint ignore:line
     var self = this;
     this.byType = function(a, b) {
         if (a.Type != b.Type)
@@ -94,7 +102,7 @@ Vendor.sort = new function() {
     this.byPrice = function(a, b) {
         return b.Cost - b.Cost;
     };
-};
+})();
 
 Vendor.prototype = {
     panel: null,
@@ -201,7 +209,7 @@ Vendor.prototype = {
                 };
                 slot.cleanup = function() {
                     slot.entity = null;
-                    button.disabled = (canBeSold.length == 0);
+                    button.disabled = (canBeSold.length === 0);
                     dom.clear(slot);
                 };
                 slot.addEventListener("mousedown", slot.cleanup, true);
@@ -210,7 +218,7 @@ Vendor.prototype = {
                 function cleanup(_, sold) {
                     sold = sold || 1;
                     lot.Quantity -= sold;
-                    if (lot.Quantity == 0)
+                    if (lot.Quantity === 0)
                         dom.remove(slot.parentNode.parentNode);
                     else
                         quantity.textContent = lot.Quantity;
@@ -233,7 +241,7 @@ Vendor.prototype = {
                         cleanup
                     );
                 });
-                button.disabled = (canBeSold.length == 0);
+                button.disabled = (canBeSold.length === 0);
 
                 var cancel = dom.button("×", "lot-cancel", function() {
                     game.network.send(

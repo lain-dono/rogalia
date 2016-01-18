@@ -1,4 +1,12 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var Vendor = require('./vendor.js')
+var util = require('../util.js')
+
+module.exports = Mail
+
 function Mail() {
     var self = this;
     this.tabs = [
@@ -124,7 +132,7 @@ Mail.prototype = {
                 Subject: subject.value,
                 Body: body.value,
                 Items: slots.filter(function(slot) {
-                    return slot.entity != null;
+                    return slot.entity !== null;
                 }).map(function(slot) {
                     return slot.entity.Id;
                 })

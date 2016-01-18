@@ -1,4 +1,7 @@
-EffectDesc.effects = {
+'use strict'
+
+//EffectDesc.effects = {
+module.exports = {
     "Overeat": {
         "class": "bad",
         "effect": "скорость перемещения персонажа снижается на 45.",

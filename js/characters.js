@@ -1,4 +1,14 @@
-"use strict";
+'use strict'
+
+var Character = require('./character.js')
+var Sprite = require('./sprite.js')
+var Panel = require('./panel.js')
+var Quest = require('./ui/quests/quest.js')
+var Vendor = require('./ui/vendor.js')
+var Exchange = require('./ui/exchange.js')
+var Bank = require('./ui/bank.js')
+var dom = require('./dom.js')
+
 Character.equipSlots =  [
     "bag",
     "right-hand",
@@ -25,7 +35,7 @@ Character.copy = function copy(to, from) {
 };
 
 Character.sync = function(data, remove) {
-    remove && remove.forEach(game.removeCharacterById);
+    remove && remove.forEach(game.removeCharacterById); // jshint ignore:line
     for (var id in data) {
         var from = data[id];
         var to = game.entities.get(id);
@@ -130,7 +140,7 @@ Character.npcActions = {
     "Quest": function() {
         var quests = this.getQuests();
         //TODO: remove quest button from dialog, instead of this stupid warning
-        if (quests.length == 0) {
+        if (quests.length === 0) {
             game.controller.showWarning(T("No more quests"));
             return;
         }
@@ -210,7 +220,9 @@ Character.npcActions = {
                         Vendor.createPrice(instance.Cost),
                         enter,
                     ];
+                    /* XXX
                     return inst;
+                    */
                 })
             );
             new Panel("instances", "Instances", [instances]).show().setEntity(self);

@@ -1,4 +1,11 @@
-"use strict";
+'use strict'
+
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var config = require('../config.js').config
+
+module.exports = Settings
+
 function Settings() {
     Settings.instance = this;
     var tabs = this.makeSettingsTabs(game.config, "Config");
@@ -16,11 +23,11 @@ function Settings() {
 
     function setPlayerSettings() {
         game.network.send("set-settings", {Settings: game.player.Settings});
-    };
+    }
 
     function setPlayerStyle() {
         game.network.send("set-style", {Style: game.player.Style});
-    };
+    }
 
     this.triggers = {
         "settings.ui.language": function() {
@@ -66,6 +73,8 @@ function Settings() {
     };
 }
 
+Settings.descriptions = require('../lang/ru/settings.js')
+
 Settings.load = function(map) {
     Object.keys(map).forEach(function(name) {
         var group = map[name];
@@ -80,7 +89,6 @@ Settings.load = function(map) {
         })
     })
 }
-
 
 Settings.toggle = function(key) {
     var path = key.split(".");
@@ -125,7 +133,9 @@ Settings.prototype = {
                         value = false;
                 }
 
-                var desc = Settings.descriptions[name] && Settings.descriptions[name][prop] || [prop, ""];
+                var desc = Settings.descriptions[name] &&
+                    Settings.descriptions[name][prop] || [prop, ""];
+
                 var title = desc[0];
                 var tip = desc[1];
 
@@ -143,7 +153,7 @@ Settings.prototype = {
                 label.onchange = function() {
                     group[prop] = !group[prop];
                     localStorage.setItem(key, group[prop]);
-                    self.triggers[key] && self.triggers[key](group[prop]);
+                    self.triggers[key] && self.triggers[key](group[prop]); // jshint ignore:line
                 };
                 tab.contents.push(label);
             });

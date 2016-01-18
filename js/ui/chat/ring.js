@@ -1,18 +1,19 @@
-"use strict";
-function ChatRing() {
+'use strict'
+
+module.exports = function ChatRing() {
     this.ring =  [];
     this.current =  this.ring.length;
     this.backup = "";
 
     this.last = function() {
-        if (this.ring.length == 0)
+        if (this.ring.length === 0)
             return null;
         return this.ring[this.ring.length-1];
     };
 
     this.prev = function() {
         this.current = Math.max(0, this.current-1);
-        if (this.ring.length == 0)
+        if (this.ring.length === 0)
             return this.backup;
 
         return this.ring[this.current];

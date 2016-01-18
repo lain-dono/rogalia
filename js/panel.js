@@ -1,4 +1,10 @@
-"use strict";
+'use strict'
+
+var dom = require('./dom.js')
+var util = require('./util.js')
+
+module.exports = Panel
+
 //TODO: make panels linked via back button
 function Panel(name, title, elements, listeners, hooks) {
     if (name in game.panels) {
@@ -137,7 +143,7 @@ Panel.prototype = {
         Panel.top = this;
     },
     hide: function() {
-        this.hooks.hide && this.hooks.hide.call(this);
+        this.hooks.hide && this.hooks.hide.call(this); // jshint ignore:line
         this.savePosition();
         this.element.style.visibility = "hidden";
         if (this.button) {
@@ -201,7 +207,7 @@ Panel.prototype = {
             this.y = 0;
         }
 
-        this.hooks.show && this.hooks.show.call(this);
+        this.hooks.show && this.hooks.show.call(this); // jshint ignore:line
         window.scrollTo(0, 0);
         return this;
     },

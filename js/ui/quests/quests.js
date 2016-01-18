@@ -1,6 +1,7 @@
-"use strict";
+'use strict'
+
 //tmp stub
-function Quests() {
+module.exports = function Quests() {
     return {
         "hello": {
             name: {

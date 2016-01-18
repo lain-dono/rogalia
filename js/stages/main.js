@@ -1,5 +1,21 @@
-"use strict";
+'use strict'
+
+var Stage = require('./stage.js')
+var Snow = require('../new-year.js')
+var Entity = require('../entity.js')
+var Character = require('../character.js')
+var util = require('../util.js')
+var cnf = require('../config.js')
+var config = cnf.config
+var debug = cnf.debug
+
+
+Stage.add(mainStage)
+window.mainStage = mainStage
+
 function mainStage(data) {
+    /*jshint validthis:true */
+
     setTimeout(function() {
         game.network.send("logon");
     }, 200);
@@ -22,7 +38,7 @@ function mainStage(data) {
         Character.sync(data.Mobs || [], data.RemoveMobs || null);
         Character.sync(data.NPCs || [], data.RemoveNPCs || null);
 
-        data.Location && game.map.sync(data.Location);
+        data.Location && game.map.sync(data.Location); // jshint ignore:line
 
         game.controller.syncMinimap(data.RemotePlayers);
         game.controller.chat.sync(data.Chat || []);
@@ -139,8 +155,8 @@ function mainStage(data) {
         this.topologicalSort(list).forEach(drawObject);
 
         var ellapsed = Date.now() - started;
-        var diff = (ellapsed > 15) ? -CELL_SIZE : +CELL_SIZE;
-        if (diff != 0 && frames > 24) {
+        var diff = (ellapsed > 15) ? -cnf.CELL_SIZE : +cnf.CELL_SIZE;
+        if (diff !== 0 && frames > 24) {
             frames = 0;
             adaptiveRadius += diff;
         }
@@ -201,7 +217,7 @@ function mainStage(data) {
 
         return util.msort(list, function(a, b) {
             var z = a.getZ() - b.getZ();
-            if (z != 0)
+            if (z !== 0)
                 return z;
 
             return (a.depth >= b.depth) ? +1 : -1;
@@ -213,5 +229,3 @@ function mainStage(data) {
         game.ctx.fillRect(game.camera.x, game.camera.y, game.screen.width, game.screen.height);
     };
 }
-
-Stage.add(mainStage);

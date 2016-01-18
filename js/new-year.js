@@ -1,5 +1,9 @@
-"use strict";
-function Snow() {
+'use strict'
+
+var cnf = require('./config.js')
+var config = cnf.config
+
+module.exports = function Snow() {
     var W = game.screen.width;
     var H = game.screen.height;
 

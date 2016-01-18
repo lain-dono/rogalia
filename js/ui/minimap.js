@@ -1,5 +1,11 @@
-"use strict";
-function Minimap() {
+'use strict'
+
+var cnf = require('../config.js')
+var dom = require('../dom.js')
+var Panel = require('../panel.js')
+var Point = require('../point.js')
+
+module.exports = function Minimap() {
     var self = this;
     var width = {
         default: 300,
@@ -8,7 +14,7 @@ function Minimap() {
     };
     function scale() {
         return width.current / width.original;
-    };
+    }
 
     this.mapImage = new Image();
     this.mapImage.onload = function() {
@@ -54,12 +60,13 @@ function Minimap() {
     }
 
     this.mapImage.onclick = function(e) {
+        var p
         if (game.controller.modifier.alt && game.player.IsAdmin) {
-            var p = pointFromEvent(e).mul(CELL_SIZE);
+            p = pointFromEvent(e).mul(cnf.CELL_SIZE);
             game.network.send("teleport", p.json());
             return;
         }
-        var p = pointFromEvent(e)
+        p = pointFromEvent(e)
         var point = this.addMarker(p.x, p.y);
         if (game.controller.modifier.shift)
             sendPoint(point)
@@ -77,7 +84,7 @@ function Minimap() {
         var pl = game.player;
         this.characters[pl.Name] = {X: pl.X, Y: pl.Y};
         for (var name in this.points) {
-            if (name in data && data[name] == null) {
+            if (name in data && data[name] === null) {
                 delete this.characters[name];
                 removePointByName(name);
             }
@@ -91,24 +98,24 @@ function Minimap() {
         var point = dom.div("point");
         point.title = title;
         return point;
-    };
+    }
 
     function addPoint(name, point) {
         self.points[name] = point;
         wrapper.appendChild(point);
-    };
+    }
 
     function updatePoint(point, x, y) {
         point.x = x;
         point.y = y;
         point.style.left = scale() * x + "px";
         point.style.top = scale() * y + "px";
-    };
+    }
 
     function removePointByName(name) {
         dom.remove(self.points[name]);
         delete self.points[name];
-    };
+    }
 
     function sendPoint(point) {
         var title = (point.title == point.name) ? "" : " " + point.title;
@@ -129,8 +136,8 @@ function Minimap() {
             var character = this.characters[name];
             if (!character)
                 continue;
-            var x = character.X / CELL_SIZE;
-            var y = character.Y / CELL_SIZE;
+            var x = character.X / cnf.CELL_SIZE;
+            var y = character.Y / cnf.CELL_SIZE;
             var point = this.points[name];
             if (!point) {
                 point = makePoint(name);

@@ -10,7 +10,7 @@
 // 4. "from {name}": "to {sel one two} {name}"
 // sexp {atom val1 val2} will select index by evaluating args[sel] and take [val1, val2][index]
 
-var dict = {
+var dict = module.exports = {
     "Spiced wolf meat": "Волчатина с пряностями",
     "Paprika": "Паприка",
     "Wolf meat": "Волчатина",

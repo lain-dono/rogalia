@@ -1,4 +1,22 @@
-"use strict";
+'use strict'
+
+var Items = require('./lang/ru/items.js')
+var Point = require('./point.js')
+var Sprite = require('./sprite.js')
+var Stats = require('./ui/stats.js')
+var Panel = require('./panel.js')
+// circular; see bottom of file
+//var Character = require('./character.js')
+//var Container = require('./container/container.js')
+var dom = require('./dom.js')
+var util = require('./util.js')
+var cnf = require('./config.js')
+var config = cnf.config
+var CELL_SIZE = cnf.CELL_SIZE
+var FONT_SIZE = cnf.FONT_SIZE
+
+module.exports = Entity
+
 function Entity(type, id) {
     var e = this;
     if (type) {
@@ -119,7 +137,7 @@ Entity.prototype = {
         return new Point(this.X, this.Y);
     },
     get round() {
-        return this.Width == 0;
+        return this.Width === 0;
     },
     showInfo: function() {
         var elements = [];
@@ -209,7 +227,7 @@ Entity.prototype = {
         if (this == entity)
             return 0;
         var z = this.getZ() - entity.getZ();
-        if (z != 0)
+        if (z !== 0)
             return z;
 
         // for topological sort test
@@ -232,9 +250,7 @@ Entity.prototype = {
         return this._spriteVersion;
     },
     initSprite: function() {
-        var path = (this.Sprite.Name)
-            ? this.Sprite.Name
-            : this.Type;
+        var path = (this.Sprite.Name) ? this.Sprite.Name : this.Type;
 
         if (this.Props.LiquidType) {
             path += "-" + this.Props.LiquidType;
@@ -249,7 +265,7 @@ Entity.prototype = {
         case "stack-of-boards":
             if (!this.Props.Slots)
                 break;
-            if (this.Props.Slots.some(function(id){ return id != 0 }))
+            if (this.Props.Slots.some(function(id){ return id !== 0 }))
                 path += "-full";
         }
 
@@ -315,7 +331,7 @@ Entity.prototype = {
     },
     getActions: function() {
         var actions = [{}, {}, {}];
-
+        /*jshint -W069 */
         if (game.player.IsAdmin) {
             actions[0]["$cmd"] = this.applyAdminCmd;
         }
@@ -329,13 +345,14 @@ Entity.prototype = {
             actions[1][action] = this.actionApply(action);
         }.bind(this));
 
-        if (this.Orientation != "" && this.MoveType != Entity.MT_STATIC) {
+        if (this.Orientation !== "" && this.MoveType != Entity.MT_STATIC) {
             actions[2]["Rotate"] = function() {
                 game.network.send("rotate", {id: this.Id});
             };
         }
         actions[2]["Destroy"] =  this.destroy;
         actions[2]["Info"] = this.showInfo;
+        /*jshint +W069 */
         return actions;
     },
     alignedData: function(p) {
@@ -411,7 +428,7 @@ Entity.prototype = {
     findRootContainer: function() {
         var cnt = this.findContainer();
         for (var i = 0; i < 100; i++) {
-            if (cnt != null && cnt.inContainer())
+            if (cnt !== null && cnt.inContainer())
                 cnt = cnt.findContainer();
             else
                 return cnt;
@@ -491,6 +508,7 @@ Entity.prototype = {
         switch(this.Group) {
         case "jukebox":
             this.defaultActionSuccess = game.jukebox.open;
+            /* falls through */
         case "portal":
         case "book":
         case "grave":
@@ -503,6 +521,7 @@ Entity.prototype = {
         case "furnace":
         case "oven":
             this._canUse = true;
+            /* falls through */
         case "fishing-rod":
         case "table":
         case "bag":
@@ -1006,7 +1025,7 @@ Entity.prototype = {
                 game.network.send("entity-add", args, function(data) {
                     for (var id in data.Entities) {
                         var entity = data.Entities[id];
-                        if (entity.Type == self.Type && entity.Creator == 0) {
+                        if (entity.Type == self.Type && entity.Creator === 0) {
                             game.chat.send("*set-quality " + id + " " + self.Quality);
                             return;
                         }
@@ -1032,3 +1051,7 @@ Entity.prototype = {
         }
     },
 };
+
+
+var Character = require('./character.js')
+var Container = require('./container/container.js')

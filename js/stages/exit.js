@@ -1,11 +1,18 @@
-"use strict";
+'use strict'
+
+var Stage = require('./stage.js')
+var cnf = require('../config.js')
+
+Stage.add(exitStage);
+window.exitStage = exitStage
+
 function exitStage(message) {
     message = message || T("Refresh page...");
     game.ctx.fillStyle = "#fff";
     game.forceDrawStrokedText(
         T(message),
-        CELL_SIZE,
-        CELL_SIZE
+        cnf.CELL_SIZE,
+        cnf.CELL_SIZE
     );
     game.network.disconnect();
 
@@ -27,5 +34,4 @@ function exitStage(message) {
     help.appendChild(game.button.logout());
     help.appendChild(reload);
     game.world.appendChild(help);
-};
-Stage.add(exitStage);
+}

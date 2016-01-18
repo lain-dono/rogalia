@@ -1,4 +1,9 @@
-"use strict";
+'use strict'
+
+var Container = require('./container.js')
+
+module.exports = ContainerEquip
+
 function ContainerEquip() {
     Container.call(this, {Id: 0});
     this.hash = "";

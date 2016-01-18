@@ -1,4 +1,12 @@
-"use strict";
+'use strict'
+
+var Character = require('../character.js')
+var Panel = require('../panel.js')
+var dom = require('../dom.js')
+var Stats = require('./stats.js')
+
+module.exports = Skills
+
 function Skills() {
     this.current = null;
 
@@ -51,34 +59,35 @@ Skills.prototype = {
         dom.clear(this.skills);
 
         var max = 100;
-        for (var attr in Skills.byAttr) {
-            Skills.byAttr[attr].forEach(function(name) {
-                var skill = game.player.Skills[name];
-                var item = Stats.prototype.createParam(
-                    name,
-                    skill.Value,
-                    2,
-                    false,
-                    "skills/" + name
-                );
-                if (skill.Value.Current == max) {
-                    item.getElementsByClassName("meter-title")[0].textContent = "max";
-                }
-                item.name = name;
-                item.skill = skill;
-                item.classList.add("skill");
-                item.title = TT("This skill depends on {attr}", {attr: attr});
-                dom.insert(dom.span("◾ ", "attr-" + attr), item);
-                if (skill.Value.Current == skill.Value.Max && skill.Value.Max != max) {
-                    item.classList.add("capped");
-                    item.title = T("Skill is capped");
-                }
-                item.onclick = this.select.bind(this, item);
-                this.skills.appendChild(item);
+        var fn = (function(name) {
+            var skill = game.player.Skills[name];
+            var item = Stats.prototype.createParam(
+                name,
+                skill.Value,
+                2,
+                false,
+                "skills/" + name
+            );
+            if (skill.Value.Current == max) {
+                item.getElementsByClassName("meter-title")[0].textContent = "max";
+            }
+            item.name = name;
+            item.skill = skill;
+            item.classList.add("skill");
+            item.title = TT("This skill depends on {attr}", {attr: attr});
+            dom.insert(dom.span("◾ ", "attr-" + attr), item);
+            if (skill.Value.Current == skill.Value.Max && skill.Value.Max != max) {
+                item.classList.add("capped");
+                item.title = T("Skill is capped");
+            }
+            item.onclick = this.select.bind(this, item);
+            this.skills.appendChild(item);
 
-                if (this.current && this.current.name == name)
-                    this.select(item);
-            }.bind(this));
+            if (this.current && this.current.name == name)
+                this.select(item);
+        }).bind(this)
+        for (var attr in Skills.byAttr) {
+            Skills.byAttr[attr].forEach(fn);
         }
     },
     select: function(item) {

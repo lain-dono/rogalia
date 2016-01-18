@@ -1,4 +1,7 @@
-"use strict";
+'use strict'
+
+/* jshint ignore:start */
+
 if (!Array.prototype.find) {
   Object.defineProperty(Array.prototype, 'find', {
     enumerable: false,
@@ -147,3 +150,5 @@ if (!String.prototype.repeat) {
         return rpt;
     }
 }
+
+/* jshint ignore:end */

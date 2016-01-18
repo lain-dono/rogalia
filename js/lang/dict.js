@@ -1,4 +1,10 @@
-"use strict";
+'use strict'
+
+var dict = require('./ru/dict.js')
+var util = require('../util.js')
+var Entity = require('../entity.js')
+var Panel = require('../panel.js')
+
 dict.init = function() {
     // TT translates text with substitutions
     // for client:

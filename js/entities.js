@@ -1,4 +1,7 @@
-"use strict";
+'use strict'
+
+var Entity = require('./entity.js')
+
 Entity.MT_PORTABLE = 0;
 Entity.MT_LIFTABLE = 1;
 Entity.MT_STATIC = 2;
@@ -22,7 +25,7 @@ Entity.init = function(data) {
 
 
 Entity.sync = function(data, remove) {
-    remove && remove.forEach(game.removeEntityById);
+    remove && remove.forEach(game.removeEntityById); // jshint ignore:line
 
     var containers = []; //to update
     for (var id in data) {
@@ -50,7 +53,7 @@ Entity.sync = function(data, remove) {
 
 Entity.get = function(id) {
     return game.entities.get(parseInt(id));
-};
+}; // jshint ignore:line
 Entity.exists = function(id) {
     return !!Entity.get(id);
 };
@@ -96,9 +99,10 @@ Entity.getSortedRecipeTuples = function() {
         return [type, Entity.recipes[type]];
     }).sort(function(a, b){
         var diff = a[1].Lvl - b[1].Lvl;
-        if (diff != 0)
+        if (diff !== 0)
             return diff;
 
         return (T(a[0]) < T(b[0])) ? -1 : +1;
     });
 };
+

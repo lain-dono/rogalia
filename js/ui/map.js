@@ -1,5 +1,12 @@
-"use strict";
-function Map() {
+'use strict'
+
+var Point = require('../point.js')
+var Character = require('../character.js')
+var cnf = require('../config.js')
+var CELL_SIZE = cnf.CELL_SIZE
+var debug = cnf.debug
+
+module.exports = function Map() {
     var CHUNK_SIZE = 8*CELL_SIZE;
     var ISO_CHUNK_SIZE = CHUNK_SIZE + CELL_SIZE;
 
@@ -56,12 +63,14 @@ function Map() {
     };
 
     this.sync = function(data) {
-        var img = new Image;
+        var img = new Image();
         img.onload = sync.bind(this, img);
         img.src = "data:image/png;base64," + data;
     };
 
     function sync(img) {
+        /*jshint validthis:true */
+
         this.cells_x = img.width;
         this.cells_y = img.height;
 
@@ -70,10 +79,11 @@ function Map() {
 
         var data = this.parse(img);
         this.data = [];
+        var id
         for(var h = 0; h < this.cells_y; h++) {
             this.data.push([]);
             for(var w = 0; w < this.cells_x; w++) {
-                var id = data[h * this.cells_x + w];
+                id = data[h * this.cells_x + w];
                 var biom = this.bioms[id];
 	        this.data[h].push({
                     x: w,
@@ -94,7 +104,7 @@ function Map() {
 
         for(var y = 0; y < this.cells_y; y++) {
             for(var x = 0; x < this.cells_x; x++) {
-                var id = this.data[y][x].id;
+                id = this.data[y][x].id;
                 for (var c = 0; c < 4; c++) {
                     var offset = 0;
                     var cx = 1 - (c & 0x1);
@@ -118,7 +128,7 @@ function Map() {
             }
         }
         this.ready = true;
-    };
+    }
 
     this.reset = function() {
         //TODO: reuse valid chunks
@@ -129,17 +139,18 @@ function Map() {
 	game.ctx.strokeStyle = gridColor;
         var sw = game.player.Location.X;
         var sh = game.player.Location.Y;
+        var sp, ep
 	for(var w = sw; w <= sw + this.width; w += CELL_SIZE) {
-            var sp = new Point(w, sh).toScreen();
-            var ep = new Point(w, sh + this.height).toScreen();
+            sp = new Point(w, sh).toScreen();
+            ep = new Point(w, sh + this.height).toScreen();
 	    game.ctx.beginPath();
 	    game.ctx.moveTo(sp.x, sp.y);
 	    game.ctx.lineTo(ep.x, ep.y);
 	    game.ctx.stroke();
 	}
 	for(var h = sh; h <= sh + this.height; h += CELL_SIZE) {
-            var sp = new Point(sw, h).toScreen();
-            var ep = new Point(sw + this.width, h).toScreen();
+            sp = new Point(sw, h).toScreen();
+            ep = new Point(sw + this.width, h).toScreen();
 	    game.ctx.beginPath();
 	    game.ctx.moveTo(sp.x, sp.y);
 	    game.ctx.lineTo(ep.x, ep.y);
@@ -190,20 +201,20 @@ function Map() {
         ];
 
         cell.corners.forEach(function(offset, i) {
-            if (x != 0 && y != 0 && !cell.transition[i]) {
+            if (x !== 0 && y !== 0 && !cell.transition[i]) {
                 // breaks ARE required
                 switch(offset) {
-                case  3: if (i != 2) return; break;
-                case  5: if (i != 1) return; break;
-                case 10: if (i != 2) return; break;
-                case 12: if (i != 1) return; break;
+                case  3: if (i !== 2) return; break;
+                case  5: if (i !== 1) return; break;
+                case 10: if (i !== 2) return; break;
+                case 12: if (i !== 1) return; break;
 
-                case  7: if (i != 3) return; break;
-                case 11: if (i != 2) return; break;
-                // case 13: if (i != 1) return; break; //TODO: fixme
-                case 14: if (i != 0) return; break;
+                case  7: if (i !== 3) return; break;
+                case 11: if (i !== 2) return; break;
+                // case 13: if (i !== 1) return; break; //TODO: fixme
+                case 14: if (i !== 0) return; break;
 
-                case 15: if (i != 0) return; break;
+                case 15: if (i !== 0) return; break;
                 }
             }
 
@@ -258,8 +269,19 @@ function Map() {
                 .div(CHUNK_SIZE)
                 .ceil();
 
-        for (var x = leftTop.x; x < rightBottom.x; x++) {
-            for (var y = rightTop.y; y < leftBottom.y; y++) {
+        var x, y, f = function(tile) {
+            if (!layers[tile.layer]) {
+                game.sendErrorf(
+                    "layers[tile.layer] is null; layers: %j; tile.layer: %j",
+                    layers,
+                    tile.layer
+                );
+                layers[tile.layer] = [];
+            }
+            layers[tile.layer].push(tile);
+        }
+        for (x = leftTop.x; x < rightBottom.x; x++) {
+            for (y = rightTop.y; y < leftBottom.y; y++) {
                 var c = new Point(x * CHUNK_SIZE, y * CHUNK_SIZE);
                 var p = c.clone().toScreen();
 
@@ -278,17 +300,7 @@ function Map() {
                     chunk = this.makeChunk(p, c);
                     this.chunks[key] = chunk;
                 }
-                chunk.layers.forEach(function(tile) {
-                    if (!layers[tile.layer]) {
-                        game.sendErrorf(
-                            "layers[tile.layer] is null; layers: %j; tile.layer: %j",
-                            layers,
-                            tile.layer
-                        );
-                        layers[tile.layer] = [];
-                    }
-                    layers[tile.layer].push(tile);
-                });
+                chunk.layers.forEach(f);
             }
         }
 
@@ -305,10 +317,10 @@ function Map() {
             var text = "(" + (x + game.camera.x) + " " + (y + game.camera.y) + ")";
             game.ctx.fillStyle = "#fff";
 
-            game.drawStrokedText(text, x, y + FONT_SIZE);
+            game.drawStrokedText(text, x, y + cnf.FONT_SIZE);
         }
 
-        game.debug.map.grid && this.drawGrid();
+        game.debug.map.grid && this.drawGrid(); // jshint ignore:line
 
         this.drawMinimap();
     };
@@ -463,7 +475,7 @@ function Map() {
                     w = h = 5;
                 } else if (e.Karma < 0 || e.Aggressive) {
                     mctx.fillStyle = "#f00";
-                    w = h = ((e.Lvl >= 50) ? 6 : 4);;
+                    w = h = ((e.Lvl >= 50) ? 6 : 4);
                 } else {
                     mctx.fillStyle = "pink";
                     w = h = ((e.Lvl >= 50) ? 5 : 3);
