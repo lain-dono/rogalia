@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
+    "profile": "webpack --profile --json > stats.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,8 +19,14 @@
   },
   "homepage": "http://rogalia.ru",
   "devDependencies": {
+    "brfs": "^1.4.2",
     "jshint": "^2.9.1",
     "jshint-loader": "^0.8.3",
+    "json-loader": "^0.5.4",
+    "transform-loader": "^0.2.3",
     "webpack": "^1.12.11"
+  },
+  "dependencies": {
+    "pixi.js": "^3.0.9"
   }
 }

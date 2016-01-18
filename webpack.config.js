@@ -1,3 +1,5 @@
+var path = require('path')
+
 module.exports = {
 	entry: "./js/main.js",
 	devtool: 'source-map',
@@ -6,15 +8,22 @@ module.exports = {
 		filename: "bundle.js"
 	},
 	module: {
-		loaders: [
-		],
 		preLoaders: [
 			{
 				test: /\.js$/, // include .js files
 				exclude: /node_modules/, // exclude any and all files in the node_modules folder
 				loader: "jshint-loader"
+			},
+		],
+		loaders: [
+			{ test: /\.json$/, loader: 'json', },
+		],
+		postLoaders: [
+			{
+				include: path.resolve(__dirname, 'node_modules/pixi.js'),
+				loader: 'transform?brfs'
 			}
-		]
+		],
 	},
 	jshint: {
 		// any jshint option http://www.jshint.com/docs/options/
@@ -36,10 +45,7 @@ module.exports = {
 			BinarySearchTree: true,
 		},
 
-		//asi: true,
-
-		// i. e.
-		//camelcase: true,
+		asi: true,
 
 		// jshint errors are displayed by default as warnings
 		// set emitErrors to true to display them as errors
