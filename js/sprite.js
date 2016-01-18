@@ -56,7 +56,7 @@ Sprite.prototype = {
             this.loading = false;
 
             var canvas = null;
-            while ((canvas = this.pending.pop()) !== null) {
+            while ((canvas = this.pending.pop()) !== undefined) {
                 this.renderIcon(canvas);
             }
             if (this._onload) {

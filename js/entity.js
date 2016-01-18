@@ -3,11 +3,11 @@
 var Items = require('./lang/ru/items.js')
 var Point = require('./point.js')
 var Sprite = require('./sprite.js')
-var Stats = require('./ui/stats.js')
 var Panel = require('./panel.js')
 // circular; see bottom of file
 //var Character = require('./character.js')
 //var Container = require('./container/container.js')
+//var Stats = require('./ui/stats.js')
 var dom = require('./dom.js')
 var util = require('./util.js')
 var cnf = require('./config.js')
@@ -1055,3 +1055,4 @@ Entity.prototype = {
 
 var Character = require('./character.js')
 var Container = require('./container/container.js')
+var Stats = require('./ui/stats.js')
