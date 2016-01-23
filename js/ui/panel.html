@@ -1,0 +1,8 @@
+<div v-show="visible"
+    :class="{ panel: true, top: isTop }"
+    :style="{ left: '300px', top: '300px', visibility: 'visible', 'z-index': zIndex }"
+    ><header v-if="hasTitleBar" class="title-bar"
+        ><div title="{{title | T}}" class="title-text">{{title | T}}</div
+        ><span v-if="hasCloseButton" @click="toggle" class="close"></span
+    ></header
+    ><div class="contents"><slot></slot></div></div>
