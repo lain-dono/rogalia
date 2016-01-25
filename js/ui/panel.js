@@ -1,5 +1,7 @@
 'use strict'
 
+require("style!raw!./panel.css")
+
 var dragIgnoreTags = ['INPUT', 'TEXTAREA', 'BUTTON', 'CODE']
 var dragIgnoreClass = 'no-drag'
 
@@ -150,7 +152,7 @@ module.exports = {
             if(config.position) {
                 this.x = config.position.x
                 this.y = config.position.y
-                this.visible = config.visible
+                //this.visible = config.visible
             } else {
                 this.center()
             }
@@ -179,8 +181,6 @@ module.exports = {
         this.$el.addEventListener('mousedown', this.$mousedown)
         window.addEventListener('mouseup',     this.$mouseup)
         window.addEventListener('mousemove',   this.$mousemove)
-
-        this.width = 300
 
         this.loadPosition()
         this.savePosition()
