@@ -1,11 +1,104 @@
 'use strict'
 
-var dom = require('../dom.js')
-var Panel = require('../panel.js')
+require('style!raw!./settings.css')
+
 var config = require('../config.js').config
+var debug = require('../config.js').debug
+var descriptions = require('../lang/ru/settings.js')
 
-module.exports = Settings
+module.exports = {
+    template: require('raw!./settings.html'),
+    props: {
+        ping: Number,
+        // TODO move it to config, etc.
+        siteUrl: {type: String, default: 'http://rogalia.ru'}
+    },
+    data: function() {
+        return {
+            settings: config,
+            descriptions: descriptions,
+        }
+    },
+    methods: {
+        open: function(link) {
+            if (link.charAt(0) == '$') {
+                link = this.siteUrl + link.substring(1);
+            }
+            window.open(link, '_blank');
+        },
+        showHelp: function() {
+            console.log('showHelp');
+        },
+        showUsers: function() {
+            console.log('showUsers');
+        },
+        lobby: function() {
+            console.log('lobby');
+        },
+        logout: function() {
+            console.log('logout');
+        },
+    },
+    attached: function() {
+        document.getElementById('fps-stats').appendChild(this.$fps.domElement)
+    },
+    created: function() {
+        this.$fps = new FpsStats()
 
+        this.$watch('settings.ui.language', function() {
+            localStorage.setItem('lang', (game.lang == 'ru') ? 'en' : 'ru')
+            game.reload()
+        })
+        this.$watch('settings.sound.playMusic', function() {
+            game.sound.toggleMusic()
+        })
+        this.$watch('settings.sound.jukebox', function() {
+            game.jukebox.toggle()
+        })
+        //this.$watch('settings.map.world', function() {
+            //dom.toggle(game.world)
+        //})
+        this.$watch('settings.ui.chatNotifications', function(attach) {
+            game.chat.initNotifications()
+        })
+        this.$watch('settings.ui.chatAttached', function(attach) {
+            if (attach) { game.chat.attach() }
+            else        { game.chat.detach() }
+        })
+        this.$watch('settings.graphics.low', function() {
+            game.map.reset()
+        })
+        this.$watch('settings.graphics.centerScreen', function() {
+            game.world.classList.toggle('snap-left')
+        })
+        this.$watch('settings.graphics.fullscreen', function() {
+            game.screen.update()
+        })
+        this.$watch('settings.character.pathfinding', function() {
+            game.player.Settings.Pathfinding = !game.player.Settings.Pathfinding
+            game.network.send("set-settings", {Settings: game.player.Settings});
+        })
+        this.$watch('settings.character.hideHelmet', function() {
+            game.player.Style.HideHelmet = !game.player.Style.HideHelmet
+            game.network.send("set-style", {Style: game.player.Style});
+            game.player.reloadSprite()
+        })
+    },
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+//Settings.descriptions = descriptions
 function Settings() {
     Settings.instance = this;
     var tabs = this.makeSettingsTabs(game.config, "Config");
@@ -73,7 +166,6 @@ function Settings() {
     };
 }
 
-Settings.descriptions = require('../lang/ru/settings.js')
 
 Settings.load = function(map) {
     Object.keys(map).forEach(function(name) {
@@ -163,3 +255,4 @@ Settings.prototype = {
         return tabs;
     },
 };
+*/

@@ -1,0 +1,53 @@
+<div class="stabs">
+    <div v-for="(t, tab) in settings" :class="['stab', t]">
+        <div class="tab-title">{{t | T}}</div>
+        <div class="stab-content">
+            <label v-for="(a, attr) in tab" :title="descriptions[t][a][1]">
+                <input type="checkbox" v-model="settings[t][a]" />
+                {{descriptions[t][a][0]}}
+            </label>
+        </div>
+    </div>
+
+    <div class="stab system">
+        <!--<button @click="showHelp">{{Help | T}}</button>-->
+        <button @click="lobby">{{"Change character" | T}}</button>
+        <button @click="logout">{{"Logout" | T}}</button>
+        <hr />
+
+        <button @click="open('$/shop/donate')">{{"Donate" | T}}</button>
+        <button @click="showUsers">{{"Users" | T}}</button>
+        <button @click="open('$/wiki/')">{{"Wiki / FAQ" | T}}</button>
+        <hr />
+        <div>
+            <a href="http://tatrix.org" target="_blank" :title=""Blog" | T">
+                {{"Blog" | T}}
+            </a>
+            <a href="http://twitter.com/rogalia" target="_blank" :title=""Group" | T">
+                <img src="http://vk.com/favicon.ico" alt="VK"/>
+            </a>
+            <a href="http://twitter.com/Tatrics" target="_blank" :title=""Twitter" | T">
+                <img src="http://twitter.com/favicon.ico" alt="VK"/>
+            </a>
+        </div>
+        <hr />
+        <div>{{"Authors" | T}}:</div>
+
+        <div>
+            <cite>Code</cite>
+            <a href="http://vk.com/tatrix" target="_blank">TatriX</a>
+        </div>
+        <div>
+            <cite>Animation</cite>
+                <a href="http://vk.com/igorekv" target="_blank">igorekv</a>
+        </div>
+        <div>
+            <cite>Music</cite>
+            <a href="http://vk.com/icelt" target="_blank">Иван Кельт</a>
+        </div>
+
+        <div id="fps-stats"></div>
+        <span>Ping: {{ping}}</span>
+        <hr />
+    </div>
+</div>
