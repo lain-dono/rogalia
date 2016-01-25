@@ -1,0 +1,10 @@
+#wiki {
+    max-width: none;
+}
+#wiki .contents {
+    resize: both;
+}
+#wiki iframe {
+    width: 900px;
+    height: 600px;
+}
