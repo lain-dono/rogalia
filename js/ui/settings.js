@@ -32,7 +32,6 @@ module.exports = {
         showUsers: function() {
             console.log('showUsers');
             this.$root.panels.users = !this.$root.panels.users
-            game.controller.system.users.panel.toggle()
         },
         lobby: function() {
             console.log('lobby');
