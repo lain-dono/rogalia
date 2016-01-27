@@ -45,7 +45,7 @@ module.exports = {
         document.getElementById('fps-stats').appendChild(this.$fps.domElement)
     },
     created: function() {
-        this.$fps = new FpsStats()
+        window.fps = this.$fps = new FpsStats()
     },
     watch: {
         'settings.ui.language': function() {
