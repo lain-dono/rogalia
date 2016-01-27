@@ -1,6 +1,6 @@
 'use strict'
 
-require("style!raw!./panel.css")
+require('./panel.styl')
 
 var dragIgnoreTags = ['INPUT', 'TEXTAREA', 'BUTTON', 'CODE']
 var dragIgnoreClass = 'no-drag'
@@ -8,7 +8,7 @@ var dragIgnoreClass = 'no-drag'
 var pad = 20
 var lsKeyPrefix = 'panels.'
 
-var zIndex = 1
+var zIndex = 100
 var topPanel = null
 var stack = []
 
