@@ -1,0 +1,31 @@
+.tabs
+    .tab-title
+        background: url('assets/bg/tab/tab.png') no-repeat
+        width: 122px
+        display: inline-block
+        padding-left: 15px
+        box-sizing: border-box
+        position: relative
+        cursor: pointer
+        &.active
+            background: url('assets/bg/tab/tab-active.png') no-repeat
+            color: #593815
+        &:hover
+            cursor: pointer
+            -webkit-filter: brightness(150%)
+            filter: brightness(150%)
+
+    > hr
+        margin: -2px 2px 0 0
+
+    .tab-icon
+        line-height: 16px
+        position: relative
+        vertical-align: middle
+        margin-right: 4px
+    .tabs-contents
+        border: 1px solid #593815
+        .tab > .tabs
+            margin-left:  10px
+            margin-right: 10px
+

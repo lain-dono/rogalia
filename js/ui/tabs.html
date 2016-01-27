@@ -1,0 +1,11 @@
+<div class="tabs">
+
+<div class="tabs-titles">
+    <div v-for="tab in tabs" @click="current = tab.id" v-text="tab.title"
+        :class="{ active: current == tab.id, 'tab-title': true }"></div>
+</div>
+
+<div class="tabs-contents">
+    <slot></slot>
+</div>
+</div>
