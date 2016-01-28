@@ -33,6 +33,7 @@ module.exports = {
         visible:         { type: Boolean, default: true, },
         zIndex:          { type: Number,  default: 1, },
         isTop:           { type: Boolean, default: false, },
+        onlyTitle:       { type: Boolean, default: false, },
     },
     computed: {
         x: {
@@ -59,13 +60,6 @@ module.exports = {
     methods: {
         toggle: function() {
             this.visible = !this.visible
-            this.savePosition()
-
-            if (this.visible) {
-                this.toTop()
-            } else {
-                this.popTop()
-            }
         },
         toTop: function() {
             if (topPanel && topPanel != this) {
@@ -152,7 +146,7 @@ module.exports = {
             if(config.position) {
                 this.x = config.position.x
                 this.y = config.position.y
-                //this.visible = config.visible
+                this.visible = config.visible
             } else {
                 this.center()
             }
@@ -183,7 +177,6 @@ module.exports = {
         window.addEventListener('mousemove',   this.$mousemove)
 
         this.loadPosition()
-        this.savePosition()
 
         this.$el.id = this.name
     },
@@ -194,5 +187,17 @@ module.exports = {
         window.removeEventListener('mousemove',   this.$mousemove)
 
         this.savePosition()
+    },
+    watch: {
+        'visible': function() {
+            this.savePosition()
+
+            if (this.visible) {
+                this.toTop()
+                this.$broadcast('panel.show')
+            } else {
+                this.popTop()
+            }
+        },
     },
 }

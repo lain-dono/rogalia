@@ -12,13 +12,15 @@
     &.top
         box-shadow: 0 0 2px 3px rgba(200, 144, 21, 0.8)
         border-radius: 6px 6px 1px 1px
+        > .title-bar
+            -webkit-filter: brightness(120%) contrast(130%);
+            filter: brightness(120%) contrast(130%);
 
     > .title-bar
         background-color: #db9416
-        background:
-            url('assets/bg/panel/header-left.png') no-repeat top left,
-            url('assets/bg/panel/header-right.png') no-repeat top right,
-            url('assets/bg/panel/header.png') repeat-x
+        background: radial-gradient(ellipse at center bottom, #db9416 0%, #bd630b 100%)
+        border: 1px solid #563a11
+        border-bottom: 0
         cursor: default
         width: 100%
         height: 14px
@@ -26,8 +28,9 @@
         padding-left: 6px
         position: relative
         border-radius: 5px 5px 0 0
+        box-shadow: inset 0px 1px 2px 1px #d4911a
 
-        > .title-text
+        .title-text
             width: 90%
             overflow: hidden
             text-overflow: ellipsis
