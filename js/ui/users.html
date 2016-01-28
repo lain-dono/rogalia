@@ -1,89 +1,89 @@
-<div class="tabs">
-    <v-tabs>
-        <tab class="flex" id="online" :title="'Online players' | T">
-            <div>
-                {{'Total' | T}}: {{online.length}}
-                <ol>
-                    <li v-for="user in online | orderBy true" @click="clickByName($event, user)">
-                        {{ user }}
-                    </li>
-                </ol>
-            </div>
+<div>
+<v-tabs>
+    <v-tab class="flex" id="online" :title="'Online players' | T">
+        <div>
+            {{'Total' | T}}: {{online.length}}
+            <ol>
+                <li v-for="user in online | orderBy true" @click="clickByName($event, user)">
+                    {{ user }}
+                </li>
+            </ol>
+        </div>
 
-            <div v-show="!friends.length">{{'No friends' | T}}</div>
-            <div v-show="friends.length">
-                {{'Total' | T}}: {{friends.length}}
-                <ol>
-                    <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
-                        {{ user }}
-                    </li>
-                </ol>
-            </div>
-            <div v-show="!blacklist.length">{{'Blacklist is empty' | T}}</div>
-            <div v-show="blacklist.length">
-                {{'Total' | T}}: {{blacklist.length}}
-                <ol>
-                    <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
-                        {{ user }}
-                    </li>
-                </ol>
-            </div>
-        </tab>
-        <tab id="friends" :title="'Friends' | T">
-            <div v-show="!friends.length">{{'No friends' | T}}</div>
-            <div v-show="friends.length">
-                {{'Total' | T}}: {{friends.length}}
-                <ol>
-                    <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
-                        {{ user }}
-                    </li>
-                </ol>
-            </div>
-        </tab>
-        <tab id="blacklist" :title="'Blacklist' | T">
-            <div v-show="!blacklist.length">{{'Blacklist is empty' | T}}</div>
-            <div v-show="blacklist.length">
-                {{'Total' | T}}: {{blacklist.length}}
-                <ol>
-                    <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
-                        {{ user }}
-                    </li>
-                </ol>
-            </div>
-        </tab>
+        <div v-show="!friends.length">{{'No friends' | T}}</div>
+        <div v-show="friends.length">
+            {{'Total' | T}}: {{friends.length}}
+            <ol>
+                <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
+                    {{ user }}
+                </li>
+            </ol>
+        </div>
+        <div v-show="!blacklist.length">{{'Blacklist is empty' | T}}</div>
+        <div v-show="blacklist.length">
+            {{'Total' | T}}: {{blacklist.length}}
+            <ol>
+                <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
+                    {{ user }}
+                </li>
+            </ol>
+        </div>
+    </v-tab>
+    <v-tab id="friends" :title="'Friends' | T">
+        <div v-show="!friends.length">{{'No friends' | T}}</div>
+        <div v-show="friends.length">
+            {{'Total' | T}}: {{friends.length}}
+            <ol>
+                <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
+                    {{ user }}
+                </li>
+            </ol>
+        </div>
+    </v-tab>
+    <v-tab id="blacklist" :title="'Blacklist' | T">
+        <div v-show="!blacklist.length">{{'Blacklist is empty' | T}}</div>
+        <div v-show="blacklist.length">
+            {{'Total' | T}}: {{blacklist.length}}
+            <ol>
+                <li v-for="user in friends | orderBy true" @click="clickByName($event, user)">
+                    {{ user }}
+                </li>
+            </ol>
+        </div>
+    </v-tab>
 
-        <tab id="all" :title="'general' | TT">
-            <v-tabs>
-                <tab id="self"   title="self">self</tab>
-                <tab id="top20"  title="top20">
-                    <iframe :src="ratingBase + '?limit=20'" frameborder="0"></iframe>
-                </tab>
-                <tab id="top100" title="top100">
-                    <iframe :src="ratingBase + '?limit=100'" frameborder="0"></iframe>
-                </tab>
-            </v-tabs>
-        </tab>
-        <tab id="pve" :title="'PVE' | T">
-            <v-tabs>
-                <tab id="self"   title="self">self</tab>
-                <tab id="top20"  title="top20">
-                    <iframe :src="ratingBase + 'pve?limit=20'" frameborder="0"></iframe>
-                </tab>
-                <tab id="top100" title="top100">
-                    <iframe :src="ratingBase + 'pve?limit=100'" frameborder="0"></iframe>
-                </tab>
-            </v-tabs>
-        </tab>
-        <tab id="pvp" :title="'PVP' | T">
-            <v-tabs>
-                <tab id="self"   title="self">self</tab>
-                <tab id="top20"  title="top20">
-                    <iframe :src="ratingBase + 'pvp?limit=20'" frameborder="0"></iframe>
-                </tab>
-                <tab id="top100" title="top100">
-                    <iframe :src="ratingBase + 'pvp?limit=100'" frameborder="0"></iframe>
-                </tab>
-            </v-tabs>
-        </tab>
-    </v-tabs>
+    <v-tab id="all" :title="'general' | TT">
+        <v-tabs>
+            <v-tab id="self"   title="self">self</v-tab>
+            <v-tab id="top20"  title="top20">
+                <iframe :src="ratingBase + '?limit=20'" frameborder="0"></iframe>
+            </v-tab>
+            <v-tab id="top100" title="top100">
+                <iframe :src="ratingBase + '?limit=100'" frameborder="0"></iframe>
+            </v-tab>
+        </v-tabs>
+    </v-tab>
+    <v-tab id="pve" :title="'PVE' | T">
+        <v-tabs>
+            <v-tab id="self"   title="self">self</v-tab>
+            <v-tab id="top20"  title="top20">
+                <iframe :src="ratingBase + 'pve?limit=20'" frameborder="0"></iframe>
+            </v-tab>
+            <v-tab id="top100" title="top100">
+                <iframe :src="ratingBase + 'pve?limit=100'" frameborder="0"></iframe>
+            </v-tab>
+        </v-tabs>
+    </v-tab>
+    <v-tab id="pvp" :title="'PVP' | T">
+        <v-tabs>
+            <v-tab id="self"   title="self">self</v-tab>
+            <v-tab id="top20"  title="top20">
+                <iframe :src="ratingBase + 'pvp?limit=20'" frameborder="0"></iframe>
+            </v-tab>
+            <v-tab id="top100" title="top100">
+                <iframe :src="ratingBase + 'pvp?limit=100'" frameborder="0"></iframe>
+            </v-tab>
+        </v-tabs>
+    </v-tab>
+</v-tabs>
 </div>
