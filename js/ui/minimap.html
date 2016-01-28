@@ -1,0 +1,16 @@
+<div>
+    <div class="wrapper no-drag" :style="{
+                'overflow': 'auto',
+                'max-width':  this.maxSize + 'px',
+                'max-height': this.maxSize + 'px',
+                }">
+        <img  @click="onMap" :width="width" :src="src" />
+        <div v-for="p in points" :id="p.id"
+             :class="['point', p.type]" :tooltip="p.title" @mousedown="onPoint($event, p)"
+             :style="{left: p.x*scale + 'px', top: p.y*scale + 'px'}"></div>
+    </div>
+    <label>
+        Zoom:
+        <input type="range" :min="min" :max="max" v-model="width" />
+    </label>
+</div>
