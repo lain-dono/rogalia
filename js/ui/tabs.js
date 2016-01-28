@@ -32,7 +32,7 @@ module.exports.tab = {
             active: false
         }
     },
-    template: '<div class="tab" v-if="active"><slot></slot></div>',
+    template: '<div class="tab"><slot v-if="active"></slot></div>',
     ready: function() {
         this.$parent.addTab(this.id, this.title)
     },
