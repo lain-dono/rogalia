@@ -1,11 +1,9 @@
-'use strict'
+var Sprite = require('./render/sprite.js')
 
 var Items = require('./lang/ru/items.js')
-var Point = require('./point.js')
-var Sprite = require('./sprite.js')
 var Panel = require('./panel.js')
+var CharacterData = require('./characterData.js')
 // circular; see bottom of file
-//var Character = require('./character.js')
 //var Container = require('./container/container.js')
 //var Stats = require('./ui/stats.js')
 var dom = require('./dom.js')
@@ -14,6 +12,8 @@ var cnf = require('./config.js')
 var config = cnf.config
 var CELL_SIZE = cnf.CELL_SIZE
 var FONT_SIZE = cnf.FONT_SIZE
+
+import {Point, toScreen, drawCenter, fillStrokedBox, fillBox} from './render'
 
 module.exports = Entity
 
@@ -148,12 +148,12 @@ Entity.prototype = {
         if (this.Group == "food") {
             elements.push(dom.hr());
             var k = Math.sqrt(this.Quality);
-            Character.vitamins.forEach(function(vitamin) {
+            CharacterData.vitamins.forEach((vitamin)=> {
                 var value = this.Props[vitamin] * k;
                 var elem = Stats.prototype.createValue(vitamin, value, 2);
                 elem.classList.add(vitamin.toLowerCase());
                 elements.push(elem);
-            }.bind(this));
+            });
             elements.push(Stats.prototype.createValue("Energy", this.Props.Energy, 2));
         } else if ("Armor" in this) {
             var armor = this.Armor * (1 + this.Quality / 100);
@@ -186,7 +186,7 @@ Entity.prototype = {
         return (this.Y - this.Height / 2) << 0;
     },
     screen: function() {
-        return this.point.toScreen();
+        return toScreen(this.point);
     },
     getDrawDx: function() {
         return this.Sprite.Dx || this.sprite.width/2;
@@ -218,7 +218,7 @@ Entity.prototype = {
         return this.sprite.height - r;
     },
     getDrawPoint: function() {
-        var p = new Point(this.X, this.Y).toScreen();
+        var p = toScreen(new Point(this.X, this.Y));
         p.x -= this.getDrawDx();
         p.y -= this.getDrawDy();
         return p.round();
@@ -325,9 +325,7 @@ Entity.prototype = {
             return true;
         }
         var meta = Entity.metaGroups[type] || [];
-        return meta.some(function(kind) {
-            return this.is(kind);
-        }.bind(this));
+        return meta.some((kind)=> this.is(kind))
     },
     getActions: function() {
         var actions = [{}, {}, {}];
@@ -341,9 +339,9 @@ Entity.prototype = {
         else if (this.MoveType == Entity.MT_LIFTABLE)
             actions[0]["Lift"] = this.lift;
 
-        this.Actions.forEach(function(action) {
+        this.Actions.forEach((action)=> {
             actions[1][action] = this.actionApply(action);
-        }.bind(this));
+        });
 
         if (this.Orientation !== "" && this.MoveType != Entity.MT_STATIC) {
             actions[2]["Rotate"] = function() {
@@ -446,9 +444,9 @@ Entity.prototype = {
         var text = document.createElement("textarea");
         text.readonly = true;
         if (this.Props.Text[0] == "$") {
-            util.ajax("books/ru/" + this.Props.Text.substr(1) + ".txt", function(data) {
+            util.ajax("books/ru/" + this.Props.Text.substr(1) + ".txt", (data)=> {
                 text.value = data;
-            }.bind(this));
+            });
         } else {
             text.value = this.Props.Text;
         }
@@ -532,9 +530,9 @@ Entity.prototype = {
                 this.defaultActionSuccess = this.open.bind(this);
             break;
         case "blank":
-            this.defaultActionSuccess = function() {
+            this.defaultActionSuccess = ()=> {
                 game.controller.craft.open(this, game.player.burden);
-            }.bind(this);
+            };
             break;
         case "currency":
             if (this.Amount)
@@ -550,9 +548,9 @@ Entity.prototype = {
             this.Actions.push("cast");
             break;
         case "mailbox":
-            this.defaultActionSuccess = function(data) {
+            this.defaultActionSuccess = (data)=> {
                 game.controller.mail.open(this, data.Mail);
-            }.bind(this);
+            }
             break;
         }
 
@@ -610,17 +608,14 @@ Entity.prototype = {
         if ((this.MoveType == Entity.MT_STATIC || this.CanCollide) &&
             game.controller.hideStatic()) {
             this.drawBox(this.getDrawBoxColor());
-        } else if (this.shouldBeAutoHidden())
-        {
+        } else if (this.shouldBeAutoHidden()) {
             this.drawBox(this.getDrawBoxColor());
         } else {
             if (this.Type == "blank") {
-                game.ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-                if (this.round) {
-                    game.iso.fillCircle(this.X, this.Y, this.Radius);
-                } else {
-                    game.iso.fillRect(this.leftTopX(), this.leftTopY(), this.Width, this.Height);
-                }
+                fillBox(game.ctx, this.round,
+                        this.X, this.Y,
+                        this.Width, this.Height,
+                        this.Radius, 'rgba(255, 255, 255, 0.3)')
             }
             this.sprite.draw(p);
         }
@@ -631,7 +626,7 @@ Entity.prototype = {
 
         if (game.debug.entity.box) {
             this.drawBox();
-            this.drawCenter();
+            drawCenter(game.ctx, this.screen())
         }
 
         if(game.debug.entity.position) {
@@ -641,52 +636,16 @@ Entity.prototype = {
             game.drawStrokedText(text, p.x, p.y);
         }
     },
-    drawClaim: function() {
-        var no = this.North*CELL_SIZE;
-        var we = this.West*CELL_SIZE;
-        var so = this.South*CELL_SIZE;
-        var ea = this.East*CELL_SIZE;
-
-        var w = we+ea;
-        var h = no+so;
-        var x = this.X - we;
-        var y = this.Y - no;
-
-        var color = (game.player.Id == this.Creator) ? "255,255,255" : "255,0,0";
-        if (config.ui.fillClaim) {
-            game.ctx.fillStyle = "rgba(" + color + ", 0.3)";
-            game.iso.fillRect(x, y, w, h);
-        }
-        if (config.ui.strokeClaim) {
-            game.ctx.lineWidth = 3;
-            game.ctx.strokeStyle = "rgba(" + color + ", 0.7)";
-            game.iso.strokeRect(x, y, w, h);
-            game.ctx.lineWidth = 1;
-        }
-    },
     drawBox: function(color) {
-        game.ctx.save();
-        game.ctx.globalAlpha = 0.3;
-        game.ctx.strokeStyle = "#fff";
-        game.ctx.fillStyle = color || "#ccc";
-        var p = this.screen();
-        if (this.round) {
-            game.iso.fillStrokedCircle(this.X, this.Y, this.Radius);
-        } else {
-            game.iso.fillStrokedRect(this.leftTopX(), this.leftTopY(), this.Width, this.Height);
-        }
-        game.ctx.restore();
+        fillStrokedBox(game.ctx, this.round,
+                this.X, this.Y, this.Width, this.Height,
+                this.Radius, color || '#ccc')
     },
     getDrawBoxColor: function() {
         if (this.Group == "gate" || this.Type.indexOf("-arc") != -1) {
             return (this.CanCollide) ? "violet" : "magenta";
         }
         return ""; //default
-    },
-    drawCenter: function() {
-        var p = this.screen();
-        game.ctx.fillStyle = "magenta";
-        game.ctx.fillRect(p.x, p.y, 3, 3);
     },
     setPoint: function(p) {
         if (this.Id && this.inWorld())
@@ -699,37 +658,40 @@ Entity.prototype = {
             game.sortedEntities.add(this);
     },
     drawHovered: function() {
-        this.sprite.drawOutline(this.getDrawPoint());
-        var p = this.screen();
-        var x = p.x - game.ctx.measureText(this.title).width / 2;
-        var y = p.y - (this.sprite.height - this.Radius) - FONT_SIZE;
+        var ctx = game.ctx
+
+        this.sprite.drawOutline(this.getDrawPoint())
+        var p = this.screen()
+        var x = p.x - ctx.measureText(this.title).width / 2
+        var y = p.y - (this.sprite.height - this.Radius) - FONT_SIZE
 
         switch (this.Group) {
         case "sign":
         case "grave":
-            if (!this.Props.Text)
-                break;
-            var text = this.Props.Text;
-            var padding = 5;
-            var measure = game.ctx.measureText(text);
-            x = p.x - measure.width / 2;
-            y -= FONT_SIZE;
-            game.ctx.fillStyle = "#444";
-            game.ctx.fillRect(
-                x,
-                y,
+            if (!this.Props.Text) {
+                break
+            }
+            var text = this.Props.Text
+            var padding = 5
+            var measure = ctx.measureText(text)
+            x = p.x - measure.width / 2
+            y -= FONT_SIZE
+            ctx.fillStyle = "#444"
+            ctx.fillRect(x, y,
                 measure.width + padding * 2,
                 FONT_SIZE + padding * 2
-            );
-            game.ctx.fillStyle = "#fff";
-            game.ctx.fillText(text, x + padding, y + padding + FONT_SIZE);
-            return;
+            )
+            ctx.fillStyle = "#fff"
+            ctx.fillText(text, x + padding, y + padding + FONT_SIZE)
+            return
         }
-        game.ctx.fillStyle = "#fff";
-        var title = this.title;
-        if (game.controller.modifier.shift)
-            title += " | " + T("Quality") + ":" + this.Quality;
-        game.drawStrokedText(title, x, y);
+        ctx.fillStyle = "#fff"
+        var title = this.title
+        if (game.controller.modifier.shift) {
+            title += " | " + T("Quality") + ":" + this.Quality
+        }
+
+        game.drawStrokedText(title, x, y)
     },
     canIntersect: function(noignore) {
         switch (this.Group) {
@@ -1053,6 +1015,5 @@ Entity.prototype = {
 };
 
 
-var Character = require('./character.js')
 var Container = require('./container/container.js')
 var Stats = require('./ui/stats.js')
