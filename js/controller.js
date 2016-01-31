@@ -1,20 +1,19 @@
-'use strict'
-
-var Point = require('./point.js')
 var Panel = require('./panel.js')
 
-var Fight = require('./ui/fight.js')
-var Skills = require('./ui/skills.js')
+//var Fight = require('./ui/fight.js')
+import Skills from './ui/skills.js'
 var Stats = require('./ui/stats.js')
 var Craft = require('./ui/craft.js')
 var Chat = require('./ui/chat/chat.js')
-var Minimap = require('./ui/minimap.js')
+//var Minimap = require('./ui/minimap.js')
 var Journal = require('./ui/quests/journal.js')
-var System = require('./ui/system.js')
-var Wiki = require('./ui/wiki.js')
+//var System = require('./ui/system.js')
+//var Wiki = require('./ui/wiki.js')
 var Auction = require('./ui/auction.js')
 var Vendor = require('./ui/vendor.js')
 var Mail = require('./ui/mail.js')
+
+var Help = require('./ui/help.js')
 
 var Container = require('./container/container.js')
 var Entity = require('./entity.js')
@@ -24,6 +23,9 @@ var dom = require('./dom.js')
 var cnf = require('./config.js')
 var config = cnf.config
 var CELL_SIZE = cnf.CELL_SIZE
+
+import {Point, toWorld} from './render'
+import * as iso from './render/iso.js'
 
 module.exports = function Controller(game) {
     var controller = this;
@@ -61,10 +63,10 @@ module.exports = function Controller(game) {
         menuHovered: null, //from X menu
         _p: new Point(),
         get point() {
-            this._p.set(
+            toWorld(this._p.set(
                 controller.mouse.world.x + game.camera.x,
                 controller.mouse.world.y + game.camera.y
-            ).toWorld();
+            ))
             return this._p;
         },
         get x() {
@@ -188,6 +190,8 @@ module.exports = function Controller(game) {
         updateHovered: function() {
             dom.hide(this.element);
             var element = document.elementFromPoint(controller.mouse.x, controller.mouse.y);
+            if (!element)
+                return
             dom.show(this.element);
 
             var hovered = null;
@@ -271,7 +275,8 @@ module.exports = function Controller(game) {
         if (!(name in this))
             return;
 
-        var button = this[name].panel.button;
+        var button = this[name].button ?
+            this[name].button : this[name].panel.button; // XXX
         if (!button)
             return;
 
@@ -298,7 +303,8 @@ module.exports = function Controller(game) {
             else if (e instanceof Entity && !e.inWorld())
                 this.world.hovered = null;
         }
-        this.minimap.update();
+
+        // XXX this.minimap.update();
     };
 
     this.toggleBag = function() {
@@ -377,7 +383,10 @@ module.exports = function Controller(game) {
                 callback: toggle(game.panels.skills)
             },
             M: {
-                callback: toggle(game.panels.map)
+                //callback: toggle(game.panels.map)
+                callback: function() {
+                    window.ui.togglePanel('map')
+                }
             },
             X: {
                 button: "pick-up",
@@ -432,33 +441,13 @@ module.exports = function Controller(game) {
                 callback: function() {
                     if (game.menu.visible)
                         game.menu.activate(key);
-                    else if (key > 0 && key <= 5)
-                        this.fight.hotkey(key);
+                    else if (key > 0 && key <= 5) {
+                        //this.fight.hotkey(key)
+                        window.ui.$broadcast('hotkey', key)
+                    }
                 }
             };
         }.bind(this));
-    };
-
-    this.initHotbar = function() {
-        //TODO: fixme
-        dom.forEach("#action-hotbar > .button",  function() {
-            var icon = new Image();
-            var base = "assets/icons/actions/" + this.id.replace("-button", "");
-            icon.src = base + ".png";
-            this.appendChild(icon);
-            icon.parentNode.addEventListener("mouseover", function() {
-                icon.src = base + "-hover.png";
-            });
-            icon.parentNode.addEventListener("mouseleave", function() {
-                icon.src = base + ".png";
-            });
-        });
-        document.getElementById("pick-up-button").onclick = function() {
-            game.player.pickUp();
-        };
-        document.getElementById("lift-button").onclick = function() {
-            game.player.liftStart();
-        };
     };
 
     this.fpsStatsBegin = function() {
@@ -490,41 +479,29 @@ module.exports = function Controller(game) {
         window.addEventListener('contextmenu', disableEvent);
         window.addEventListener('dragstart', disableEvent);
 
-        this.fight = new Fight();
+        //this.fight = new Fight();
         this.skills = new Skills();
         this.stats = new Stats();
         this.craft = new Craft();
         this.chat = game.chat = new Chat();
-        this.minimap = new Minimap();
+        //this.minimap = new Minimap();
         this.journal = new Journal();
-        this.system = new System();
-        this.wiki = new Wiki();
+        //this.system = new System();
+        //this.wiki = new Wiki();
         this.auction = new Auction();
         this.vendor = new Vendor();
         this.mail = new Mail();
-        this.fpsStats = this.system.fps;
+        //this.fpsStats = this.system.fps;
+        this.fpsStats = window.fps;
         this.inventory = {panel: {}};
-
-        this.createButton(this.skills.panel, "skills");
-        this.createButton(this.stats.panel, "stats");
-        this.createButton(this.inventory.panel, "inventory");
-        this.createButton(this.craft.panel, "craft");
-        this.createButton(this.chat.panel, "chat");
-        this.createButton(this.journal.panel, "journal");
-        this.createButton(this.minimap.panel, "map");
-
-        this.createButton(this.wiki.panel, "wiki");
-        this.createButton(this.system.panel, "system");
-
-        this.inventory.panel.button.onclick = this.toggleBag;
 
         this.initAvatar();
         this.initHotkeys();
-        this.initHotbar();
+        //this.initHotbar();
 
         Container.load();
 
-        game.help = this.system.help;
+        game.help = new Help();
         this.ready = true;
 
         if (document.location.hash.indexOf("noui") != -1) {
@@ -537,27 +514,6 @@ module.exports = function Controller(game) {
         }
     };
 
-    this.createButton = function(panel, buttonName) {
-        function makeToggle(button, panel) {
-            return function() {
-                if (!panel.visible)
-                    game.help.runHook({type: button.id});
-                panel.toggle();
-            };
-        }
-        buttonName = buttonName || panel.name;
-        var button = document.getElementById(buttonName + "-button");
-        button.style.display = "block";
-        if (panel.visible)
-            button.classList.add("active");
-        panel.button = button;
-        button.onclick = makeToggle(button, panel);
-
-        var icon = document.createElement("div");
-        icon.className = "icon";
-        button.appendChild(icon);
-    };
-
     this.terraCursor = function(tile) {
         this.world.cursor = {
             scale: 1,
@@ -565,44 +521,42 @@ module.exports = function Controller(game) {
             setPoint: function(){}, //TODO: fixme
             alignedData: function() {return null;},
             rotate: function(delta) {
-                if (delta < 0)
-                    this.scale++;
-                else
-                    this.scale--;
+                if (delta < 0) {
+                    this.scale++
+                } else {
+                    this.scale--
+                }
             },
             draw: function() {
-                var size = CELL_SIZE;
+                var size = CELL_SIZE
 
-                var p = game.controller.world.point.clone();
-                p.x /= size;
-                p.y /= size;
-                p.floor();
-                p.x *= size;
-                p.y *= size;
+                var p = game.controller.world.point.clone()
+                p.x /= size
+                p.y /= size
+                p.floor()
+                p.x *= size
+                p.y *= size
 
-                size *= this.scale;
+                size *= this.scale
 
-                var s = p.clone().toScreen();
+                var s = p.clone().toScreen()
 
-                game.ctx.drawImage(
-                    tile,
+                var ctx = game.ctx
+
+                ctx.drawImage(tile,
                     0,
                     0,
                     CELL_SIZE * 2,
                     CELL_SIZE,
+
                     s.x - CELL_SIZE,
                     s.y,
                     CELL_SIZE * 2,
                     CELL_SIZE
-                );
+                )
 
-                game.ctx.strokeStyle = "#0ff";
-                game.iso.strokeRect(
-                    p.x,
-                    p.y,
-                    size,
-                    size
-                );
+                ctx.strokeStyle = '#0ff'
+                iso.strokeRect(ctx, p.x, p.y, size, size)
             }
         };
         this.callback[this.LMB] = function() {
@@ -867,7 +821,6 @@ module.exports = function Controller(game) {
         cursor.rotate(delta);
     };
 
-
     this.updateHovered = function() {
         if (this.world.menuHovered)
             return;
@@ -883,8 +836,8 @@ module.exports = function Controller(game) {
     this.drawAlign = function(entity, p) {
         var data = entity.alignedData(p);
         if (data) {
-            game.ctx.strokeStyle = "#00ffff";
-            game.iso.strokeRect(data.x, data.y, data.w, data.h);
+            game.ctx.strokeStyle = '#00ffff'
+            iso.strokeRect(game.ctx, data.x, data.y, data.w, data.h);
         }
     };
 
@@ -921,7 +874,9 @@ module.exports = function Controller(game) {
             this.drawAlign(entity, this.world.point);
         }
 
-        Character.drawActions();
+        // Character.drawActions();
+        game.characters.forEach((c)=> c.drawAction())
+
         if (this.modifier.ctrl && this.keys.X && !game.menu.visible) {
             this.drawItemsMenu();
         }
@@ -1001,22 +956,6 @@ module.exports = function Controller(game) {
         localStorage.clear();
         game.panels = {}; //dont save positions;
         game.reload();
-    };
-
-    this.addPlayer = function(name) {
-        if (controller.system)
-            controller.system.users.addPlayer(name);
-    };
-
-    this.removePlayer = function(name) {
-        if (controller.system)
-            controller.system.users.removePlayer(name);
-    };
-
-    this.syncMinimap = function(data) {
-        if (!this.minimap)
-            return;
-        this.minimap.sync(data);
     };
 
     this.updateVisibility = function() {

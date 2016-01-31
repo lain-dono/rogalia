@@ -1,14 +1,13 @@
 'use strict'
 
-var PIXI = require('pixi.js')
-
+var Container = require('pixi.js/src/core/display/Container.js')
 var cnf = require('../config.js')
 
 function Stage() {
-    PIXI.Container.call(this)
+    Container.call(this)
 }
 
-Stage.prototype = Object.create(PIXI.Container.prototype);
+Stage.prototype = Object.create(Container.prototype);
 Stage.prototype.constructor = Stage;
 module.exports = Stage;
 

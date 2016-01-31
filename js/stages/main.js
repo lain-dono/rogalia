@@ -1,18 +1,25 @@
 'use strict'
 
 var Stage = require('./stage.js')
-var Snow = require('../new-year.js')
 var Entity = require('../entity.js')
 var Character = require('../character.js')
 var util = require('../util.js')
 var cnf = require('../config.js')
 var config = cnf.config
 var debug = cnf.debug
+var graphics = config.graphics
+
+
+var CELL_SIZE = cnf.CELL_SIZE
+
+import {Snow, fillClaim, strokeClaim} from '../render'
 
 Stage.add(module, mainStage)
 
 function mainStage(data) {
     /*jshint validthis:true */
+
+    require('../ui')
 
     setTimeout(function() {
         game.network.send("logon");
@@ -21,7 +28,7 @@ function mainStage(data) {
 
     game.controller.chat.init(data.Chat);
 
-    this.snow = new Snow();
+    this.snow = new Snow(game.screen.width, game.screen.height)
 
     this.startTime = 0;
 
@@ -54,10 +61,12 @@ mainStage.prototype.sync = function (data) {
 
     data.Location && game.map.sync(data.Location); // jshint ignore:line
 
-    game.controller.syncMinimap(data.RemotePlayers);
+    //game.controller.syncMinimap(data.RemotePlayers)
+    window.ui.$broadcast('sync.RemotePlayers', data.RemotePlayers)
+
     game.controller.chat.sync(data.Chat || []);
     game.controller.skills.update();
-    game.controller.fight.update();
+    //game.controller.fight.update();
     game.controller.craft.update();
     game.controller.journal.update();
     if (data.Players && game.player.Id in data.Players) {
@@ -69,14 +78,19 @@ mainStage.prototype.update = function(currentTime) {
     currentTime = currentTime || Date.now();
     var ellapsedTime = currentTime - this.startTime;
     this.startTime = currentTime;
-    game.epsilon = ellapsedTime / 1000;
 
-    game.entities.forEach(function(e) {
-        e.update(game.epsilon);
-    });
+    var eps = game.epsilon = ellapsedTime / 1000;
+    var entities = game.entities.array
+    for (var i = 0, l = entities.length; i < l; i++) {
+        entities[i].update(eps)
+    }
+
     game.help.update();
     game.controller.update();
-    this.snow.update();
+
+    if (graphics.snowflakes) {
+        this.snow.update(game.screen.width, game.screen.height)
+    }
 }
 
 function isVisible(t) {
@@ -94,43 +108,92 @@ function drawObject(t) {
     if (isVisible(t))
         t.draw();
 }
-function drawUI(t) {
-    if (isVisible(t))
-        t.drawUI();
-}
-function drawAura(t) {
-    if (isVisible(t))
-        t.drawAura();
-}
-function drawClaim(t) {
-    t.drawClaim();
-}
 
 mainStage.prototype.draw = function() {
-    game.ctx.clear();
-    game.ctx.save();
-    game.ctx.translate(-game.camera.x, -game.camera.y);
+    var ctx = game.ctx
+    ctx.clear()
+    ctx.save()
+    ctx.translate(-game.camera.x, -game.camera.y)
 
-    this.drawGlobalEffects();
+    this.drawGlobalEffects()
 
-    game.map.draw();
-    game.characters.forEach(drawAura);
-    game.claims.forEach(drawClaim);
+    ctx.save()
+    var width = game.screen.width
+    var height = game.screen.height
+    game.map.draw(width, height, game.camera, game.entities.array)
+    ctx.restore()
+
+    ctx.save()
+    // XXX
+    ctx.translate(game.camera.x, game.camera.y)
+    game.renderer.render(game.pixiStage)
+    ctx.restore()
+
+    var i, l, t
+
+    //game.characters.forEach(drawAura)
+    var characters = game.characters.array
+    for (i = 0, l = characters.length; i < l; i++) {
+        t = characters[i]
+        if (isVisible(t)) {
+            t.drawAura()
+        }
+    }
 
 
-    game.sortedEntities.traverse(drawObject);
-    // this.drawOrder();
-    // this.drawTopologic();
-    // this.drawAdaptive();
-    this.snow.draw();
+    //game.claims.forEach(drawClaim)
+    var claims = game.claims.array
+    for (i = 0, l = claims.length; i < l; i++) {
+        var claim = claims[i]
 
-    if (debug.map.darkness)
-        game.map.drawDarkness();
-    game.characters.forEach(drawUI);
-    game.controller.draw();
+        var no = claim.North*CELL_SIZE
+        var we = claim.West*CELL_SIZE
+        var so = claim.South*CELL_SIZE
+        var ea = claim.East*CELL_SIZE
+
+        var w = we+ea
+        var h = no+so
+        var x = claim.X - we
+        var y = claim.Y - no
+
+        if (config.ui.fillClaim) {
+            fillClaim(ctx, w, h, x, y, game.player.Id == claim.Creator)
+        }
+        if (config.ui.strokeClaim) {
+            strokeClaim(ctx, w, h, x, y, game.player.Id == claim.Creator)
+        }
+    }
+
+    game.sortedEntities.traverse(drawObject)
+
+    //this.drawOrder()
+    //this.drawTopologic()
+    //this.drawAdaptive()
+
+    if (graphics.snowflakes) {
+        if ('Vomit' in game.player.Effects) {
+            this.snow.drawShit(ctx, game.camera)
+        } else {
+            this.snow.drawSnow(ctx, game.camera)
+        }
+    }
+
+    if (debug.map.darkness) {
+        game.map.drawDarkness()
+    }
+
+    //game.characters.forEach(drawUI)
+    for (i = 0, l = characters.length; i < l; i++) {
+        t = characters[i]
+        if (isVisible(t)) {
+            t.drawUI()
+        }
+    }
+
+    game.controller.draw()
     // game.iso.fillRect(game.player.Location.X)
-    // this.debug();
-    game.ctx.restore();
+    // this.debug()
+    ctx.restore()
 }
 
 mainStage.prototype.drawGlobalEffects = function() {
@@ -186,6 +249,7 @@ mainStage.prototype.getDrawableList = function() {
 }
 
 mainStage.prototype.topologicalSort = function(list) {
+    //console.log('topologicalSort')
     list.forEach(function(e) {
         e.visited = false;
         e.behind = list.filter(function(t) {

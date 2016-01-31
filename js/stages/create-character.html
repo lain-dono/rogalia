@@ -1,0 +1,45 @@
+<div>
+<panel name="create-character"  title="Create character" :has-close-button="false">
+<form>
+    <div class="lobby-account">{{login}}</div>
+    <hr>
+
+    <label :class="{'new-sex': true, checked: sex == 'male'}" id="new-male">
+        <input v-model="sex" type="radio" name="sex" value="male" />
+    </label>
+    <label :class="{'new-sex': true, checked: sex == 'female'}" id="new-female">
+        <input v-model="sex" type="radio" name="sex" value="female" />
+    </label>
+
+    <hr>
+
+    <input class="name" :placeholder="'Name' | T" v-model="name">
+
+    <hr>
+    <div class="profession-tabs">
+        <img v-for="prof in professions"
+             @click="current = prof.name"
+             :class="{'profession-tab': true, active: current == prof.name}"
+             :src="'assets/icons/skills/' + mainSkill($index) + '.png'"
+             :tooltip="prof.name | T" />
+    </div>
+
+    <div class="professions">
+        <div v-for="prof in professions" class="profession" v-show="current == prof.name">
+            <div>{{prof.name | T}}</div>
+            <p class="profession-desc">
+                <div v-if="prof.desc">{{prof.desc | T}}</div>
+                <div v-else>{{'No description' | T}}</div>
+                <br>{{'Main skills' | T}}:
+                <ul style="margin: 0">
+                    <li v-for="skill in prof.skills">{{$key | T}}: {{skill}}</li>
+                </ul>
+            </p>
+        </div>
+    </div>
+    <hr>
+    <button @click.prevent="create">{{'Create' | T}}</button>
+    <button @click.prevent="back">{{'Back' | T}}</button>
+</form>
+</panel>
+</div>
