@@ -1,15 +1,8 @@
 'use strict'
 
-require('./users.styl')
-
-var tabs = require('./tabs.js')
 
 module.exports = {
     template: require('raw!./users.html'),
-    components: {
-        'v-tabs': tabs.tabs,
-        'v-tab': tabs.tab,
-    },
     props: {
         online: Array,
         friends: Array,

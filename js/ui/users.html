@@ -1,6 +1,6 @@
 <div>
-<v-tabs>
-    <v-tab class="flex" id="online" :title="'Online players' | T">
+<tabs>
+    <tab class="flex" id="online" :title="'Online players' | T">
         <div>
             {{'Total' | T}}: {{online.length}}
             <ol>
@@ -28,8 +28,8 @@
                 </li>
             </ol>
         </div>
-    </v-tab>
-    <v-tab id="friends" :title="'Friends' | T">
+    </tab>
+    <tab id="friends" :title="'Friends' | T">
         <div v-show="!friends.length">{{'No friends' | T}}</div>
         <div v-show="friends.length">
             {{'Total' | T}}: {{friends.length}}
@@ -39,8 +39,8 @@
                 </li>
             </ol>
         </div>
-    </v-tab>
-    <v-tab id="blacklist" :title="'Blacklist' | T">
+    </tab>
+    <tab id="blacklist" :title="'Blacklist' | T">
         <div v-show="!blacklist.length">{{'Blacklist is empty' | T}}</div>
         <div v-show="blacklist.length">
             {{'Total' | T}}: {{blacklist.length}}
@@ -50,40 +50,40 @@
                 </li>
             </ol>
         </div>
-    </v-tab>
+    </tab>
 
-    <v-tab id="all" :title="'general' | TT">
-        <v-tabs>
-            <v-tab id="self"   title="self">self</v-tab>
-            <v-tab id="top20"  title="top20">
+    <tab id="all" :title="'general' | TT">
+        <tabs>
+            <tab id="self"   title="self">self</tab>
+            <tab id="top20"  title="top20">
                 <iframe :src="ratingBase + '?limit=20'" frameborder="0"></iframe>
-            </v-tab>
-            <v-tab id="top100" title="top100">
+            </tab>
+            <tab id="top100" title="top100">
                 <iframe :src="ratingBase + '?limit=100'" frameborder="0"></iframe>
-            </v-tab>
-        </v-tabs>
-    </v-tab>
-    <v-tab id="pve" :title="'PVE' | T">
-        <v-tabs>
-            <v-tab id="self"   title="self">self</v-tab>
-            <v-tab id="top20"  title="top20">
+            </tab>
+        </tabs>
+    </tab>
+    <tab id="pve" :title="'PVE' | T">
+        <tabs>
+            <tab id="self"   title="self">self</tab>
+            <tab id="top20"  title="top20">
                 <iframe :src="ratingBase + 'pve?limit=20'" frameborder="0"></iframe>
-            </v-tab>
-            <v-tab id="top100" title="top100">
+            </tab>
+            <tab id="top100" title="top100">
                 <iframe :src="ratingBase + 'pve?limit=100'" frameborder="0"></iframe>
-            </v-tab>
-        </v-tabs>
-    </v-tab>
-    <v-tab id="pvp" :title="'PVP' | T">
-        <v-tabs>
-            <v-tab id="self"   title="self">self</v-tab>
-            <v-tab id="top20"  title="top20">
+            </tab>
+        </tabs>
+    </tab>
+    <tab id="pvp" :title="'PVP' | T">
+        <tabs>
+            <tab id="self"   title="self">self</tab>
+            <tab id="top20"  title="top20">
                 <iframe :src="ratingBase + 'pvp?limit=20'" frameborder="0"></iframe>
-            </v-tab>
-            <v-tab id="top100" title="top100">
+            </tab>
+            <tab id="top100" title="top100">
                 <iframe :src="ratingBase + 'pvp?limit=100'" frameborder="0"></iframe>
-            </v-tab>
-        </v-tabs>
-    </v-tab>
-</v-tabs>
+            </tab>
+        </tabs>
+    </tab>
+</tabs>
 </div>

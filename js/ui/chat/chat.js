@@ -1,16 +1,123 @@
 'use strict'
 
+require("style!raw!./chat.css")
+
 var dom = require('../../dom.js')
 var dict = require('../../lang/ru/dict.js')
 var Panel = require('../../panel.js')
 var Entity = require('../../entity.js')
-var Character = require('../../character.js')
+var equipSlots = require('../../characterData.js').equipSlots
 var cnf = require('../../config.js')
 var config = cnf.config
 var ChatRing = require('./ring.js')
 var Vendor = require('../vendor.js')
 
+var SERVER = '[server]'
+
+var channelsIDs = {
+    global       : 0,
+    local        : 1,
+    party        : 2,
+    //             3
+    //             4
+    server       : 5,
+    private      : 6,
+    system       : 7,
+    announcement : 8,
+    npc          : 9,
+}
+
 module.exports = Chat
+
+Chat.vv = {
+    template: require('raw!./chat.html'),
+    filters: {
+        channelFilter: function(value, channels) {
+            return value.filter(function(el) {
+                return channels[el.channel]
+            })
+        },
+        startsWith: function(value, prefix) {
+            return value.filter(function(el) {
+                return el.startsWith(prefix)
+            })
+        },
+    },
+    data: function() {
+        return {
+            filters: false,
+            input: '',
+
+            channels: {
+                global       : true,
+                local        : true,
+                party        : true,
+                server       : true,
+                private      : true,
+                system       : true,
+                announcement : true,
+                npc          : true,
+            },
+
+            messages: [
+                { channel: 'global',       time: '14:30', from: 'global', body: 'ha ha ha' },
+                { channel: 'local',        time: '14:30', from: 'local', body: 'ha ha ha' },
+                { channel: 'party',        time: '14:30', from: 'party', body: 'ha ha ha' },
+                { channel: 'server',       time: '14:30', from: 'server', body: 'ha ha ha' },
+                { channel: 'private',      time: '14:30', from: 'private', body: 'ha ha ha' },
+                { channel: 'system',       time: '14:30', from: 'system', body: 'ha ha ha' },
+                { channel: 'announcement', time: '14:30', from: 'announcement', body: 'ha ha ha' },
+                { channel: 'npc',          time: '14:30', from: 'npc', body: 'ha ha ha' },
+            ],
+        }
+    },
+
+    attached: function() {
+        this.$watch('messages', function() {
+            var el = document.querySelector('#chat .messages')
+            el.scrollTop = el.scrollHeight
+        })
+    },
+
+    computed: {
+        isCommand: function() {
+            return this.input.startsWith('*')
+        },
+    },
+
+    methods: {
+        toggleSettings: function() {
+            this.filters = !this.filters
+        },
+        prevMessage: function() {
+            console.log('prevMessage')
+        },
+        nextMessage: function() {
+            console.log('nextMessage')
+        },
+        sendMessage: function() {
+            console.log('sendMessage')
+            var now = new Date()
+            var t = sprintf('[%02d:%02d]', now.getHours(),  now.getMinutes())
+            if(this.isCommand) {
+                this.messages.push({
+                    channel: 'system',
+                    time: t,
+                    from: 'fail',
+                    body: 'cmd ' + this.input + ' not found',
+                })
+            } else {
+                this.messages.push({
+                    channel: 'local',
+                    time: t,
+                    from: 'You',
+                    body: this.input,
+                })
+            }
+            this.input = ''
+        },
+    },
+}
 
 function Chat() {
     var self = this;
@@ -66,14 +173,18 @@ function Chat() {
                     game.network.send(
                         "friend-add",
                         {Name: name},
-                        game.controller.system.users.updateFriendsTab
+                        function() {
+                            window.ui.updateFriends()
+                        }
                     );
                 },
                 removeFromFriends: function() {
                     game.network.send(
                         "friend-remove",
                         {Name: name},
-                        game.controller.system.users.updateFriendsTab
+                        function() {
+                            window.ui.updateFriends()
+                        }
                     );
                 },
             },
@@ -82,14 +193,18 @@ function Chat() {
                     game.network.send(
                         "blacklist-add",
                         {Name: name},
-                        game.controller.system.users.updateBlacklistTab
+                        function() {
+                            window.ui.updateBlacklist()
+                        }
                     );
                 },
                 removeFromBlacklist: function() {
                     game.network.send(
                         "blacklist-remove",
                         {Name: name},
-                        game.controller.system.users.updateBlacklistTab
+                        function() {
+                            window.ui.updateBlacklist()
+                        }
                     );
                 },
             }
@@ -276,7 +391,7 @@ function Chat() {
                 /* falls through */
             case "clear-equip-slot":
                 var args = message.split(" ");
-                args[2] = Character.equipSlots.indexOf(args[2]);
+                args[2] = equipSlots.indexOf(args[2]);
                 message = args.join(" ");
                 local = false;
                 break;
@@ -503,8 +618,6 @@ function Chat() {
     this.newMessageElement.onmouseenter = semishow;
     tabElem.contents.onmouseleave = semihide;
 
-    var SERVER = "[server]";
-
     this.format = function(body) {
         var matches = body.match(/\${[^}]+}|https?:\/\/\S+|#\S+|^>.*/g);
         var content = document.createElement("span");
@@ -720,11 +833,11 @@ function Chat() {
             var event = JSON.parse(message.Body);
             switch (event.Event) {
             case "logon":
-                game.controller.addPlayer(event.Name);
+                window.ui.$emit('online.add', event.Name)
                 message.Body = TT("{name} logged in", {name: event.Name});
                 break;
             case "logoff":
-                game.controller.removePlayer(event.Name);
+                window.ui.$emit('online.remove', event.Name)
                 message.Body = TT("{name} disconnected", {name: event.Name});
                 break;
             }

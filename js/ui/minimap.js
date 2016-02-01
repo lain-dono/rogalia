@@ -1,11 +1,7 @@
-'use strict'
+import Vue from 'vue'
+import {Point} from '../render'
 
-require('./minimap.styl')
-
-var cnf = require('../config.js')
-var Point = require('../point.js')
-
-var Vue = require('vue')
+var CELL_SIZE = require('../config.js').CELL_SIZE
 
 function sendPoint(point) {
     var title = ''
@@ -15,24 +11,26 @@ function sendPoint(point) {
     game.chat.send(sprintf("${marker:%d %d%s}", point.x, point.y, title))
 }
 
-module.exports = {
+var markerPoint = 'marker-point'
+
+export default {
     template: require('raw!./minimap.html'),
     events: {
         'sync.RemotePlayers': 'sync',
         'mmap.addMarker': 'addMarker',
     },
-    data: function() {
+    data() {
         return {
-            maxSize: 500,
+            maxSize: 512,
             min: 500,
             max: 2049,
-            width: 400,
+            width: 500,
             src: sprintf('%s//%s/map', window.location.protocol, game.network.addr),
             points: {},
         }
     },
     computed: {
-        scale: function() {
+        scale() {
             return this.width / this.max
         },
     },
@@ -43,16 +41,38 @@ module.exports = {
             el.scrollTop  -= diff
             el.scrollLeft -= diff
         },
+        'points': function() {
+            var data = {}
+            for (var k in this.points) {
+                if (!this.points.hasOwnProperty(k)) {
+                    continue
+                }
+                var p = this.points[k]
+                if (p.type === markerPoint) {
+                    data[k] = p
+                }
+            }
+            localStorage.setItem('minimap.markers', JSON.stringify(data))
+        },
+    },
+    attached() {
+        var data = localStorage.getItem('minimap.markers')
+        if (data) {
+            data = JSON.parse(data)
+            for (var k in data) {
+                Vue.set(this.points, k, data[k])
+            }
+        }
     },
     methods: {
-        onMap: function(e) {
+        onMap(e) {
             var rect = e.target.getBoundingClientRect()
             var x = e.pageX - rect.left
             var y = e.pageY - rect.top
             var p = (new Point(x, y)).div(this.scale).round()
 
             if (game.controller.modifier.alt && game.player.IsAdmin) {
-                game.network.send('teleport', p.mul(cnf.CELL_SIZE).json())
+                game.network.send('teleport', p.mul(CELL_SIZE).json())
                 return
             }
 
@@ -62,8 +82,8 @@ module.exports = {
             }
         },
 
-        onPoint: function(event, point) {
-            if (point.type !== 'marker-point') {
+        onPoint(event, point) {
+            if (point.type !== markerPoint) {
                 return
             }
             switch (event.button) {
@@ -78,26 +98,28 @@ module.exports = {
                 }
                 break
             case game.controller.RMB:
-                this.points.$delete(name)
+                Vue.delete(this.points, point.name)
                 break
             }
         },
 
-        addMarker: function(x, y, title) {
+        addMarker(x, y, title) {
             var name = x + ' ' + y
             if (name in this.points) {
                 return this.points[name]
             }
 
             var point = {
-                x: x, y: y, title: title || name,
+                x: x, y: y,
+                title: title || name,
+                name: name,
                 type: 'marker-point',
             }
             Vue.set(this.points, name, point)
             return point
         },
 
-        addCharacters: function(characters) {
+        addCharacters(characters) {
             for (var name in characters) {
                 var ch = characters[name]
                 if (!ch) {
@@ -105,7 +127,7 @@ module.exports = {
                 }
                 var p = this.points[name]
                 if (!p) { // if not exist
-                    p = { title: name, type: '', }
+                    p = { title: name, name: name, type: '', }
                 }
                 if (name == game.player.Name) {
                     p.id = 'player-point'
@@ -116,13 +138,13 @@ module.exports = {
                 } else {
                     console.warn('wtf?', name, ch, p)
                 }
-                p.x = ch.X / cnf.CELL_SIZE
-                p.y = ch.Y / cnf.CELL_SIZE
+                p.x = ch.X / CELL_SIZE
+                p.y = ch.Y / CELL_SIZE
                 Vue.set(this.points, name, p)
             }
         },
 
-        sync: function(data) {
+        sync(data) {
             data = data || {}
             var pl = game.player
             data[pl.Name] = {X: pl.X, Y: pl.Y}
@@ -131,12 +153,11 @@ module.exports = {
                 if (name in data && data[name] === null) {
                     console.info('fail data["%s"] is null', name)
                     delete data[name]
-                    this.points.$delete(name)
+                    Vue.delete(this.points, name)
                 }
             }
 
             this.addCharacters(data)
-            console.log('sync minimap', data)
         }
     },
 }

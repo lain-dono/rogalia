@@ -9,6 +9,10 @@ var Vendor = require('./vendor.js')
 
 module.exports = Bank
 
+Bank.vv = {
+
+}
+
 function Bank() {
     var balance = document.createElement("label");
     var price = Vendor.createPriceInput();

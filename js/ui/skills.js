@@ -1,13 +1,108 @@
-'use strict'
-
 var Character = require('../character.js')
+require('../characters.js')
 var Panel = require('../panel.js')
 var dom = require('../dom.js')
 var Stats = require('./stats.js')
 
-module.exports = Skills
+var max = 100
 
-function Skills() {
+export var byAttr = {
+    strength: ['Carpentry', 'Metalworking', 'Leatherworking'],
+    vitality: ['Stoneworking', 'Mining', 'Lumberjacking'],
+    dexterity: ['Pottery', 'Tailoring', 'Swordsmanship'],
+    intellect: ['Mechanics', 'Alchemy'],
+    perception: ['Survival', 'Farming', 'Fishing'],
+    wisdom: ['Herbalism', 'Cooking', 'Leadership'],
+}
+
+export var vv = {
+    template: require('raw!./skills.html'),
+    data() {
+        return {
+            selected: '',
+            byAttr: {
+                strength: ["Carpentry", "Metalworking", "Leatherworking"],
+                vitality: ["Stoneworking", "Mining", "Lumberjacking"],
+                dexterity: ["Pottery", "Tailoring", "Swordsmanship"],
+                intellect: ["Mechanics", "Alchemy"],
+                perception: ["Survival", "Farming", "Fishing"],
+                wisdom: ["Herbalism", "Cooking", "Leadership"],
+            },
+            descriptions: {
+                "Survival": "Survival gives you basic recipes like bonfire",
+                "Stoneworking": "Stoneworking gives you recipes like sharp stone, stone axe, stone hammer, etc.",
+                "Lumberjacking": "Lumberjacking gives you an ability to chop trees.",
+            },
+        }
+    },
+    methods: {
+        learn() {
+            if(this.selected === '' || this.learnDiff() <= 0) {
+                game.error("No selected skill");
+                return
+            }
+            game.network.send("learn-skill", { name: this.selected });
+        },
+
+        skillDataByName(name) {
+            return game.player.Skills[name]
+        },
+        currentValue(name) {
+            return this.skillDataByName(name).Value.Current
+        },
+        maxValue(name) {
+            return this.skillDataByName(name).Value.Max
+        },
+
+        LP() {
+            return game.player.LP
+        },
+        learnDiff() {
+            return this.nextLvlOf().Cost - game.player.LP
+        },
+
+        isSelectedMax() {
+            return !this.nextLvlOf()
+        },
+        nextLvlOf() {
+            var skill = this.skillDataByName(this.selected)
+            console.log(Character.skillLvls, skill)
+            for (var i in Character.skillLvls) {
+                var next = Character.skillLvls[i]
+                if (next.Value > skill.Value.Max) {
+                    return next
+                }
+            }
+            return
+        },
+
+        title(attr, name) {
+            if(this.isCapped(name)) {
+                return T('Skill is capped')
+            } else {
+                return TT('This skill depends on {attr}', {attr: attr})
+            }
+        },
+
+        isNormal(name) {
+            return !this.isMax(name) && !this.isCapped
+        },
+        isCapped(name) {
+            var skill = this.skillDataByName(name).Value
+            return skill.Current == skill.Max && skill.Max != max
+        },
+        isMax(name) {
+            var skill = this.skillDataByName(name).Value
+            return skill.Value.Current == max
+        },
+        select(name) {
+            this.select = name
+            this.showDescription(name);
+        },
+    },
+}
+
+export default function Skills() {
     this.current = null;
 
     this.skills = document.createElement("div");
@@ -61,6 +156,9 @@ Skills.prototype = {
         var max = 100;
         var fn = (function(name) {
             var skill = game.player.Skills[name];
+            console.log(skill)
+
+            //createParam: function(label, param, digits, useColors, icon) {
             var item = Stats.prototype.createParam(
                 name,
                 skill.Value,

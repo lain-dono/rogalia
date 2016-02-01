@@ -1,7 +1,3 @@
-'use strict'
-
-require('./panel.styl')
-
 var dragIgnoreTags = ['INPUT', 'TEXTAREA', 'BUTTON', 'CODE']
 var dragIgnoreClass = 'no-drag'
 
@@ -12,7 +8,7 @@ var zIndex = 100
 var topPanel = null
 var stack = []
 
-module.exports = {
+export default {
     // TODO
     //  getTopExcept: function(except) {
     //      for (var i = stack.length-1; i >= 0; i--) {
@@ -33,35 +29,32 @@ module.exports = {
         visible:         { type: Boolean, default: true, },
         zIndex:          { type: Number,  default: 1, },
         isTop:           { type: Boolean, default: false, },
-        onlyTitle:       { type: Boolean, default: false, },
     },
     computed: {
         x: {
-            get: function() { return this.$el.offsetLeft },
-            set: function(x) { this.$el.style.left = x + 'px' },
+            get()  { return this.$el.offsetLeft },
+            set(x) { this.$el.style.left = x + 'px' },
         },
         y: {
-            get: function() { return this.$el.offsetTop },
-            set: function(y) { this.$el.style.top = y + 'px' },
+            get()  { return this.$el.offsetTop },
+            set(y) { this.$el.style.top = y + 'px' },
         },
         width: {
-            get: function() {
-                return parseInt(getComputedStyle(this.$el).width)
-            },
-            set: function(w) {
+            get() { return parseInt(getComputedStyle(this.$el).width) },
+            set(w) {
                 this.$el.style.width = w + pad + 'px'
                 this.$el.style.maxWidth = w + pad + 'px'
             },
         },
-        height: function() {
+        height() {
             return parseInt(getComputedStyle(this.$el).height)
         },
     },
     methods: {
-        toggle: function() {
+        toggle() {
             this.visible = !this.visible
         },
-        toTop: function() {
+        toTop() {
             if (topPanel && topPanel != this) {
                 topPanel.isTop = false
             }
@@ -76,7 +69,7 @@ module.exports = {
             }
             stack.push(this)
         },
-        popTop: function() {
+        popTop() {
             if (this.$button) {
                 this.$button.classList.remove('active')
             }
@@ -85,11 +78,11 @@ module.exports = {
                 topPanel = next
             }
         },
-        center: function() {
+        center() {
             this.x = window.innerWidth/2 - this.$el.offsetWidth/2
             this.y = window.innerHeight/2 - this.$el.offsetHeight/2
         },
-        updateVisibility: function() {
+        updateVisibility() {
             if (!this.visible || !this.$entity) {
                 return
             }
@@ -98,18 +91,18 @@ module.exports = {
 
         // drag'n'drop stuff
 
-        mousemove: function(event) {
+        mousemove(event) {
             var drag = this.$drag
             if (drag !== null) {
                 this.$el.style.left = event.pageX - drag.dx + 'px'
                 this.$el.style.top  = event.pageY - drag.dy + 'px'
             }
         },
-        mouseup: function() {
+        mouseup() {
             this.$drag = null
             this.savePosition()
         },
-        mousedown: function(event) {
+        mousedown(event) {
             var mod = game.controller.modifier
             if (!(mod.ctrl || mod.shift || mod.alt)) {
                 this.toTop()
@@ -140,7 +133,7 @@ module.exports = {
 
         // load/save position in localStorage
 
-        loadPosition: function() {
+        loadPosition() {
             var key = 'panels.' + this.name
             var config = JSON.parse(localStorage.getItem(key)) || {}
             if(config.position) {
@@ -151,7 +144,7 @@ module.exports = {
                 this.center()
             }
         },
-        savePosition: function() {
+        savePosition() {
             if (!this.temporary) {
                 var config = {
                     position: {
@@ -166,7 +159,7 @@ module.exports = {
         },
     },
 
-    attached: function() {
+    attached() {
         // dnd
         this.$drag = null
         this.$mousemove = this.mousemove.bind(this)
@@ -180,7 +173,7 @@ module.exports = {
 
         this.$el.id = this.name
     },
-    detached: function() {
+    detached() {
         // dnd
         this.$el.removeEventListener('mousedown', this.$mousedown)
         window.removeEventListener('mouseup',     this.$mouseup)

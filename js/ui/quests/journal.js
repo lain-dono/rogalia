@@ -4,6 +4,8 @@ var dom = require('../../dom.js')
 var Panel = require('../../panel.js')
 var Quest = require('./quest.js')
 
+var qqq = require('../../i18n')
+
 module.exports = Journal
 
 function Journal() {

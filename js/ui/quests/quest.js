@@ -1,7 +1,7 @@
 'use strict'
 
 var Vendor = require('../vendor.js')
-var Entity = require('../../entity.js')
+var getPreview = require('../../entity.js').getPreview
 var dom = require('../../dom.js')
 
 module.exports = Quest
@@ -39,7 +39,7 @@ Quest.prototype = {
         for (var item in items) {
             var slot = document.createElement("div");
             slot.classList.add("slot");
-            slot.appendChild(Entity.getPreview(item));
+            slot.appendChild(getPreview(item));
             slot.onclick = game.controller.craft.search.bind(game.controller.craft, item, true);
 
             var desc = document.createElement("div");

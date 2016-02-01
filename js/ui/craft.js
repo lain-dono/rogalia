@@ -7,7 +7,108 @@ var Stats = require('./stats.js')
 var dom = require('../dom.js')
 var util = require('../util.js')
 
+var filterBy = require('vue').options.filters.filterBy
+
+window.Entity = Entity
+
+Craft.help = require('../lang/ru/craft.js')
+
 module.exports = Craft
+
+function craftFilter(arr, search, types) {
+    search = search.toLowerCase()
+    return arr.filter(function(el) {
+        if (!types[el.moveType]) {
+            console.log('movetype', el.moveType)
+            return false
+        }
+        var name = el.typeTS.toLowerCase()
+        if(name.indexOf(search) === -1) {
+            return false
+        }
+        return types.unavailable || safeToCreate(el)
+    })
+}
+
+function safeToCreate(recipe) {
+    if (!recipe.level) {
+        return true
+    }
+    var skill = game.player.Skills[recipe.skill]
+    if (!skill) {
+        game.error('Skill %s not found', recipe.skill)
+    }
+    return skill.Value.Current >= recipe.level
+}
+
+Craft.vv = {
+    template: require('raw!./craft.html'),
+    props: {
+        //groups: Object,
+    },
+    filters: {
+        craftFilter: craftFilter,
+    },
+    data: function() {
+        return {
+            visible: {},
+            search: '',
+            types: {
+                portable: true,
+                liftable: true,
+                static: true,
+                unavailable: true,
+            },
+            groups: {},
+            skills: [],
+            selected: {type:''},
+        }
+    },
+    methods: {
+        safeToCreate: safeToCreate,
+        toggleGroup(group) {
+            console.log('toggleGroup %s', group)
+            this.visible[group] = !this.visible[group]
+            this.$log('visible')
+        },
+        isVisible(group) {
+            return !!this.visible[group]
+        },
+        visibleGroup(group) {
+            return 0 !== craftFilter(this.groups[group], this.search, this.types).length
+        },
+    },
+
+    attached() {
+        var groups = {}
+        var visible = {}
+        Entity.getSortedRecipeTuples().forEach(function(tuple) {
+            var recipe = tuple[1]
+            var type = tuple[0]
+            var skill = recipe.Skill
+            var moveType = Entity.templates[type].MoveType
+            groups[skill] = groups[skill] || []
+            groups[skill].push({
+                type:    type,
+                typeTS:  TS(type),
+                skill:   skill,
+                level:   recipe.Lvl,
+                equip:   recipe.Equipment,
+                require: recipe.Ingredients,
+                tool:    recipe.Tool,
+                liquid:  recipe.Liquid,
+                output:  recipe.Output,
+                moveType: ['portable', 'liftable', 'static'][moveType],
+            })
+            visible[skill] = false
+        })
+        this.skills = Object.keys(groups)
+        this.visible = visible
+        this.groups = groups
+
+        this.$log('groups')
+    },
+}
 
 function Craft() {
     this.visibleGroups = {};
@@ -83,7 +184,6 @@ function Craft() {
         this.search(this.searchInput.value, true);
 }
 
-Craft.help = require('../lang/ru/craft.js')
 
 Craft.prototype = {
     visibleGroups: null,
@@ -251,6 +351,7 @@ Craft.prototype = {
             groups[recipe.Skill][type] = recipe;
         });
 
+        var visibleGroups = this.visibleGroups;
         var fn = function() {
             dom.toggle(this);
             visibleGroups[this.group] = !this.classList.contains("hidden");
@@ -259,7 +360,7 @@ Craft.prototype = {
         for (group in groups) {
             var recipes = groups[group];
             var subtree = document.createElement("ul");
-            subtree.className =  (this.visibleGroups[group]) ? "" : "hidden";
+            subtree.className =  (visibleGroups[group]) ? "" : "hidden";
             subtree.group = group;
 
             for (var type in recipes) {
@@ -289,7 +390,6 @@ Craft.prototype = {
 
             var subtreeLi = document.createElement("li");
             var groupToggle = document.createElement("span");
-            var visibleGroups = this.visibleGroups;
             groupToggle.className = "group-toggle";
             groupToggle.textContent = T(group);
             groupToggle.subtree = subtree;

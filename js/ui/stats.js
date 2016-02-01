@@ -3,12 +3,36 @@
 var util = require('../util.js')
 var ContainerEquip = require('../container/equip.js')
 var dom = require('../dom.js')
-var Character = require('../character.js')
+var CharacterData = require('../characterData.js')
 var Panel = require('../panel.js')
 var cnf = require('../config.js')
 var config = cnf.config
 
 module.exports = Stats
+
+Stats.vv = {
+    components: {
+    },
+    methods: {
+        playerBG: function() {
+            /* TODO
+            var sex = player.sex();
+            this.classList.add(sex);
+            var worn =  ["feet", "legs", "body", "head"].filter(function(name) {
+                return !!player.equipSlot(name);
+            });
+            worn.push("naked");
+            var dollStyle = worn.map(function(name) {
+                return "url('assets/bg/doll/" + sex + "/" + name + ".png')";
+            }).join(",");
+            this.style.backgroundImage = dollStyle;
+            */
+
+            //'url(\'assets/bg/doll/' + player.sex + '/' + naked'.png');
+            return ''
+        },
+    },
+}
 
 function Stats() {
     this.equipContainer = new ContainerEquip();
@@ -139,7 +163,7 @@ Stats.prototype = {
             update: function(self, player) {
                 self.equipContainer.update();
                 return self.equipContainer.slots.map(function(slot, i) {
-                    var title = Character.equipSlots[i];
+                    var title = CharacterData.equipSlots[i];
                     slot.onclear = function() {
                         slot.setTitle(TS(title));
                     };
@@ -168,14 +192,14 @@ Stats.prototype = {
             name: "main",
             update: function(self, player) {
                 var attributes = dom.div("attributes");
-                Character.attrs.forEach(function(attr) {
+                CharacterData.attrs.forEach(function(attr) {
                     var elem = self.createValue(attr, player.Attr[attr], 2);
                     elem.classList.add("attr-" + attr.toLowerCase());
                     attributes.appendChild(elem);
                 });
 
                 var health = dom.div("health");
-                Character.vitamins.forEach(function(vitamin) {
+                CharacterData.vitamins.forEach(function(vitamin) {
                     var elem = self.createValue(vitamin, player.Health[vitamin], 2);
                     elem.classList.add("vitamin-" + vitamin.toLowerCase());
                     health.appendChild(elem);
@@ -407,12 +431,19 @@ Stats.prototype = {
         section.elem.appendChild(fragment);
     },
     updateExp: function() {
+        // XXX
+        setTimeout(function() {
+            var exp = game.player.Exp
+            window.ui.exp.current = exp.Current
+            window.ui.exp.max = exp.Max
+        }, 2000)
+        /*
         var xp = document.getElementById("xp-progress");
-        var exp = game.player.Exp;
         var width = exp.Current/exp.Max * 100;
         if (+xp.style.width != width) {
             xp.style.width = width + "%";
             xp.title = sprintf("%d/%d", exp.Current, exp.Max);
         }
+        */
     },
 };

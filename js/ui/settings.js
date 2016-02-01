@@ -1,7 +1,5 @@
 'use strict'
 
-require('./settings.styl')
-
 var config = require('../config.js').config
 var debug = require('../config.js').debug
 var descriptions = require('../lang/ru/settings.js')
@@ -13,37 +11,37 @@ module.exports = {
         // TODO move it to config, etc.
         siteUrl: {type: String, default: 'http://rogalia.ru'}
     },
-    data: function() {
+    data() {
         return {
             settings: config,
             descriptions: descriptions,
         }
     },
     methods: {
-        open: function(link) {
+        open(link) {
             if (link.charAt(0) == '$') {
                 link = this.siteUrl + link.substring(1);
             }
             window.open(link, '_blank');
         },
-        showHelp: function() {
+        showHelp() {
             console.log('showHelp');
         },
-        showUsers: function() {
+        showUsers() {
             console.log('showUsers');
             this.$root.panels.users = !this.$root.panels.users
         },
-        lobby: function() {
+        lobby() {
             console.log('lobby');
         },
-        logout: function() {
+        logout() {
             console.log('logout');
         },
     },
-    attached: function() {
+    attached() {
         document.getElementById('fps-stats').appendChild(this.$fps.domElement)
     },
-    created: function() {
+    created() {
         window.fps = this.$fps = new FpsStats()
     },
     watch: {
