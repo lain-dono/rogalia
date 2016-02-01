@@ -1,0 +1,25 @@
+<div id="actions">
+    <div class="button main-action" @click="$emit('actions.main')"></div>
+    <div class="wrapper">
+        <div class="exp">
+            <div class="bar" :tooltip="exp.current + '/' + exp.max"
+                :style="{width: exp.current/exp.max * 100.0 +'%'}"></div>
+        </div>
+        <div :class="{'button-bar': true, cooldown: cooldown}">
+            <div class="button" @click="onAction('tsuki')"   tooltip="[1] Тски: колющий удар">
+                <img src="assets/icons/actions/tsuki.png"></div>
+            <div class="button" @click="onAction('shomen')"  tooltip="[2] Шомен: режущий удар">
+                <img src="assets/icons/actions/shomen.png"></div>
+            <div class="button" @click="onAction('irimi')"   tooltip="[3] Ирими: шаг вперед">
+                <img src="assets/icons/actions/irimi.png"></div>
+            <div class="button" @click="onAction('tenkan')"  tooltip="[4] Тенкан: разворот на 180">
+                <img src="assets/icons/actions/tenkan.png"></div>
+            <div class="button" @click="onAction('kaiten')"  tooltip="[5] Кайтен: шаг с разворотом">
+                <img src="assets/icons/actions/kaiten.png"></div>
+            <div class="button" @click="onAction('pick-up')" tooltip="[X] Поднять">
+                <img src="assets/icons/actions/pick-up.png"></div>
+            <div class="button" @click="onAction('lift')"    tooltip="[A] Тащить">
+                <img src="assets/icons/actions/lift.png"></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+<div>
+    <!--<div class="contents" id="attached-chat">-->
+    <tabs>
+        <tab id="general" :title="'general' | TT">
+            1
+        </tab>
+        <tab id="private" :title="'private' | TT">
+            2
+        </tab>
+        <tab id="system" :title="'system' | TT">
+            3
+        </tab>
+        <tab id="party" :title="'party' | TT">
+            4
+        </tab>
+    </tabs>
+
+    <div class="tabs-contents" id="chat-wrapper">
+
+        <div class="tab-content active">
+            <div class="messages no-drag">
+
+                <div v-for="msg in messages | channelFilter channels"
+                    :class="['message', msg.channel]">
+                    <span class="from" :title="msg.time" v-text="msg.from"></span>:
+                    <span class="body" v-html="msg.body"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <div v-show="isCommand" class="cmd-help">
+            HELP
+            <hr>
+            HELP
+            <hr>
+        </div>
+
+        <input class="new-message" type="text"
+            @keydown.38.prevent="prevMessage"
+            @keydown.40.prevent="nextMessage"
+            @keydown.13.prevent="sendMessage"
+            v-model="input" />
+    </div>
+
+    <label id="chat-always-visible-label" title="Always visible">
+        <input type="checkbox" id="chat-always-visible">
+    </label>
+    <div  id="chat-settings-icon">
+        <img @click="toggleSettings" src="assets/icons/tab/settings.png" />
+        <div v-show="filters" class="filters">
+            <strong>Каналы:</strong>
+            <label v-for="(chan, enabled) in channels">
+                <input v-model="enabled" type="checkbox" />
+                {{chan}}
+            </label>
+        </div>
+    </div>
+</div>

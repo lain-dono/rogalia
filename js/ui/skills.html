@@ -1,0 +1,60 @@
+<div>
+    <div class="skill-list">
+        <div v-for="(attr, list) in byAttr">
+            <label v-for="name in list" @click="selected = name"
+                   class="param skill" :class="{
+                    capped: isCapped(name),
+                    selected: name == selected }">
+                <span :class="'attr-' + attr">◾</span>
+                <span :tooltip="title(attr, name)">{{name | T}}</span>
+                <v-param
+                   :icon="'skills/' + name" :digits="2"
+                   :current="currentValue(name)" :max="maxValue(name)"></v-param>
+                <!--<div class="meter-wrapper value">-->
+                    <!--<meter :max="maxValue(name)" :value="currentValue(name)"-->
+                     <!--title="0 / 10">{{currentValue(name)}} / {{maxValue(name)}}</meter>-->
+                    <!--<img :src="'assets/icons/skills/' + name.toLowerCase() + '.png'" />-->
+                    <!--<div class="meter-title">{{currentValue(name)}} / {{maxValue(name)}}</div>-->
+                <!--</div>-->
+            </label>
+
+
+                <!--<span :class="attr-vitality">◾ </span>-->
+                <!--{{name | T}}-->
+                <!--<v-param @click="selected = name"-->
+                    <!--:class="{ skill:true, capped: isCapped(name), selected: name == selected }"-->
+                    <!--:tooltip="title(attr)"-->
+                    <!--:label="name" :current="currentValue(name)" :max="maxValue(name)"-->
+                    <!--:icon="'skills/' + name"-->
+                    <!--:attr="attr"-->
+                    <!--:digits="2"></v-param>-->
+            <!--</label>-->
+        </div>
+    </div>
+    <hr>
+<div>
+    <div v-if="!selected" class="description"
+        v-text="'Select skill to see it\'s description' | T"></div>
+
+    <div v-else class="description" style="white-space: pre-wrap;">
+    {{'Value' | T}}: {{/*formatParam(skill.Value)*/}}
+    <span v-show="descriptions[name]" v-text="descriptions[name]+'\n\n'"></span>
+    <span v-if="isSelectedMax()" v-text="'Skill has it\'s maximum level' | T"></span>
+    <span v-else style="white-space: pre-wrap;">
+    {{'Unlocks {lvl} lvl of the {skill} skill' | TT {lvl: nextLvlOf().Name, skill: T(seleced)} }}
+
+
+    {{'New maximum value' | T}}: {{ nextLvlOf().Value }}
+    {{'Cost'}}: {{ nextLvlOf().Cost }}
+    {{'You have {amount} LP' | TT {amount: LP()} }}
+
+    <div v-if="learnDiff() > 0">
+    {{ 'You need {diff} additional LP to learn this skill' | TT {diff: learnDiff()} }}
+    </span>
+    </span>
+    </div>
+</div>
+    <hr>
+    <button @click="learn" :disabled="selected && learnDiff() > 0">{{'Learn' | T}}</button>
+</div>
+

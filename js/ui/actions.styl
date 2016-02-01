@@ -1,0 +1,125 @@
+@import 'kouto-swiss'
+
+.cooldown
+    opacity: 0.5
+
+#actions
+    position: absolute
+    bottom: 2rem
+    right: 0rem
+    z-index: 1
+    display: flex
+    justify-content: space-around
+
+    .button-bar
+        display: flex
+        justify-content: space-between
+        .button
+            margin: 0 -8px
+
+    .wrapper
+        display: flex
+        justify-content: space-around
+        flex-flow: column nowrap
+
+    .exp
+        position: relative
+        margin: 4px
+        background: url("assets/bg/xp.png") repeat-x
+
+        .bar
+            background: url("assets/bg/xp-full.png") repeat-x
+            height: 7px
+
+        &:before
+            position: absolute
+            top: -6px
+            left: -4px
+            content: url("assets/bg/xp-left.png")
+        &:after
+            position: absolute
+            top: -6px
+            right: -4px
+            content: url("assets/bg/xp-right.png")
+
+    .main-action.button
+        background-image: url('assets/bg/main-button.png')
+        width: 105px
+        height: 67px
+        display: flex
+        justify-content: space-around
+        > img
+            margin: auto
+        &:hover > img
+            -webkit-filter: brightness(125%)
+            filter: brightness(125%)
+
+
+#controls-bar, #action-hotbar-container
+    position: absolute
+    right: 4px
+
+#controls-bar
+    bottom: 0
+    top: 0
+    margin: auto
+    height: 376px
+
+#action-hotbar-container
+    bottom: 4px
+    display: flex
+    align-items: flex-end
+
+#action-hotbar-wrapper
+    position: relative
+
+#main-action-button
+    background-image: url("assets/bg/main-button.png")
+    width: 105px
+    height: 67px
+    display: flex
+    justify-content: space-around
+
+    > img
+        margin: auto
+
+    &:hover > img
+        -webkit-filter: brightness(125%)
+        filter: brightness(125%)
+
+
+#xp-progress-bar, .xp
+    position: relative
+    margin: 4px
+    background: url("assets/bg/xp.png") repeat-x
+
+    .bar
+        background: url("assets/bg/xp-full.png") repeat-x
+        height: 7px
+
+    &:before
+        position: absolute
+        top: -6px
+        left: -4px
+        content: url("assets/bg/xp-left.png")
+    &:after
+        position: absolute
+        top: -6px
+        right: -4px
+        content: url("assets/bg/xp-right.png")
+
+#xp-progress
+    background: url("assets/bg/xp-full.png") repeat-x
+    height: 7px
+
+
+#action-hotbar, .action-hotbar
+    display: inline-block
+    position: relative
+    .button
+        display: inline-block
+        img
+            position: relative
+            top: 4px
+
+

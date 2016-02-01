@@ -1,0 +1,78 @@
+<div class="flex stretch row">
+
+<div id="recipe-list-wrapper">
+    <label class="recipe-search">
+        <input :placeholder="'search' | T" v-model="search" />
+        <button :tooltip="'Clear search' | T" @click="search=''" class="recipe-search-clear">❌</button>
+    </label>
+    <div id="recipe-filters">
+        <div :tooltip="'Search by ingredient' | T" class="slot"></div>
+        <div>
+            <label v-for="(name, checked) in types" :tooltip="name | T">
+                <input type="checkbox" v-model="checked">
+            </label>
+        </div>
+    </div>
+    <hr>
+    <ul class="recipe-list no-drag">
+        <li v-for="skill in skills | orderBy true" v-show="visibleGroup(skill)">
+            <img :src="'assets/icons/skills/' + skill.toLowerCase() + '.png'">
+            <span class="group-toggle" @click="toggleGroup(skill)">{{skill | T}}</span>
+            <ul v-show="visible[skill]">
+<!--:class="{recipe: true,selected: selected == type,unavailable: !safeToCreate(recipe) }">{{type | TS}}</li>-->
+                <li v-for="recipe in groups[skill] | craftFilter search types"
+                    @click="selected = recipe"
+                    :class="{
+                    recipe: true,
+                    selected: selected.type == recipe.type,
+                    unavailable: !safeToCreate(recipe)}">{{recipe.type | TS}}</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="vr"></div>
+
+<div id="recipe-details">
+    <div class="preview-wrapper">
+        <canvas height="42" width="51" id="item-preview"></canvas>
+    </div>
+    <span class="recipe-title">Энергия</span>
+    <hr>
+    <div>
+        Требования:
+        <ul>
+            <li>Навык: алхимия </li>
+            <li tooltip="Вы должны быть рядом с оборудованием">Оборудование:
+                <a class="item-link">круг превращения</a>
+            </li>
+        </ul>
+    </div>
+    <hr>
+    Ингредиенты:
+    <ul>
+        <li>1x <a class="item-link">a</a></li>
+        <li>1x <a class="item-link">g</a></li>
+        <li>1x <a class="item-link">i</a></li>
+        <li>1x <a class="item-link">k</a></li>
+        <li>1x <a class="item-link">l</a></li>
+        <li>1x <a class="item-link">o</a></li>
+        <li>1x <a class="item-link">r</a></li>
+    </ul>
+    <div id="recipe-slots">
+        <div -v-for="" tooltip="A" class="slot">
+            <img :src="icon" />
+            <canvas height="27" width="30" tooltip="A" class="item-preview"></canvas>
+        </div>
+    </div>
+    <hr>
+    <div id="recipe-buttons">
+        <button class="recipe-craft-all">{{'Craft all' | T}}</button>
+        <button class="recipe-auto">{{'Auto' | T}}</button>
+        <button class="recipe-create">{{'Create' | T}}</button>
+    </div>
+    <hr>
+    <div class="item-descr">Чистая энергия. Что может быть лучше для работы над материей?</div>
+</div>
+
+</div>

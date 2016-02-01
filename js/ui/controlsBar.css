@@ -1,0 +1,77 @@
+#controls-bar > .button {
+    display: block;
+}
+#controls-bar > .button > .icon {
+    width: 45px;
+    height: 45px;
+    display: inline-block;
+    background-repeat: no-repeat;
+}
+
+#controls-bar > .button:hover > .icon {
+    -webkit-filter: brightness(125%);
+    filter: brightness(125%);
+}
+
+#stats-button > .icon {
+    background-image: url("assets/icons/controls/stats.png");
+}
+#stats-button.active > .icon {
+    background-image: url("assets/icons/controls/stats-active.png");
+}
+
+#wiki-button > .icon {
+    background-image: url("assets/icons/controls/wiki.png");
+}
+#wiki-button.active > .icon {
+    background-image: url("assets/icons/controls/wiki-active.png");
+}
+
+#system-button > .icon {
+    background-image: url("assets/icons/controls/system.png");
+}
+#system-button.active > .icon {
+    background-image: url("assets/icons/controls/system-active.png");
+}
+
+#map-button > .icon {
+    background-image: url("assets/icons/controls/map.png");
+}
+#map-button.active > .icon {
+    background-image: url("assets/icons/controls/map-active.png");
+}
+
+#inventory-button > .icon {
+    background-image: url("assets/icons/controls/inventory.png");
+}
+#inventory-button.active > .icon {
+    background-image: url("assets/icons/controls/inventory-active.png");
+}
+
+#craft-button > .icon {
+    background-image: url("assets/icons/controls/craft.png");
+}
+#craft-button.active > .icon {
+    background-image: url("assets/icons/controls/craft-active.png");
+}
+
+#skills-button > .icon {
+    background-image: url("assets/icons/controls/skills.png");
+}
+#skills-button.active > .icon {
+    background-image: url("assets/icons/controls/skills-active.png");
+}
+
+#chat-button > .icon {
+    background-image: url("assets/icons/controls/chat.png");
+}
+#chat-button.active > .icon {
+    background-image: url("assets/icons/controls/chat-active.png");
+}
+
+#journal-button > .icon {
+    background-image: url("assets/icons/controls/journal.png");
+}
+#journal-button.active > .icon {
+    background-image: url("assets/icons/controls/journal-active.png");
+}

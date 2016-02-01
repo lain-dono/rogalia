@@ -1,0 +1,122 @@
+<panel name="stats" title="Stats">
+<div class="summary">
+    <span>{{player.Name}}</span>
+    <span> {{'level' | T}} {{player.Lvl}}</span>
+    <div v-if="player.Citizenship.Faction" class="faction">
+        <span style="margin-top: 10px;">{{player.Citizenship.Faction}}</span>
+        <span> {{'rank' | T}}: {{player.Citizenship.Rank}}</span>
+    </div>
+</div>
+<div :style="'background-image': playerBG() " class="doll {{player.sex()}}"></div>
+<div class="equip">
+    <div title="Сумка" class="slot equip-bag"></div>
+    <div title="Правая рука" class="slot equip-right-hand"></div>
+    <div title="Левая рука" class="slot equip-left-hand"></div>
+    <div title="Голова" class="slot equip-head"></div>
+    <div title="Шея" class="slot equip-neck"></div>
+    <div title="Тело" class="slot equip-body"></div>
+    <div title="Ноги" class="slot equip-legs"></div>
+    <div title="Стопы" class="slot equip-feet"></div>
+</div>
+<hr>
+<div class="vital">
+    <label class="param">Жизнь
+        <div class="meter-wrapper value">
+            <meter title="245 / 300" value="245" max="300" optimum="300" high="225" low="75">245 / 300</meter>
+            <img src="assets/icons/stats/hp.png">
+            <div class="meter-title">245 / 300</div>
+        </div>
+    </label>
+    <label class="param">Сытость
+        <div class="meter-wrapper value">
+            <meter title="0 / 100" value="0" max="100" optimum="100" high="75" low="25">0 / 100</meter>
+            <img src="assets/icons/stats/fullness.png">
+            <div class="meter-title">0 / 100</div>
+        </div>
+    </label>
+    <label class="param">Выносливость
+        <div class="meter-wrapper value">
+            <meter title="0 / 100" value="0" max="100" optimum="100" high="75" low="25">0 / 100</meter>
+            <img src="assets/icons/stats/stamina.png">
+            <div class="meter-title">0 / 100</div>
+        </div>
+    </label>
+</div>
+<hr>
+<div class="main">
+    <div class="attributes">
+        <label class="param attr-strength">Сила<span class="value">10.00</span></label>
+        <label class="param attr-vitality">Живучесть<span class="value">10.00</span></label>
+        <label class="param attr-dexterity">Ловкость<span class="value">10.19</span></label>
+        <label class="param attr-intellect">Интеллект<span class="value">10.00</span></label>
+        <label class="param attr-perception">Восприятие<span class="value">10.00</span></label>
+        <label class="param attr-wisdom">Мудрость<span class="value">10.00</span></label>
+    </div>
+    <div class="vr"></div>
+    <div class="health">
+        <label class="param vitamin-protein">Белки<span class="value">0.00</span></label>
+        <label class="param vitamin-fat">Жиры<span class="value">0.00</span></label>
+        <label class="param vitamin-carbohydrate">Углеводы<span class="value">0.00</span></label>
+        <label class="param vitamin-phosphorus">Фосфор<span class="value">0.00</span></label>
+        <label class="param vitamin-calcium">Кальций<span class="value">0.00</span></label>
+        <label class="param vitamin-magnesium">Магний<span class="value">0.00</span></label>
+    </div>
+</div>
+<hr>
+<div class="params">
+    <label class="param">Скорость
+        <div class="meter-wrapper value">
+            <meter title="55 / 100" value="55" max="100" optimum="100" high="75" low="25">55 / 100</meter>
+            <img src="assets/icons/stats/speed.png">
+            <div class="meter-title">55 / 100</div>
+        </div>
+    </label>
+    <label class="param">Броня
+        <div class="meter-wrapper value">
+            <meter title="0 / 0" value="0" max="100" optimum="0" high="0" low="0">0 / 0</meter>
+            <img src="assets/icons/stats/armor.png">
+            <div class="meter-title">0 / 0</div>
+        </div>
+    </label>
+    <label class="param">Защита
+        <div class="meter-wrapper value">
+            <meter title="1 / 1" value="1" max="1" optimum="1" high="0.75" low="0.25">1 / 1</meter>
+            <img src="assets/icons/stats/defence.png">
+            <div class="meter-title">1 / 1</div>
+        </div>
+    </label>
+    <label class="param">Точность
+        <div class="meter-wrapper value">
+            <meter title="1 / 1" value="1" max="1" optimum="1" high="0.75" low="0.25">1 / 1</meter>
+            <img src="assets/icons/stats/accuracy.png">
+            <div class="meter-title">1 / 1</div>
+        </div>
+    </label>
+</div>
+<hr>
+<div class="exp">
+    <label class="param">Опыт<div class="meter-wrapper value">
+            <meter title="73 / 852" value="73" max="852.629800451459">73 / 852</meter>
+            <img src="assets/icons/stats/xp.png">
+            <div class="meter-title">73 / 852</div>
+        </div>
+    </label>
+    <label class="param">Очки обучения
+        <span class="value">23</span>
+    </label>
+    <label class="param">Статусные очки
+        <div class="meter-wrapper value">
+            <meter title="0 / 10" value="0" max="10">0 / 10</meter>
+            <div class="meter-title">0 / 10</div>
+        </div>
+    </label>
+</div>
+<hr>
+<div class="karmic">
+    <label class="param">Карма<span class="value">27</span></label>
+    <label class="param">Слава<span class="value">0</span></label>
+    <hr>
+</div>
+<button>Статистика</button>
+<button>Рейтинги</button>
+</panel>

@@ -1,0 +1,7 @@
+<div class="meter-wrapper value">
+    <meter :value="current" :max="max"
+        optimum="100"high="75" low="25">{{ current | toFixed digits }} / {{ max }}</meter>
+    <img v-if="icon != ''"
+        :src="'assets/icons/' + icon.toLowerCase() + '.png'" />
+    <div class="meter-title">{{ current | toFixed digits }} / {{ max }}</div>
+</div>
