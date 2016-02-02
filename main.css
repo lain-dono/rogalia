@@ -721,13 +721,17 @@ hr {
     left: 0;
 }
 .recipe-list >  li {
-    padding-left: 16px;
     list-style-type: none;
     cursor: pointer;
+}
+.group-toggle {
+    padding-left: 16px;
 }
 .recipe-list li li {
     list-style-type: none;
     background: #74481b;
+    font-size: smaller;
+    padding-left: 3px;
 }
 .recipe-list li li:nth-child(even) {
     background: #683f16;

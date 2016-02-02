@@ -131,24 +131,22 @@ Quest.prototype = {
         var button = document.createElement("button");
         button.textContent = T(action);
 
-        var nearEndNpc = game.player.interactTarget.Name == this.End;
+        var nearEndNpc = game.player.interactTarget.Type == this.End;
         var canEnd = this.ready() && nearEndNpc;
 
         if (canEnd || canStart) {
             var self = this;
             button.onclick = function() {
-                game.network.send("quest", {QuestId: self.Id}, function update(data) {
-                    // we must clear AvailableQuests because
-                    // server will send us only non-empty quest list
-                    // so when we accept the last "available" quest
-                    // we have to manually clean up here
-                    delete game.player.AvailableQuests[self.Name];
-                    if (canEnd || !nearEndNpc)
-                        game.panels.quest.close();
-                    else
-                        game.panels.quest.setContents(self.getContents());
-                    return null;
-                });
+                game.network.send(
+                    "quest",
+                    {Id: game.player.interactTarget.Id, QuestId: self.Id},
+                    function update(data) {
+                        if (canEnd || !nearEndNpc)
+                            game.panels.quest.close();
+                        else
+                            game.panels.quest.setContents(self.getContents());
+                        return null;
+                    });
             };
         } else {
             button.disabled = true;

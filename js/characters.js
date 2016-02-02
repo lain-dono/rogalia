@@ -40,7 +40,7 @@ Character.sync = function(data, remove) {
         var from = data[id];
         var to = game.entities.get(id);
         if (!to) {
-            to = new Character(id, from.Name);
+            to = new Character(id);
             to.init(from);
             game.addCharacter(to);
         } else {

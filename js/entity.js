@@ -526,6 +526,7 @@ Entity.prototype = {
         case "drying-frame":
         case "garbage":
         case "container":
+        case "feeder":
             if (this.MoveType != Entity.MT_PORTABLE)
                 this.defaultActionSuccess = this.open.bind(this);
             break;
@@ -677,20 +678,24 @@ Entity.prototype = {
             x = p.x - measure.width / 2
             y -= FONT_SIZE
             ctx.fillStyle = "#444"
-            ctx.fillRect(x, y,
+            game.ctx.fillRect(
+                x,
+                y,
                 measure.width + padding * 2,
                 FONT_SIZE + padding * 2
-            )
-            ctx.fillStyle = "#fff"
-            ctx.fillText(text, x + padding, y + padding + FONT_SIZE)
-            return
+            );
+            game.ctx.fillStyle = "#fff";
+            game.ctx.fillText(text, x + padding, y + padding + FONT_SIZE);
+            return;
+        case "feeder":
+            game.ctx.fillStyle = "rgba(20, 200, 20, 0.3)";
+            game.iso.fillCircle(this.X, this.Y, this.FeedRadius);
+            break;
         }
-        ctx.fillStyle = "#fff"
-        var title = this.title
-        if (game.controller.modifier.shift) {
-            title += " | " + T("Quality") + ":" + this.Quality
-        }
-
+        game.ctx.fillStyle = "#fff";
+        var title = this.title;
+        if (game.controller.modifier.shift)
+            title += " | " + T("Quality") + ":" + this.Quality;
         game.drawStrokedText(title, x, y)
     },
     canIntersect: function(noignore) {

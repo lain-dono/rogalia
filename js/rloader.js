@@ -1,10 +1,9 @@
-var util = require('./util.js')
-
-module.exports = function Loader(assetsDir) {
+"use strict";
+function Loader(assetsDir) {
     this.assetsDir = assetsDir;
 };
 
-module.exports.prototype = {
+Loader.prototype = {
     get status() {
         return this._loaded + "/" + this._loading;
     },
@@ -18,7 +17,7 @@ module.exports.prototype = {
         this.runCallbacks();
     },
     loadImage: function(name) {
-        if(name === undefined || name.length === 0) {
+        if(name == undefined || name.length == 0) {
             game.sendError("Trying to load undefined or empty image");
             return new Image();
         }

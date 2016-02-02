@@ -98,7 +98,7 @@ Entity.getSortedRecipeTuples = function() {
     return Object.keys(Entity.recipes).map(function(type) {
         return [type, Entity.recipes[type]];
     }).sort(function(a, b){
-        var diff = a[1].Lvl - b[1].Lvl;
+        var diff = (a[1].Lvl || 0) - (b[1].Lvl || 0);
         if (diff !== 0)
             return diff;
 
