@@ -1,27 +1,12 @@
-'use strict'
+var Sprite = require('./render/sprite.js')
 
 var Character = require('./character.js')
-var Sprite = require('./sprite.js')
 var Panel = require('./panel.js')
 var Quest = require('./ui/quests/quest.js')
 var Vendor = require('./ui/vendor.js')
 var Exchange = require('./ui/exchange.js')
 var Bank = require('./ui/bank.js')
 var dom = require('./dom.js')
-
-Character.equipSlots =  [
-    "bag",
-    "right-hand",
-    "left-hand",
-    "head",
-    "neck",
-    "body",
-    "legs",
-    "feet",
-];
-
-Character.attrs = ["Strength", "Vitality", "Dexterity", "Intellect", "Perception", "Wisdom"];
-Character.vitamins = ["Protein", "Fat", "Carbohydrate", "Phosphorus", "Calcium", "Magnesium"];
 
 Character.copy = function copy(to, from) {
     for(var prop in from) {
@@ -48,13 +33,9 @@ Character.sync = function(data, remove) {
         }
     }
     game.player.updateEffects();
-    game.controller.syncMinimap();
-};
-
-Character.drawActions = function() {
-    game.characters.forEach(function(c) {
-        c.drawAction();
-    });
+    //game.controller.syncMinimap();
+    if(window.ui)
+        window.ui.$broadcast('sync.RemotePlayers')
 };
 
 Character.spriteDir = "characters/";

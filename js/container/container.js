@@ -5,6 +5,142 @@ var Panel = require('../panel.js')
 var ContainerSlot = require('./slot.js')
 var Entity = require('../entity.js')
 
+Container.vv = {
+    data: function() {
+        return {
+            slots: [],
+            hasButtons: true,
+            isFuel: false,
+        }
+    },
+    computed: {
+        hasSpace: function() {
+            for (var i = 0, l = this._slots.length; i < l; i++) {
+                if (this.slots[i] === 0) {
+                    return true
+                }
+            }
+            return false
+        },
+    },
+    events: {
+        'slot.mousedown': function(e, slot) {
+            if (slot.locked) {
+                return
+            }
+
+            var entity = slot.$entity
+            if (!entity) { //slot is empty
+                return
+            }
+
+            slot.viewed = true
+            if (e.button == game.controller.RMB) {
+                game.menu.show(entity)
+                return
+            }
+
+            if (game.controller.hovered) { // swap
+                return
+            }
+
+            var mods = game.controller.modifier
+            if (mods.shift && !mods.ctrl) {
+                game.chat.linkEntity(entity)
+                return
+            } else if (mods.ctrl) {
+                this.dwim(slot)
+                return
+            }
+
+            e.stopPropagation();
+
+            slot.locked = true
+            game.controller.cursor.set(entity, e.pageX, e.pageY, function() {
+                slot.locked = false
+            })
+        },
+    },
+    methods: {
+        moveAll: function() {
+            //var top = this.getTopExcept(id);
+            //if (top) {
+            //    game.network.send("move-all", {From: id, To: top.id});
+            //}
+        },
+        shortAll: function() {
+            //game.network.send("Sort", {Id: id});
+        },
+        openAll: function() {
+            var containers = this.slots.filter(function(slot) {
+                return (slot.entity && slot.entity.isContainer())
+            }).map(function(slot) {
+                return slot.entity
+            })
+
+            var opened = containers.reduce(function(opened, entity) {
+                var cnt = Container.get(entity);
+                return (cnt && cnt.visible) ? opened + 1 : opened;
+            }, 0)
+
+            var open = opened < containers.length
+            containers.forEach(function(entity) {
+                var cnt = Container.open(entity)
+                if (open) {
+                    cnt.panel.show()
+                } else {
+                    cnt.panel.hide();
+                }
+            });
+        },
+
+        hasEntity: function(entity) {
+            return this.slots.indexOf(entity.Id) !== -1
+        },
+
+        // dwim want slot with entity
+        dwim: function(slot) {
+            var entity = slot.$entity;
+
+            if (!entity) {
+                console.log('dwim: got empty slot')
+                return
+            }
+
+            if (game.controller.craft.dwim(slot)) {
+                return
+            }
+
+            var blank = game.controller.craft.blank;
+            if (blank.panel && blank.panel.visible) {
+                blank.use(entity)
+                return
+            }
+
+            if (Panel.top.name == 'blank-panel') {
+                return
+            }
+
+            var top = this.getTopExcept(entity.Container);
+            if (!top) {
+                entity.dwim()
+                return
+            }
+
+            var mods = game.controller.modifier
+            if (mods.ctrl && mods.shift) {
+                game.network.send('move-all', {
+                    From: entity.Container,
+                    To: top.id,
+                    Type: entity.Type,
+                });
+            } else {
+                Container.move(entity, top);
+            }
+        },
+    },
+}
+
 module.exports = Container
 
 function Container(entity) {

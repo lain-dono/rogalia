@@ -1,5 +1,3 @@
-'use strict'
-
 var util = require('./util')
 var Panel = require('./panel')
 
@@ -9,6 +7,17 @@ module.exports = function Menu() {
     this.visible = false;
     this.length = 0;
 };
+
+
+// see also lang/dict.js
+function stringToSymbol(symbol) {
+    return [].map.call(util.lcfirst(symbol), function(c, i) {
+        var l = c.toLowerCase();
+        if (c != l)
+            return "-" + l;
+        return l;
+    }).join("");
+}
 
 module.exports.prototype = {
     activate: function(index) {
@@ -77,7 +86,7 @@ module.exports.prototype = {
             index = 0;
 
         var item_a = document.createElement("a");
-        item_a.textContent = index + ". " + TS(util.stringToSymbol(title));
+        item_a.textContent = index + ". " + TS(stringToSymbol(title));
         item_a.className = "action";
         var callback
         if (action instanceof Function) {

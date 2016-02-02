@@ -112,22 +112,29 @@ function drawObject(t) {
 mainStage.prototype.draw = function() {
     var ctx = game.ctx
     ctx.clear()
+
+    // XXX
     ctx.save()
     ctx.translate(-game.camera.x, -game.camera.y)
 
+    ctx.save()
     this.drawGlobalEffects()
 
-    ctx.save()
     var width = game.screen.width
     var height = game.screen.height
-    game.map.draw(width, height, game.camera, game.entities.array)
+    game.map.draw(width, height, game.camera)
+    if (debug.map.grid) {
+        game.map.drawGrid()
+    }
+    game.map.drawMinimap(game.entities.array)
     ctx.restore()
 
     ctx.save()
-    // XXX
     ctx.translate(game.camera.x, game.camera.y)
     game.renderer.render(game.pixiStage)
     ctx.restore()
+
+
 
     var i, l, t
 

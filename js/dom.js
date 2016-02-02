@@ -164,9 +164,17 @@ var dom = module.exports = {
         element.parentNode.removeChild(element);
     },
     hide: function(element) {
+        if (!element || !element.classList) {
+            console.error('fail hide', element)
+            return
+        }
         element.classList.add("hidden");
     },
     show: function(element) {
+        if (!element || !element.classList) {
+            console.error('fail show', element)
+            return
+        }
         element.classList.remove("hidden");
     },
     toggle: function(element) {

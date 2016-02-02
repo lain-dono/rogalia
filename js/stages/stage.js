@@ -1,6 +1,5 @@
-'use strict'
-
-var Container = require('pixi.js/src/core/display/Container.js')
+//var Container = require('pixi.js/src/core/display/Container.js')
+var Container = PIXI.Container
 var cnf = require('../config.js')
 
 function Stage() {

@@ -5,13 +5,13 @@
     <title>Rogalia :: Alpha :: Early access</title>
     <!-- <script src='https://www.google.com/recaptcha/api.js'></script> -->
     <script>
-     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+     <!--(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){-->
+       <!--(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),-->
+			      <!--m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)-->
+     <!--})(window,document,'script','//www.google-analytics.com/analytics.js','ga');-->
 
-     ga('create', 'UA-32173828-2', 'auto');
-     ga('send', 'pageview');
+     <!--ga('create', 'UA-32173828-2', 'auto');-->
+     <!--ga('send', 'pageview');-->
 
      /* (function (d, w, c) {
 	(w[c] = w[c] || []).push(function() {
@@ -37,9 +37,48 @@
 	})(document, window, "yandex_metrika_callbacks"); */
     </script>
     <link rel="icon" type="image/png" href="favicon.ico?v2" />
-    <link rel="stylesheet" href="main.css"/>
+    <!--<link rel="stylesheet" href="main.css"/>-->
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+
+    <div id="app" v-show="true" style="display: none">
+      <!--<panel v-show="panels.system" name="v-system" title="System">-->
+	<!--<system></system>-->
+      <!--</panel>-->
+      <panel :visible.sync="panels.skills" name="skills" title="Skills">
+	<skills></skills>
+      </panel>
+      <panel :visible.sync="panels.system" name="settings" title="Settings">
+	<settings></settings>
+      </panel>
+      <panel :visible.sync="panels.users" name="users" title="Users">
+	<users :online="online" :friends="friends" :blacklist="blacklist"></users>
+      </panel>
+      <panel :visible.sync="panels.craft" name="craft" title="Craft">
+	<craft></craft>
+      </panel>
+      <panel :visible.sync="panels.chat" name="chat" title="Chat">
+	<chat></chat>
+      </panel>
+      <panel :visible.sync="panels.map" name="map" title="Map">
+	<minimap></minimap>
+      </panel>
+      <!--<stats>lol</stats>-->
+      <panel :visible.sync="panels.wiki" name="v-wiki" title="Wiki">
+	  <iframe src="http://rogalia.ru/wiki/"></iframe>
+      </panel>
+      <div id="controls-bar" class="button-bar" style="z-index: 300">
+	<div v-for="name in buttons"
+	  :class="{button:true, active:panels[name]}"
+	  @click="togglePanel(name)"
+	  :id="name + '-button'"
+	  :title="name | capitalize"
+	  ><div class="icon"></div></div>
+      </div>
+	<actions :exp="exp"></actions>
+    </div>
+
     <!-- <div id="adsence">
 	 <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5659182463296220" data-ad-slot="2188089399" data-ad-format="auto"></ins>
 	 <div id="adsence-explanation">Откуда тут взялась реклама?</div>
@@ -70,51 +109,44 @@
 		  <canvas id="minimap-objects-canvas"></canvas>
 	      </div>
 	  </div>
-	  <div id="controls-bar" class="button-bar">
-	      <div class="button" id="stats-button"></div>
-	      <div class="button" id="inventory-button"></div>
-	      <div class="button" id="skills-button" title="Skills"></div>
-	      <div class="button" id="craft-button" title="Craft"></div>
-	      <div class="button" id="chat-button" title="Chat" style="display: none"></div>
-	      <div class="button" id="journal-button" title="Journal"></div>
-	      <div class="button" id="wiki-button" title="Wiki"></div>
-	      <div class="button" id="map-button" title="Map"></div>
-	      <div class="button" id="system-button" title="System"></div>
-	  </div>
+	  <!--<div id="controls-bar" class="button-bar">-->
+	      <!--<div class="button" id="stats-button"></div>-->
+	      <!--<div class="button" id="inventory-button"></div>-->
+	      <!--<div class="button" id="skills-button" title="Skills"></div>-->
+	      <!--<div class="button" id="craft-button" title="Craft"></div>-->
+	      <!--<div class="button" id="chat-button" title="Chat" style="display: none"></div>-->
+	      <!--<div class="button" id="journal-button" title="Journal"></div>-->
+	      <!--<div class="button" id="wiki-button" title="Wiki"></div>-->
+	      <!--<div class="button" id="map-button" title="Map"></div>-->
+	      <!--<div class="button" id="system-button" title="System"></div>-->
+	  <!--</div>-->
 	  <div title="Game time" id="time">00:00</div>
 	  <div id="effects"></div>
 	  <div id="warning"></div>
 	  <div id="anouncement"></div>
 	  <div id="messages"></div>
-	  <div id="action-hotbar-container">
-	      <div id="main-action-button" class="button"></div>
-	      <div id="action-hotbar-wrapper">
-		  <div id="xp-progress-bar"><div id="xp-progress"></div></div>
-		  <div id="action-hotbar" class="button-bar">
-		      <div class="button tooltip" id="tsuki-button">
-			  <span>[1]<br>Тски: колющий удар</span>
-		      </div>
-		      <div class="button tooltip" id="shomen-button">
-			  <span>[2]<br>Шомен: режущий удар</span>
-		      </div>
-		      <div class="button tooltip" id="irimi-button">
-			  <span>[3]<br>Ирими: шаг вперед</span>
-		      </div>
-		      <div class="button tooltip" id="tenkan-button">
-			  <span>[4]<br>Тенкан: разворот на 180</span>
-		      </div>
-		      <div class="button tooltip" id="kaiten-button">
-			  <span>[5]<br>Кайтен: шаг с разворотом</span>
-		      </div>
-		      <div class="button tooltip" id="pick-up-button">
-			  <span>[X]<br>Поднять</span>
-		      </div>
-		      <div class="button tooltip" id="lift-button">
-			  <span>[A]<br>Тащить</span>
-		      </div>
-		  </div>
-	      </div>
-	  </div>
+	  <!--<div id="action-hotbar-container">-->
+	      <!--<div id="main-action-button" class="button"></div>-->
+	      <!--<div id="action-hotbar-wrapper">-->
+		  <!--<div id="xp-progress-bar"><div id="xp-progress"></div></div>-->
+		  <!--<div id="action-hotbar" class="button-bar">-->
+		      <!--<div class="button" tooltip="[1] Тски: колющий удар" id="tsuki-button">-->
+		      <!--</div>-->
+		      <!--<div class="button" tooltip="[2] Шомен: режущий удар" id="shomen-button">-->
+		      <!--</div>-->
+		      <!--<div class="button" tooltip="[3] Ирими: шаг вперед" id="irimi-button">-->
+		      <!--</div>-->
+		      <!--<div class="button" tooltip="[4] Тенкан: разворот на 180" id="tenkan-button">-->
+		      <!--</div>-->
+		      <!--<div class="button" tooltip="[5] Кайтен: шаг с разворотом" id="kaiten-button">-->
+		      <!--</div>-->
+		      <!--<div class="button" tooltip="[X] Поднять" id="pick-up-button">-->
+		      <!--</div>-->
+		      <!--<div class="button" tooltip="[A] Тащить" id="lift-button">-->
+		      <!--</div>-->
+		  <!--</div>-->
+	      <!--</div>-->
+	  <!--</div>-->
 	  <div id="action-progress" class="hidden"><div id="action-progress-value"></div></div>
       </div>
     </div>
@@ -123,6 +155,7 @@
     <script src="js/lib/sprintf.min.js"></script>
     <script src="js/lib/binary-search-tree.js"></script>
     <script src="js/lib/image-filters.js"></script>
+    <script src="node_modules/pixi.js/bin/pixi.min.js"></script>
     <script src="bundle.js"></script>
   </body>
 </html>

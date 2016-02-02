@@ -47,8 +47,8 @@ export function toScreen(p) {
     var x = p.x
     p.x = (x - p.y)
     p.y = (x + p.y) / 2
-    p.x = round(p.x)
-    p.y = round(p.y)
+    //p.x = round(p.x)
+    //p.y = round(p.y)
     return p
 }
 

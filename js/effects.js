@@ -1,5 +1,3 @@
-'use strict'
-
 var dom = require('./dom.js')
 
 module.exports = EffectDesc

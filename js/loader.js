@@ -35,10 +35,10 @@ module.exports.prototype = {
         image.alt = name;
         image.addEventListener("load",  this.loaded.bind(this));
 
-        image.onerror = function(e) {
+        image.onerror = (e)=> {
             game.sendError("Cannot load " + name);
             this.loaded();
-        }.bind(this);
+        }
 
         image.src = this.assetsDir + name;
 
@@ -65,9 +65,9 @@ module.exports.prototype = {
     },
     load: function(url, callback) {
         this._loading++;
-        util.ajax(url, function(data) {
+        util.ajax(url, (data)=> {
             callback(JSON.parse(data));
             this.loaded();
-        }.bind(this));
+        });
     }
 };

@@ -1,22 +1,36 @@
 var path = require('path')
+var ExtractTextPlugin = require('extract-text-webpack-plugin')
 
-module.exports = {
-	entry: "./js/main.js",
-	devtool: 'source-map',
+var extractCSS = new ExtractTextPlugin('[name].css')
+
+module.exports = [{
+	name: 'js',
+	entry: './js/main.js',
+	//devtool: 'source-map',
 	output: {
 		path: __dirname,
-		filename: "bundle.js"
+		filename: 'bundle.js',
+		chunkFilename: '[id].bundle.js',
 	},
 	module: {
 		preLoaders: [
 			{
-				test: /\.js$/, // include .js files
-				exclude: /node_modules/, // exclude any and all files in the node_modules folder
-				loader: "jshint-loader"
+				test: /\.js$/,
+				exclude: /(node_modules|bower_components)/,
+				loader: 'jshint-loader'
 			},
 		],
 		loaders: [
 			{ test: /\.json$/, loader: 'json', },
+			//{ test: /\.js$/, loader: 'source-map-loader', },
+			{
+				test: /\.js$/,
+				exclude: /(node_modules|bower_components)/,
+				loader: 'babel',
+				query: {
+					presets: ['es2015']
+				}
+			}
 		],
 		postLoaders: [
 			{
@@ -47,6 +61,9 @@ module.exports = {
 
 		asi: true,
 
+		// {int} Specify the ECMAScript version to which the code must adhere.
+		esversion: 6,
+
 		// jshint errors are displayed by default as warnings
 		// set emitErrors to true to display them as errors
 		emitErrors: false,
@@ -58,5 +75,28 @@ module.exports = {
 
 		// custom reporter function
 		//reporter: function(errors) { }
-	}
-};
+	},
+}, {
+	name: 'css',
+	entry: {
+		styles: [
+			'./js/main.styl',
+		]
+	},
+	//devtool: 'source-map',
+	output: {
+		path: __dirname,
+		filename: 'tmp.css.js',
+	},
+	module: {
+		loaders: [
+			{ test: /\.styl/, loader: extractCSS.extract(['css?sourceMap&-url', 'stylus?sourceMap']) },
+		],
+	},
+	stylus: {
+		use: [require('kouto-swiss')()],
+	},
+	plugins: [
+		extractCSS,
+	]
+}]

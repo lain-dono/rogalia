@@ -1,9 +1,29 @@
-'use strict'
+var Vue = require('vue')
 
 var dict = require('./ru/dict.js')
 var util = require('../util.js')
 var Entity = require('../entity.js')
 var Panel = require('../panel.js')
+
+function isString(s) {
+    return (typeof s === "string" || s instanceof String);
+}
+
+
+// see also menu.js
+function symbolToString(string) {
+    return util.ucfirst(string.split("-").join(" "));
+    // return this.ucfirst([].map.call(string, function(c, i) {
+    //     if (i != 0) {
+    //         var l = c.toLowerCase();
+    //         if (c != l)
+    //             return " " + l;
+    //     }
+    //     if (c == "-")
+    //         return " ";
+    //     return c;
+    // }).join(""));
+}
 
 dict.init = function() {
     // TT translates text with substitutions
@@ -50,10 +70,12 @@ dict.init = function() {
         return;
     }
     window.T = function(text, symbol) {
-        if (!util.isString(text))
+        if (!isString(text)) {
             return text;
-        if (symbol)
-            text = util.symbolToString(text);
+        }
+        if (symbol) {
+            text = symbolToString(text);
+        }
         var t = dict[text];
         if (t)
             return t;
@@ -62,6 +84,10 @@ dict.init = function() {
             return util.lcfirst(t);
         return text;
     };
+
+    Vue.filter('T', T)
+    Vue.filter('TT', TT)
+    Vue.filter('TS', TS)
 
     dict.update = function(elem) {
         function update(elem) {
@@ -87,7 +113,7 @@ dict.getTranslations = function() {
             dict[title] = "";
 
         for (var action in entity.getActions()) {
-            action = util.symbolToString(action);
+            action = symbolToString(action);
             if (action in dict)
                 continue;
             dict[action] = "";
@@ -96,7 +122,7 @@ dict.getTranslations = function() {
     for (type in Entity.recipes) {
         var recipe = Entity.recipes[type];
         for (var kind in recipe.Ingredients) {
-            kind = util.symbolToString(kind);
+            kind = symbolToString(kind);
             if (!dict[kind])
                 dict[kind] = "";
         }

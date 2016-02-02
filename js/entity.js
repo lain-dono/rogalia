@@ -22,20 +22,27 @@ function Entity(type, id) {
     if (type) {
         e = Object.create(Entity.templates[type]);
     }
+
     e.Id = id || 0;
     e.Type = type || "";
-    if (id)
+
+    if (id) {
         e.sprite = {};
+    }
+
+    e.x = 0
+    e.y = 0
+
     return e;
 }
 
 Entity.prototype = {
-    Id: 0,
+    //Id: 0,
     Name: "",
     Width: 0,
     Height: 0,
     Radius: 0,
-    Type: "",
+    //Type: "",
     Group: "",
     Lvl: 1,
     Container: 0,
@@ -58,8 +65,6 @@ Entity.prototype = {
     _canUse: false,
     _icon: null,
     _spriteVersion: "",
-    x: 0,
-    y: 0,
     get X() {
         return this.x;
     },

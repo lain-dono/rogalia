@@ -5,6 +5,50 @@ var util = require('./util.js')
 
 module.exports = Panel
 
+
+
+var dragIgnoreTags = ["INPUT", "TEXTAREA", "BUTTON", "CODE"];
+function dragIgnore(element) {
+    if (element.classList.contains("no-drag")) {
+        return true;
+    } else if (dragIgnoreTags.indexOf(element.tagName) != -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function draggable(element) {
+    var drag = null;
+    element.addEventListener('mousedown', function(e) {
+        // if (!e.target.classList.contains("contents") && !e.target.classList.contains("title-text"))
+        //     return;
+    if(getComputedStyle(e.target).cursor == "pointer")
+        return;
+    var checking = e.target;
+    while(checking && checking != element) {
+            if (dragIgnore(checking))
+                return;
+        checking = checking.parentNode;
+    }
+
+    drag = {
+        dx: e.pageX - element.offsetLeft,
+        dy: e.pageY - element.offsetTop,
+    };
+    });
+    window.addEventListener('mouseup', function(e) {
+    drag = null;
+    });
+    window.addEventListener('mousemove', function(e) {
+    if (drag) {
+        element.style.left = e.pageX - drag.dx + "px";
+        element.style.top = e.pageY - drag.dy + "px";
+    }
+    });
+}
+
+
 //TODO: make panels linked via back button
 function Panel(name, title, elements, listeners, hooks) {
     if (name in game.panels) {
@@ -28,7 +72,6 @@ function Panel(name, title, elements, listeners, hooks) {
 
     this.title = dom.div("title-text");
     this.setTitle(title);
-
 
     this.titleBar = document.createElement("header");
     this.titleBar.className = "title-bar";
@@ -62,7 +105,7 @@ function Panel(name, title, elements, listeners, hooks) {
 
     this.element.appendChild(this.contents);
 
-    util.draggable(this.element);
+    draggable(this.element);
 
     if (listeners) {
         for(var type in listeners) {

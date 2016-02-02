@@ -1,20 +1,24 @@
-var Sprite = require('pixi.js/src/core/sprites/Sprite.js')
-var Texture = require('pixi.js/src/core/textures/Texture.js')
-var ticker = require('pixi.js/src/core/ticker')
+//var Sprite = require('pixi.js/src/core/sprites/Sprite.js')
+//var Texture = require('pixi.js/src/core/textures/Texture.js')
+//var ticker = require('pixi.js/src/core/ticker')
+var Sprite = PIXI.Sprite
+var Texture = PIXI.Texture
+var ticker = PIXI.ticker
 
-var remove = false
-if (!window.PIXI) {
-    window.PIXI = {
-        filters: {
-            AbstractFilter: require('pixi.js/src/core/renderers/webgl/filters/AbstractFilter.js'),
-        }
-    }
-    remove = true
-}
-var OutlineFilter = require('pixi-extra-filters/src/filters/outline/OutlineFilter.js');
-if (remove) {
-    delete window.PIXI
-}
+//var remove = false
+//if (!window.PIXI) {
+    //window.PIXI = {
+        //filters: {
+            //AbstractFilter: require('pixi.js/src/core/renderers/webgl/filters/AbstractFilter.js'),
+        //}
+    //}
+    //remove = true
+//}
+//var OutlineFilter = require('pixi-extra-filters/src/filters/outline/OutlineFilter.js');
+//if (remove) {
+    //delete window.PIXI
+//}
+
 
 function AnimatedSprite(path, width, height, speed) {
     //Sprite.call(this, null);
@@ -51,9 +55,9 @@ function AnimatedSprite(path, width, height, speed) {
     this._currentTime = 0;
 
     return
-    this.outlineFilter = new OutlineFilter(
-            game.renderer.width, game.renderer.height,
-            4, 0xFFFFFF)
+    //this.outlineFilter = new OutlineFilter(
+            //game.renderer.width, game.renderer.height,
+            //4, 0xFFFFFF)
 }
 
 // constructor

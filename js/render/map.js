@@ -1,4 +1,12 @@
-import core, {Texture, Sprite, Graphics, Container} from 'pixi.js/src/core/'
+//import core, {Texture, BaseTexture, Rectangle, Sprite, Graphics, Container, ParticleContainer} from 'pixi.js/src/core/'
+
+var Texture = PIXI.Texture
+var BaseTexture = PIXI.BaseTexture
+var Rectangle = PIXI.Rectangle
+var Sprite = PIXI.Sprite
+var Graphics = PIXI.Graphics
+var Container = PIXI.Container
+var ParticleContainer = PIXI.ParticleContainer
 
 var Character = require('../character.js')
 var cnf = require('../config.js')
@@ -11,7 +19,10 @@ var ISO_CHUNK_SIZE = CHUNK_SIZE + CELL_SIZE
 
 var gridColor = '#999'
 
-import {Point, toWorld, toScreen} from './point.js'
+var TILE_WIDTH = 64
+var TILE_HEIGHT = 32
+
+import {Point, toWorld, toScreen, toScreenNoRound} from './point.js'
 
 function parse(img, canvas, biomsIn) {
     canvas.width = img.width * 2
@@ -48,6 +59,8 @@ export function Map(ctx, player) {
     this.player = player
 
     this.container = new Container()
+    //this.container.alpha = 0.7
+    this.container.cacheAsBitmap = true
 
     this.minimapSprite = new Sprite()
     this.minimapGraphics = new Graphics()
@@ -66,7 +79,7 @@ export function Map(ctx, player) {
     this.minimapC.addChild(this.minimapSprite)
     this.minimapC.addChild(this.minimapGraphics)
 
-    game.pixiStage.addChild(this.container)
+    //game.pixiStage.addChild(this.container)
     game.pixiStage.addChild(this.minimapC)
 
     this.data = []
@@ -128,14 +141,16 @@ export function Map(ctx, player) {
         this.layers = this.makeLayers()
         this.reset()
 
-        for(var y = 0; y < this.cells_y; y++) {
-            for(var x = 0; x < this.cells_x; x++) {
+        var x, y, c, i
+
+        for(y = 0; y < this.cells_y; y++) {
+            for(x = 0; x < this.cells_x; x++) {
                 id = this.data[y][x].id
-                for (var c = 0; c < 4; c++) {
+                for (c = 0; c < 4; c++) {
                     var offset = 0
                     var cx = 1 - (c & 0x1)
                     var cy = 1 - ((c >> 1) & 0x1)
-                    for (var i = 0; i < 4; i++) {
+                    for (i = 0; i < 4; i++) {
                         var dx = x + cx - (i & 0x1)
                         var dy = y + cy - ((i >> 1) & 0x1)
                         var other =
@@ -154,11 +169,243 @@ export function Map(ctx, player) {
             }
         }
         this.ready = true
+
+        this.recalc(data)
+    }
+
+    this.recalc = function(data) {
+        //var data = this.data
+        //var cell = (x, y, id)=> !(data[y] && data[y][x] && data[y][x].id === id)
+
+        var xx = [8, 3, 0, 2, 1, 4, 5, 6, 7, 9, 10, 11, 12, 13]
+        var cw = this.cells_x
+        var ch = this.cells_y
+        var cell = (x, y, id)=> {
+            if (x < 0 || x > cw) {
+                return false
+            }
+            if (y < 0 || y > ch) {
+                return false
+            }
+            return xx[data[y * cw + x]] == id
+        }
+
+        var container = this.container
+        container.removeChildren()
+
+        var w2 = CELL_SIZE / 2
+        var h2 = CELL_SIZE / 4
+
+
+        for (var t = 0, l = this.textures.length; t < l; t++) {
+            var tex = this.textures[t]
+            tex.removeChildren()
+            var bid = tex.bid
+            if(bid == 0 || bid == 0) // dw // grass or grass
+                container.addChild(tex)
+        //}
+
+        //for (var b = 0, l = this.bioms.length; b < l; b++) {
+            //var bid = this.bioms[b].id
+            for (var y = 0; y < ch; y++) {
+                line:
+                for (var x = 0; x < cw; x++) {
+                    //var tt = data[y][x]
+                    //
+                    //var tid = tt.id
+                    var tid = xx[data[y * cw + x]]
+
+                    var _u = cell(x+0, y-1, bid)
+                    var _d = cell(x+0, y+1, bid)
+                    var _r = cell(x+1, y+0, bid)
+                    var _l = cell(x-1, y+0, bid)
+
+                    var dr = cell(x+1, y+1, bid)
+                    var dl = cell(x-1, y+1, bid)
+                    var ur = cell(x+1, y-1, bid)
+                    var ul = cell(x-1, y-1, bid)
+
+
+                    //var _u = cell(x-0, y+1, bid)
+                    //var _d = cell(x-0, y-1, bid)
+                    //var _r = cell(x-1, y-0, bid)
+                    //var _l = cell(x+1, y-0, bid)
+
+                    //var dr = cell(x-1, y-1, bid)
+                    //var dl = cell(x+1, y-1, bid)
+                    //var ur = cell(x-1, y+1, bid)
+                    //var ul = cell(x+1, y+1, bid)
+
+                    var ox = +CELL_SIZE, oy = +CELL_SIZE
+                    var stid
+                    if (tid == bid) {
+                        stid = 0xF
+                        //continue line
+                    //} else if (true) {
+                        //continue
+
+                    } else if (dr && dl && ur && ul) {
+                        stid = 0xF
+                    } else if (_r && _l && _u && _d) {
+                        stid = 0xF
+
+                    } else if (dr && ul) {
+                        stid = 0x9
+                    } else if (dl && ur) {
+                        stid = 0x6
+
+                    } else if (_d && (_r || ur) || _r && (_d || dl)) {
+                        stid = 0xE
+                        //ox -= w2
+                    } else if (_d && (_l || ul) || _l && (_d || dr)) {
+                        stid = 0xD
+                        //oy += h2
+                    } else if (_u && (_r || dr) || _r && (_u || ul)) {
+                        stid = 0xB
+                        //ox += w2
+                    } else if (_u && (_l || dl) || _l && (_u || ur)) {
+                        stid = 0x7
+                        //oy -= h2
+
+                    } else if (_r) {
+                        stid = 0xA
+                        //ox += w2
+                        //oy += h2
+                    } else if (_l) {
+                        stid = 0x5
+                        //ox -= w2
+                        //oy -= h2
+                    } else if (_u) {
+                        stid = 0x3
+                        //ox += w2
+                        //oy -= h2
+                    } else if (_d) {
+                        stid = 0xC
+                        //ox -= w2
+                        //oy += h2
+
+                    } else if (dr) {
+                        stid = 0x8
+                        //oy += h2
+                    } else if (dl) {
+                        stid = 0x4
+                        //ox -= w2
+                    } else if (ur) {
+                        stid = 0x2
+                        //oy -= h2
+                    } else if (ul) {
+                        stid = 0x1
+                        //ox += w2
+                    } else {
+                        continue line
+                    }
+
+                    var sprite = new Sprite(tex.ts[stid | 0])
+                    //container.addChild(sprite)
+                    sprite.position.x = ox + CELL_SIZE * (x - y)
+                    sprite.position.y = oy + CELL_SIZE * (x + y) / 2
+                    sprite.scale.set(-1)
+
+                    tex.addChild(sprite)
+                }
+            }
+        }
     }
 
     this.reset = function() {
         //TODO: reuse valid chunks
         this.chunks = {}
+    }
+
+    var tick = 0
+
+    this.aa = 1
+    this.alpha = 0.5
+    this.draw = function(width, height, cam) {
+        // this.each(game.screen, function(w, h, p, x, y) {
+        //     this.drawTile(ctx, w, h, p)
+        // })
+        // return
+        //
+        tick++;
+
+        var cw = toWorld(cam.clone())
+        this.container.position.x = this.location.x - cw.x
+        this.container.position.y = this.location.y - cw.y
+        toScreen(this.container.position)
+
+        var x, y, i, l, tile
+        if (true) {
+            var layers = this.makeLayers()
+
+            var leftTop = toWorld(cam.clone())
+                    .div(CHUNK_SIZE)
+                    .floor()
+            var rightTop = toWorld(cam.clone().add(new Point(width, 0)))
+                    .div(CHUNK_SIZE)
+                    .floor()
+            var leftBottom = toWorld(cam.clone().add(new Point(0, height)))
+                    .div(CHUNK_SIZE)
+                    .ceil()
+            var rightBottom = toWorld(cam.clone().add(new Point(width, height)))
+                    .div(CHUNK_SIZE)
+                    .ceil()
+
+                //ctx.globalAlpha = (1 + Math.cos(tick * this.alpha)) * this.aa
+            for (x = leftTop.x; x < rightBottom.x; x++) {
+                for (y = rightTop.y; y < leftBottom.y; y++) {
+                    var c = new Point(x * CHUNK_SIZE, y * CHUNK_SIZE);
+                    var p = toScreen(c.clone())
+
+                    // if (p.x + CHUNK_SIZE < cam.x)
+                    //     continue;
+                    // if (p.y + CHUNK_SIZE < cam.y)
+                    //     continue;
+                    // if (p.x - CHUNK_SIZE > cam.x + width)
+                    //     continue;
+                    // if (p.y > cam.y + scr.height)
+                    //     continue;
+
+                    var key = x + '.' + y
+                    var chunk = this.chunks[key]
+                    if (!chunk) {
+                        chunk = this.makeChunk(p, c)
+                        this.chunks[key] = chunk
+                    }
+
+                    for (i = 0, l = chunk.layers.length; i < l; i++) {
+                        tile = chunk.layers[i]
+                        if (!layers[tile.layer]) {
+                            game.sendErrorf(
+                                'layers[tile.layer] is null; layers: %j; tile.layer: %j',
+                                layers,
+                                tile.layer
+                            )
+                            layers[tile.layer] = []
+                        }
+                        layers[tile.layer].push(tile)
+                    }
+                }
+            }
+
+            for (i = 0, l = layers.length; i < l; i++) {
+                var layer = layers[i]
+                for (var j = 0, ll = layer.length; j < ll; j++) {
+                    tile = layer[j]
+                    ctx.drawImage(tile.canvas, tile.p.x, tile.p.y)
+                    // var p = tile.p.clone().add({x: CHUNK_SIZE, y: 0}).toWorld()
+                    // ctx.strokeStyle = '#000'
+                    // iso.strokeRect(ctx, p.x, p.y, CHUNK_SIZE, CHUNK_SIZE)
+                }
+            }
+        }
+
+        if (debug.map.position && false) {
+            var text = '(' + (x + cam.x) + ' ' + (y + cam.y) + ')'
+            ctx.fillStyle = '#fff'
+
+            game.drawStrokedText(text, x, y + cnf.FONT_SIZE)
+        }
     }
 
     this.drawGrid = function() {
@@ -233,88 +480,6 @@ export function Map(ctx, player) {
                 CELL_SIZE
             )
         }
-    }
-
-    this.draw = function(width, height, cam, entities) {
-        // this.each(game.screen, function(w, h, p, x, y) {
-        //     this.drawTile(ctx, w, h, p)
-        // })
-        // return
-        var layers = this.makeLayers()
-
-        var leftTop = toWorld(cam.clone())
-                .div(CHUNK_SIZE)
-                .floor()
-        var rightTop = toWorld(cam.clone().add(new Point(width, 0)))
-                .div(CHUNK_SIZE)
-                .floor()
-        var leftBottom = toWorld(cam.clone().add(new Point(0, height)))
-                .div(CHUNK_SIZE)
-                .ceil()
-        var rightBottom = toWorld(cam.clone().add(new Point(width, height)))
-                .div(CHUNK_SIZE)
-                .ceil()
-
-        var x, y, i, l, tile
-        for (x = leftTop.x; x < rightBottom.x; x++) {
-            for (y = rightTop.y; y < leftBottom.y; y++) {
-                var c = new Point(x * CHUNK_SIZE, y * CHUNK_SIZE);
-                var p = toScreen(c.clone())
-
-                // if (p.x + CHUNK_SIZE < cam.x)
-                //     continue;
-                // if (p.y + CHUNK_SIZE < cam.y)
-                //     continue;
-                // if (p.x - CHUNK_SIZE > cam.x + width)
-                //     continue;
-                // if (p.y > cam.y + scr.height)
-                //     continue;
-
-                var key = x + '.' + y
-                var chunk = this.chunks[key]
-                if (!chunk) {
-                    chunk = this.makeChunk(p, c)
-                    this.chunks[key] = chunk
-                }
-
-                for (i = 0, l = chunk.layers.length; i < l; i++) {
-                    tile = chunk.layers[i]
-                    if (!layers[tile.layer]) {
-                        game.sendErrorf(
-                            'layers[tile.layer] is null; layers: %j; tile.layer: %j',
-                            layers,
-                            tile.layer
-                        )
-                        layers[tile.layer] = []
-                    }
-                    layers[tile.layer].push(tile)
-                }
-            }
-        }
-
-        for (i = 0, l = layers.length; i < l; i++) {
-            var layer = layers[i]
-            for (var j = 0, ll = layer.length; j < ll; j++) {
-                tile = layer[j]
-                ctx.drawImage(tile.canvas, tile.p.x, tile.p.y)
-                // var p = tile.p.clone().add({x: CHUNK_SIZE, y: 0}).toWorld()
-                // ctx.strokeStyle = '#000'
-                // iso.strokeRect(ctx, p.x, p.y, CHUNK_SIZE, CHUNK_SIZE)
-            }
-        }
-
-        if (debug.map.position && false) {
-            var text = '(' + (x + cam.x) + ' ' + (y + cam.y) + ')'
-            ctx.fillStyle = '#fff'
-
-            game.drawStrokedText(text, x, y + cnf.FONT_SIZE)
-        }
-
-        if(debug.map.grid) {
-            this.drawGrid()
-        }
-
-        this.drawMinimap(entities)
     }
 
     this.makeLayers = function() {
@@ -466,9 +631,16 @@ export function Map(ctx, player) {
             return tile
         })
 
-        this.textures = this.bioms.map(function(biom) {
-            var tile = Texture.fromImage('assets/map/' + biom.Name + '.png')
-            tile.id = biom.id
+        this.textures = this.bioms.map((biom)=> {
+            //var tile = Texture.fromImage('assets/map/' + biom.Name + '.png')
+            var base = BaseTexture.fromImage('assets/map/' + biom.Name + '.png')
+            var tile = new Container()
+            tile.bid = biom.id
+            tile.ts = []
+            for (var i = 0; i <= 0xF; i++) {
+                var frame = new Rectangle(0, i*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
+                tile.ts.push(new Texture(base, frame))
+            }
             return tile
         })
 

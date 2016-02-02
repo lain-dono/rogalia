@@ -1,0 +1,20 @@
+<div>
+    <div class="slots-wrapper">
+        <v-slot v-for="slots"></v-slot>
+    </div>
+    <div v-if="isFuel" class="fuel-wrapper" title="Fuel">
+        <div :style="{width: fuel.current + '%';" class="fuel-current"></div>
+        <div class="fuel-max"></div>
+        <div class="slot"></div>
+        <v-slot ></v-slot>
+    </div>
+    <hr />
+    <div v-show="hasButtons">
+        <img class="icon-button" @click="moveAll" :title="'Move all' | T"
+            src="assets/icons/panel/move-all.png" />
+        <img class="icon-button" @click="sortAll" :title="'Sort' | T"
+            src="assets/icons/panel/sort.png" />
+        <img class="icon-button" @click="openAll" :title="'Open all' | T"
+            src="assets/icons/panel/open-all.png" />
+    </div>
+</div>

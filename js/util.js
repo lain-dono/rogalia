@@ -62,28 +62,6 @@ var util = module.exports = new (function() { // jshint ignore:line
         return string.charAt(0).toLowerCase() + string.slice(1);
     };
 
-    this.symbolToString = function(string) {
-        return this.ucfirst(string.split("-").join(" "));
-        // return this.ucfirst([].map.call(string, function(c, i) {
-        //     if (i != 0) {
-        //         var l = c.toLowerCase();
-        //         if (c != l)
-        //             return " " + l;
-        //     }
-        //     if (c == "-")
-        //         return " ";
-        //     return c;
-        // }).join(""));
-    };
-    this.stringToSymbol = function(symbol) {
-        return [].map.call(this.lcfirst(symbol), function(c, i) {
-            var l = c.toLowerCase();
-            if (c != l)
-                return "-" + l;
-            return l;
-        }).join("");
-    };
-
     //point to rect
     this.intersects = function(x, y, rx, ry, w, h) {
         return x > rx && x < rx + w && y > ry && y < ry + h;
@@ -266,71 +244,6 @@ var util = module.exports = new (function() { // jshint ignore:line
 
     };
 
-    var dragIgnoreTags = ["INPUT", "TEXTAREA", "BUTTON", "CODE"];
-    this.dragIgnore = function(element) {
-        if (element.classList.contains("no-drag"))
-	    return true;
-        else if (dragIgnoreTags.indexOf(element.tagName) != -1)
-            return true;
-        else
-            return false;
-    };
-
-    this.draggable = function(element) {
-        var drag = null;
-        element.addEventListener('mousedown', function(e) {
-            // if (!e.target.classList.contains("contents") && !e.target.classList.contains("title-text"))
-            //     return;
-	    if(getComputedStyle(e.target).cursor == "pointer")
-	        return;
-	    var checking = e.target;
-	    while(checking && checking != element) {
-                if (util.dragIgnore(checking))
-                    return;
-	        checking = checking.parentNode;
-	    }
-
-	    drag = {
-	        dx: e.pageX - element.offsetLeft,
-	        dy: e.pageY - element.offsetTop,
-	    };
-        });
-        window.addEventListener('mouseup', function(e) {
-	    drag = null;
-        });
-        window.addEventListener('mousemove', function(e) {
-	    if (drag) {
-	        element.style.left = e.pageX - drag.dx + "px";
-	        element.style.top = e.pageY - drag.dy + "px";
-	    }
-        });
-    };
-
-    this.toggleFullscreen = function() {
-        if (!document.fullscreenElement &&    // alternative standard method
-            !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                } else if (document.documentElement.msRequestFullscreen) {
-                    document.documentElement.msRequestFullscreen();
-                } else if (document.documentElement.mozRequestFullScreen) {
-                    document.documentElement.mozRequestFullScreen();
-                } else if (document.documentElement.webkitRequestFullscreen) {
-                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-    };
-
     this.date = {
         human: function(date) {
             return date.toLocaleDateString("ru-RU");
@@ -343,41 +256,9 @@ var util = module.exports = new (function() { // jshint ignore:line
         },
     };
 
-    this.isString = function(s) {
-        return (typeof s === "string" || s instanceof String);
-    };
-
-    this.imageToCanvas = function(image) {
-	var canvas = document.createElement("canvas");
-	canvas.width = image.width;
-	canvas.height = image.height;
-	canvas.getContext("2d").drawImage(image, 0, 0);
-
-	return canvas;
-    };
-
-    this.canvasToImage = function(canvas) {
-	var image = new Image();
-	image.src = canvas.toDataURL("image/png");
-	return image;
-    };
 
     this.dotimes = function(n, callback) {
         return Array.apply(null, Array(n)).map(callback);
     };
 })()
 
-if (!Math.hypot) {
-    Math.hypot = function hypot() {
-        var y = 0;
-        var length = arguments.length;
-
-        for (var i = 0; i < length; i++) {
-            if(arguments[i] === Infinity || arguments[i] === -Infinity) {
-                return Infinity;
-            }
-            y += arguments[i] * arguments[i];
-        }
-        return Math.sqrt(y);
-    };
-}

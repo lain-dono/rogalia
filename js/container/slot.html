@@ -1,0 +1,10 @@
+<div :title="title" @mousedown="$parent.$emit('slot.mousedown', $event, this)" :class="{
+        slot: true,
+        locked: locked,
+        'has-item': hasItem,
+    }">
+    <!-- added manualy: <canvas class="item" height="xx" width="xx"></canvas>-->
+    <img v-if="icon != ''" src="icon" class="item" />
+    <sub v-if="sub != ''" v-text="sub" class=""></sub>
+    <sup v-if="quality != ''" v-text="sup" :class="{quality: true, 'almost-broken': almostBroken}"></sup>
+</div>

@@ -1,11 +1,9 @@
-'use strict'
-
-module.exports.CELL_SIZE = 32;
-module.exports.FONT_SIZE = 14;
-module.exports.DEFAULT_CLIENT_WIDTH = 1280;
-module.exports.DEFAULT_CLIENT_HEIGHT = 720;
-module.exports.LOBBY_X = 85;
-module.exports.LOBBY_Y = 15;
+module.exports.CELL_SIZE = 32
+module.exports.FONT_SIZE = 14
+export var DEFAULT_CLIENT_WIDTH = 1280
+export var DEFAULT_CLIENT_HEIGHT = 720
+export var LOBBY_X = 85
+export var LOBBY_Y = 15
 
 // global
 for(var k in module.exports) { 
@@ -14,7 +12,7 @@ for(var k in module.exports) {
    }
 }
 
-module.exports.config = {
+export var config = {
     character: {
         pathfinding: function() { return game.player.Settings.Pathfinding; },
         hideHelmet: function() { return game.player.Style.HideHelmet; },
@@ -50,7 +48,7 @@ module.exports.config = {
     },
 };
 
-module.exports.debug = {
+export var debug = {
     map: {
         world: true,
         darkness: false,

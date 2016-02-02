@@ -121,7 +121,7 @@ lobbyStage.app = {
             if(avatar.sex == 'new') {
                 game.setStage('createCharacter')
             } else {
-                game.player.Name = avatar.name
+                game.playerName = avatar.name
                 game.network.send('enter', {
                     Name: avatar.name,
                     Version: game.version,

@@ -408,110 +408,6 @@ hr {
     color: red;
 }
 
-#craft {
-    width: 500px;
-}
-#craft .contents {
-    display: flex;
-    justify-content: space-around;
-    height: 500px;
-}
-#recipe-list-wrapper {
-    width: 34%;
-}
-#recipe-filters {
-    display: flex;
-    align-items: center;
-    margin-top: 3px;
-}
-#recipe-details {
-    width: 65%;
-}
-#recipe-details ul {
-    margin: 0;
-}
-.recipe-title {
-    float: left;
-}
-.recipe-list {
-    height: 443px;
-    overflow-y: auto;
-    padding: 0 4px 0 0px;
-    position: relative;
-}
-
-.recipe-search, .recipe-search > input {
-    width: 138px;
-    position: relative;
-}
-.recipe-search-clear {
-    min-width: 0;
-    right: -26px;
-    top: 0;
-    position: absolute;
-}
-.recipe-list.filter-portable .recipe.portable,
-.recipe-list.filter-liftable .recipe.liftable,
-.recipe-list.filter-static .recipe.static,
- .recipe-list.filter-unavailable .recipe.unavailable {
-    display: none!important;
-}
-.recipe-list.searching > li {
-    display: none;
-}
-.recipe-list.searching ul {
-    display: block!important;
-}
-.recipe-list.searching .recipe {
-    display: none;
-}
-.recipe-list.searching .found {
-    display: list-item!important;
-}
-.recipe-list ul {
-    padding: 0;
-}
-.recipe-list > li > img {
-    position: absolute;
-    left: 0;
-}
-.recipe-list >  li {
-    list-style-type: none;
-    cursor: pointer;
-}
-.group-toggle {
-    padding-left: 16px;
-}
-.recipe-list li li {
-    list-style-type: none;
-    background: #74481b;
-    font-size: smaller;
-    padding-left: 3px;
-}
-.recipe-list li li:nth-child(even) {
-    background: #683f16;
-}
-.recipe-list .recipe.selected {
-    color: #0f0;
-}
-.recipe-list .recipe:hover, .recipe-list .group-toggle:hover {
-    color: lightgreen;
-}
-#recipe-details .item-link {
-    margin-left: 3px;
-    cursor: pointer;
-}
-#recipe-slots {
-    overflow: auto;
-}
-#recipe-buttons {
-    display: flex;
-    clear: both;
-}
-
-.recipe-create, .recipe-auto, .recipe-craft-all {
-    width: 33%;
-}
 
 #admin-bar {
     max-width: 544px;
@@ -754,70 +650,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     overflow: hidden;
     text-align: left;
     border-radius: 5px;
-}
-
-#lobby, #create-character {
-    text-align: center;
-}
-#lobby {
-    width: 452px;
-}
-#create-character {
-    width: 236px;
-}
-
-.lobby-account {
-    background: url("assets/bg/strip/center.png") repeat-x;
-    height: 32px;
-    line-height: 32px;
-    display: table;
-    margin: auto;
-    position: relative;
-    text-align: center;
-}
-
-.lobby-account:before,
-.lobby-account:after {
-    position: absolute;
-    top: -5px;
-}
-.lobby-account:before {
-    content: url("assets/bg/strip/left.png");;
-    left: -60px;
-}
-.lobby-account:after {
-    content: url("assets/bg/strip/right.png");
-    right: -60px;
-}
-
-#lobby .avatar-container {
-    background: url("assets/bg/main-button.png") no-repeat;
-    width: 105px;
-    height: 86px;
-    cursor: pointer;
-    display: inline-block;
-    margin-right: 3px;
-    position: relative;
-}
-#lobby .create {
-    margin: auto;
-    left: 0;
-    right: 0;
-    position: absolute;
-}
-#lobby .avatar-name {
-    margin-top: 8px;
-}
-#lobby .avatar-container:hover {
-    -webkit-filter: brightness(120%);
-    filter: brightness(120%);
-}
-
-#lobby .avatar {
-    width: 60px;
-    height: 58px;
-    overflow: hidden;
-    margin: auto;
 }
 
 #create-character {
@@ -1591,3 +1423,26 @@ input[type=number], .lot-quantity > input, .price > input {
     display: flex;
     flex-direction: column;
 }
+
+
+
+
+
+
+@import 'kouto-swiss'
+
+
+@import './stages/lobby.styl'
+
+@import './ui/minimap.styl'
+@import './ui/actions.styl'
+@import './ui/craft.styl'
+@import './ui/minimap.styl'
+@import './ui/settings.styl'
+@import './ui/controlsBar.css'
+@import './ui/tooltip.styl'
+@import './ui/tabs.styl'
+@import './ui/panel.styl'
+@import './ui/users.styl'
+@import './ui/skills.styl'
+

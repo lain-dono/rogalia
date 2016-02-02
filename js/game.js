@@ -1,4 +1,5 @@
-'use strict';
+//var core = require('pixi.js/src/core')
+var core = PIXI
 
 require('./polyfill.js')
 
@@ -14,7 +15,7 @@ require('./stages/login.js')
 require('./stages/main.js')
 var Stage = require('./stages/stage.js')
 
-var Settings = require('./ui/settings.js')
+//var Settings = require('./ui/settings.js')
 var Quests = require('./ui/quests/quests.js')
 
 var Loader = require('./loader.js')
@@ -33,24 +34,76 @@ var Character = require('./character.js')
 require('./characters.js')
 var Controller = require('./controller.js')
 var Network = require('./network.js')
-var HashTable = require('./hashtable.js')
-var Point = require('./point.js')
+import HashTable from './hashtable.js'
 var Alert = require('./alert.js')
 var Panel = require('./panel.js')
 var Container = require('./container/container.js')
 var dom = require('./dom.js')
 var util = require('./util.js')
 
+import {Map, Point, toScreen, drawStrokedText} from './render'
 
-var Map = require('./ui/map.js')
+import {forEach, indexOf} from 'fast.js'
+
+function NoBTS() {
+    this.data = []
+}
+var compare = (a, b)=> a.compare(b)
+NoBTS.prototype = {
+    add(val) {
+        this.data.push(val)
+        this.data.sort(compare)
+    },
+    remove(val) {
+        var idx = indexOf(this.data, val)
+        if(idx !== -1) {
+            this.data.splice(idx, 1)
+        }
+    },
+    traverse(fn) { forEach(this.data, fn) },
+    findReverse(fn) {
+        var data = this.data
+        for (var i = data.length - 1; i >= 0; i--) {
+            var x = data[i]
+            if(fn(x)) return x
+        }
+        return undefined
+    },
+}
 
 module.exports = function Game() {
     window.game = this;
 
     this.world = document.getElementById("world");
     this.interface = document.getElementById("interface");
+
     this.canvas = document.getElementById("canvas");
-    this.ctx = this.canvas.getContext("2d");
+
+    if (true) {
+        var width = 800;
+        var height = 600;
+        var options = {
+            view: this.canvas,
+            transparent: true,
+            autoResize: false,
+            antialias: false,
+            preserveDrawingBuffer: false,
+            resolution: 1,
+
+            clearBeforeRender: false,
+            roundPixels: true,
+        }
+
+        if (false && core.utils.isWebGLSupported()) {
+            this.renderer = new core.WebGLRenderer(width, height, options);
+        } else {
+            this.renderer = new core.CanvasRenderer(width, height, options);
+        }
+
+        this.pixiStage = new core.Container()
+    }
+
+    this.ctx = this.renderer.context
     this.ctx.clear = function() {
         game.ctx.clearRect(0, 0, game.canvas.width, game.canvas.height);
     };
@@ -59,7 +112,7 @@ module.exports = function Game() {
     };
     this.setFontSize();
 
-    Settings.load(config);
+    //Settings.load(config);
 
     this.screen = {
         width: 0,
@@ -145,13 +198,14 @@ module.exports = function Game() {
     this.player = null;
     this.playerName = "";
 
-    this.map = new Map();
+    this.map = new Map(this.ctx, this.player);
 
     this.controller = new Controller(this);
     this.network = new Network();
 
     this.entities = new HashTable();
     this.sortedEntities = new BinarySearchTree();
+    //this.sortedEntities = new NoBTS();
     this.claims = new HashTable();
     this.characters = new HashTable();
     this.containers = {};
@@ -170,69 +224,15 @@ module.exports = function Game() {
 
     this.drawStrokedText = function(text, x, y, strokeStyle) {
         if (game.config.ui.simpleFonts) {
-            game.ctx.fillText(text, x, y);
-            return;
+            game.ctx.fillText(text, x, y)
+            return
         }
-        this.forceDrawStrokedText(text, x, y, strokeStyle);
-    };
+        drawStrokedText(game.ctx, text, x, y, strokeStyle);
+    }
 
     this.forceDrawStrokedText = function(text, x, y, strokeStyle) {
-        var lineJoin = game.ctx.lineJoin;
-        game.ctx.strokeStyle = strokeStyle || "#333";
-        game.ctx.lineWidth = 3;
-        game.ctx.lineJoin = 'round';
-        game.ctx.strokeText(text, x, y);
-        game.ctx.fillText(text, x, y);
-        game.ctx.lineWidth = 1;
-        game.ctx.lineJoin = lineJoin;
-    };
-
-    function draw(x, y, callback) {
-        var p = new Point(x, y).toScreen();
-        game.ctx.save();
-        if (game.ctx.lineWidth < 2)
-            game.ctx.lineWidth = 2;
-        game.ctx.translate(p.x, p.y);
-        game.ctx.scale(1, 0.5);
-        game.ctx.rotate(Math.PI / 4);
-        callback();
-        game.ctx.restore();
+        drawStrokedText(game.ctx, text, x, y, strokeStyle);
     }
-    var k = Math.sqrt(2);
-    this.iso = Object.create({
-        strokeRect: function(x, y, w, h) {
-            draw(x, y, function() {
-                game.ctx.strokeRect(0, 0, w * k, h * k);
-            });
-        },
-        fillRect: function(x, y, w, h) {
-            draw(x, y, function() {
-                game.ctx.fillRect(0, 0, w * k, h * k);
-            });
-        },
-        fillCircle: function(x, y, r) {
-            draw(x, y, function() {
-                game.ctx.beginPath();
-                game.ctx.arc(0, 0, r * k, 0, Math.PI * 2);
-                game.ctx.fill();
-            });
-        },
-        strokeCircle: function(x, y, r) {
-            draw(x, y, function() {
-                game.ctx.beginPath();
-                game.ctx.arc(0, 0, r * k, 0, Math.PI * 2);
-                game.ctx.stroke();
-            });
-        },
-        fillStrokedCircle: function(x, y, r) {
-            this.fillCircle(x, y, r);
-            this.strokeCircle(x, y, r);
-        },
-        fillStrokedRect: function(x, y, w, h) {
-            this.fillRect(x, y, w, h);
-            this.strokeRect(x, y, w, h);
-        },
-    })
 
     this.save = function() {
         // on exit stage all panels are hidden
@@ -330,6 +330,7 @@ module.exports = function Game() {
         if (character.Name == game.playerName) {
             character.isPlayer = true;;
             game.player = character;
+            game.map.player = character
         }
     };
 
@@ -513,6 +514,8 @@ module.exports = function Game() {
         this.panel = new Panel("jukebox", "Jukebox", [this.iframe]);
         this.panel.temporary = true;
 
+        this.panel.hide()
+
         var videoRegexp = new RegExp(/^[A-Za-z0-9_-]{11}$/);
         var current = {
             video: "",
@@ -553,11 +556,32 @@ module.exports = function Game() {
         }.bind(this);
     })()
 
-    var maximize = document.getElementById("maximize");
+    var maximize = document.getElementById('maximize')
     maximize.onclick = function() {
-        maximize.classList.toggle("maximized");
-        util.toggleFullscreen();
-    };
+        maximize.classList.toggle('maximized')
+
+        // alternative standard method
+        var el = document.fullscreenElement ||
+                 document.webkitFullscreenElement ||
+                 document.mozFullScreenElement ||
+                 document.msFullscreenElement
+        var req = document.documentElement.requestFullscreen ||
+                  document.documentElement.webkitRequestFullscreen ||
+                  document.documentElement.mozRequestFullScreen ||
+                  document.documentElement.msRequestFullscreen ||
+                  function() {}
+        var exit = document.exitFullscreen ||
+                   document.webkitExitFullscreen ||
+                   document.mozCancelFullScreen ||
+                   document.msExitFullscreen ||
+                   function() {}
+
+        if (!el) {
+            req.call(document.documentElement)
+        } else {
+            exit.call(document)
+        }
+    }
 
     this.stage = new Stage();
     this.setStage("connecting");
@@ -575,16 +599,21 @@ module.exports = function Game() {
         return false;
     };
 
+    render(this.renderer, game.controller, game, this.pixiStage)
+}
+
+function render(renderer, controller, game, stage) {
+    var requestAnimationFrame = window.requestAnimationFrame
     function tick(currentTime) {
-        game.controller.fpsStatsBegin();
+        requestAnimationFrame(tick)
 
-        game.update(currentTime);
-        game.draw();
+        controller.fpsStatsBegin()
 
-        game.controller.fpsStatsEnd();
+        game.update(currentTime)
+        //XXX renderer.render(stage)
+        game.draw()
 
-        requestAnimationFrame(tick);
+        controller.fpsStatsEnd()
     }
-
-    tick();
-};
+    tick()
+}
