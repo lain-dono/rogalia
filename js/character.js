@@ -24,7 +24,7 @@ import {Point} from './render'
 
 module.exports = Character
 
-function Character(id, name) {
+function Character(id) {
     this.Id = id;
     this.name = "";
     this.x = 0;
@@ -126,6 +126,11 @@ Object.defineProperties(Character.prototype, {
                 game.sortedEntities.add(this);
             }
         }
+    },
+
+    Name: {
+        get: function() { return this.name },
+        set: function(name) { this.name = name },
     },
 })
 
@@ -642,10 +647,10 @@ Character.prototype.getActions = function() {
     };
     if (game.player.IsAdmin) {
         common.Kill = function() {
-            game.chat.send("*kill " + this.Name);
+            game.chat.send("*kill " + this.Id);
         };
         common.ComeToMe = function() {
-            game.chat.send("*come-to-me " + this.Name);
+            game.chat.send("*come-to-me " + this.Id);
         };
         if (this.Type == "vendor") {
             common.RemoveVendor = function() {
@@ -982,11 +987,11 @@ Character.prototype.getQuestMarker = function() {
 Character.prototype.getName = function() {
     var name = this.Name;
     if (this.Type == "vendor") {
-        return (this.Owner) ? "$ " + name : T(name);
+        return (this.Owner) ? name : T(name);
         // return TT("Vendor of {name}", {name: name});
     }
     if (this.IsNpc) {
-        return (name) ? T(name) : TS(this.Type);
+        return TS(this.Name)
     }
 
     if (this.Title)
