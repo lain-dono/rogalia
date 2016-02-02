@@ -1,58 +1,40 @@
-'use strict'
+import {forEach, every, some, filter, map} from 'fast.js'
 
-function HashTable(data) {
-    this.hash = {};
-    this.array = [];
+export default function HashTable(data) {
+    this.hash = {}
+    this.array = []
     if (data) {
         for (var key in data) {
-            this.set(key, data[key]);
+            this.set(key, data[key])
         }
     }
 }
 
-module.exports = HashTable
-
 HashTable.prototype = {
-    hash: null,
-    array: null,
-    get length() {
-        return this.array.length;
+    get length() { return this.array.length },
+    has(key) { return this.hash[key] !== undefined },
+    get(key) { return this.hash[key] },
+    set(key, value) {
+        this.remove(key)
+        this.hash[key] = value
+        this.array.push(value)
     },
-    has: function(key) {
-        return this.get(key) !== undefined;
-    },
-    get: function(key) {
-        return this.hash[key];
-    },
-    set: function(key, value) {
-        this.remove(key);
-        this.hash[key] = value;
-        this.array.push(value);
-    },
-    remove: function(key) {
-        var old = this.hash[key];
+    remove(key) {
+        var old = this.hash[key]
         if (old) {
-            var i = this.array.findIndex(function(item) {
-                return item === old;
-            });
-            this.array.splice(i, 1);
+            var array = this.array
+            for (var i = 0, l = array.length; i < l; i++) {
+                if(array[i] === old) {
+                    array.splice(i, 1)
+                    break
+                }
+            }
         }
-        delete this.hash[key];
-
+        delete this.hash[key]
     },
-    forEach: function(callback) {
-        this.array.forEach(callback);
-    },
-    every: function(predicate) {
-        return this.array.every(predicate);
-    },
-    some: function(predicate) {
-        return this.array.some(predicate);
-    },
-    filter: function(predicate) {
-        return this.array.filter(predicate);
-    },
-    map: function(predicate) {
-        return this.array.map(predicate);
-    },
-};
+    forEach(fn) { return forEach(this.array, fn) },
+    every(fn)   { return every(this.array, fn) },
+    some(fn)    { return some(this.array, fn) },
+    filter(fn)  { return filter(this.array, fn) },
+    map(fn)     { return map(this.array, fn) },
+}
