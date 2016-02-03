@@ -1083,7 +1083,7 @@ Character.prototype.drawName = function(drawHp, drawName) {
         }
     }
 }
-Character.prototype.flag: function() {
+Character.prototype.flag = function() {
     if (this.Team)
         return Character.flags[this.Team];
     if (this.Citizenship)
