@@ -151,12 +151,12 @@ function Chat() {
         var partyActions = {};
 
         var party = game.player.Party;
-        if (!party || party[0] == game.player.Name) {
+        if (!party || party[0] == game.playerName) {
             if (!party || party.indexOf(name) == -1) {
                 partyActions.inviteToParty = function() {
                     self.send("*invite " + name);
                 };
-            } else if (party[0] == game.player.Name) {
+            } else if (party[0] == game.playerName) {
                 partyActions.kickFromParty = function() {
                     self.send("*kick " + name);
                 };
@@ -228,7 +228,7 @@ function Chat() {
         var privateIndex = name.indexOf(privateSymbol);
         if (privateIndex != -1) {
             var fromName = name.substring(0, privateIndex);
-            if (fromName == game.player.Name)
+            if (fromName == game.playerName)
                 name = name.substring(privateIndex + privateSymbol.length);
             else
                 name = fromName;
@@ -775,7 +775,7 @@ function Chat() {
     }
 
     function fromMe(message) {
-        return !message.From || message.From == game.player.Name;
+        return !message.From || message.From == game.playerName;
     }
 
     function appendMessage(message, contents) {
@@ -940,7 +940,7 @@ function Chat() {
         var needAlert = false;
         for(var i = 0, l = data.length; i < l; i++) {
             this.addMessage(data[i]);
-            if (data[i].From != game.player.Name) {
+            if (data[i].From != game.playerName) {
                 if (data[i].Channel != 9)
                     needAlert = true;
             }

@@ -12,29 +12,6 @@
 
      <!--ga('create', 'UA-32173828-2', 'auto');-->
      <!--ga('send', 'pageview');-->
-
-     /* (function (d, w, c) {
-	(w[c] = w[c] || []).push(function() {
-	try {
-	w.yaCounter22856329 = new Ya.Metrika({id:22856329,
-	webvisor:true,
-	clickmap:true,
-	trackLinks:true,
-	accurateTrackBounce:true});
-	} catch(e) { }
-	});
-
-	var n = d.getElementsByTagName("script")[0],
-	s = d.createElement("script"),
-	f = function () { n.parentNode.insertBefore(s, n); };
-	s.type = "text/javascript";
-	s.async = true;
-	s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
-
-	if (w.opera == "[object Opera]") {
-	d.addEventListener("DOMContentLoaded", f, false);
-	} else { f(); }
-	})(document, window, "yandex_metrika_callbacks"); */
     </script>
     <link rel="icon" type="image/png" href="favicon.ico?v2" />
     <!--<link rel="stylesheet" href="main.css"/>-->
@@ -79,10 +56,6 @@
 	<actions :exp="exp"></actions>
     </div>
 
-    <!-- <div id="adsence">
-	 <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5659182463296220" data-ad-slot="2188089399" data-ad-format="auto"></ins>
-	 <div id="adsence-explanation">Откуда тут взялась реклама?</div>
-    </div> -->
     <div id="cursor"></div>
     <span title="Version" id="version"></span>
     <div id="world">
@@ -103,6 +76,7 @@
 	  </div>
           <div id="party"></div>
 	  <div id="target-container" class="hidden character-avatar-container"></div>
+          <div id="bg-state" class="hidden"></div>
 	  <div id="minimap-container">
 	      <div id="minimap">
 		  <canvas id="minimap-canvas"></canvas>

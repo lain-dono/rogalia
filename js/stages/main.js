@@ -61,6 +61,8 @@ mainStage.prototype.sync = function (data) {
 
     data.Location && game.map.sync(data.Location); // jshint ignore:line
 
+    data.BG && game.controller.updateBG(data.BG);
+
     //game.controller.syncMinimap(data.RemotePlayers)
     window.ui.$broadcast('sync.RemotePlayers', data.RemotePlayers)
 

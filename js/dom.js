@@ -48,8 +48,8 @@ var dom = module.exports = {
     slot: function() {
         return this.div("slot");
     },
-    span: function(text, classOrId) {
-        return this.tag("span", classOrId, {text: text});
+    span: function(text, classOrId, title) {
+        return this.tag("span", classOrId, {text: text, title: title});
     },
     img: function(src, classOrId) {
         var img = new Image();

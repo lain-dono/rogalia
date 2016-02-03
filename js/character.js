@@ -199,7 +199,7 @@ Character.prototype.updateParty = function(members) {
         return;
 
     members.forEach(function(name, i) {
-        if (name == game.player.Name)
+        if (name == game.playerName)
             return;
         var member = game.characters.get(name);
         var avatar
@@ -212,7 +212,7 @@ Character.prototype.updateParty = function(members) {
         }
         var cnt = dom.div(".character-avatar-container");
         cnt.appendChild(avatar);
-        var prefix = (i === 0 && party[0] != game.player.Name) ? "★" : "";
+        var prefix = (i === 0 && party[0] != game.playerName) ? "★" : "";
         cnt.appendChild(dom.span(prefix + name, "party-member-name"));
         cnt.onmousedown = function(e) {
             return game.chat.nameMenu(e, name);
@@ -512,7 +512,8 @@ Character.prototype.initSprite = function() {
         this.sprite.offset = 2*this.Radius;
         this.sprite.width = 96;
         this.sprite.height = 96;
-        this.sprite.speed = 7000;
+        //this.sprite.speed = 7000;
+        this.sprite.speed = 14000;
     }
     if (!this.sprite.nameOffset)
         this.sprite.nameOffset = this.sprite.height;
@@ -768,7 +769,8 @@ Character.prototype._setDst = function(x, y) {
 }
 Character.prototype.getDrawPoint = function() {
     var p = this.screen();
-    var dy = (this.mount) ? this.mount.sprite.offset : 0;
+    //var dy = (this.mount) ? this.mount.sprite.offset : 0;
+    var dy = (this.mount) ? 1 : 0;
     return {
         p: p,
         x: Math.round(p.x - this.sprite.width / 2),
@@ -1075,12 +1077,18 @@ Character.prototype.drawName = function(drawHp, drawName) {
         ctx.fillStyle = (this.Karma < 0 || this.Aggressive) ?
             "#f00" : ((this == game.player) ? "#ff0" : "#fff");
         game.drawStrokedText(name, x, y - dy / 2);
-        if (this.Citizenship) {
-            var flag = Character.flags[this.Citizenship.Faction];
-            if (flag)
-                flag.draw({x: x - 20, y: y - dy/2  - 14});
+        var flag = this.flag()
+        if (flag) {
+            flag.draw({x: x - 20, y: y - dy/2  - 14});
         }
     }
+}
+Character.prototype.flag: function() {
+    if (this.Team)
+        return Character.flags[this.Team];
+    if (this.Citizenship)
+        return Character.flags[this.Citizenship.Faction];
+    return null;
 }
 Character.prototype.idle = function() {
     return this.Dx === 0 && this.Dy === 0 && this.Action.Name === '';
@@ -1141,7 +1149,7 @@ Character.prototype.animate = function() {
     }
 
     if (this.mount)
-        animation = "sit";
+        animation = "ride";
     this.sprite = this.sprites[animation];
     this.sprite.position = position;
 
@@ -1885,7 +1893,13 @@ Character.prototype.distanceTo = function(e) {
 Character.prototype.selectNextTarget = function() {
     var self = this;
     var list = game.findCharsNear(this.X, this.Y, 5*cnf.CELL_SIZE).filter(function(c) {
-        return c != self && c != self.target && c.IsNpc;
+        if (c == self)
+            return false;
+        if (c == self.target)
+            return false;
+        if (c.Team && c.Team == self.Team)
+            return false;
+        return party.indexOf(c.Name) == -1;
     }).sort(function(a, b) {
         return a.distanceTo(self) - b.distanceTo(self);
     });

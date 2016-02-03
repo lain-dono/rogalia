@@ -899,7 +899,7 @@ ol li a:hover {
     color: #ccc;
 }
 
-#time, #maximize, #mute, #build-warning {
+#time, #maximize, #mute, #build-warning, #bg-state {
     position: absolute;
     right: 3px;
     top: 3px;
@@ -936,6 +936,35 @@ ol li a:hover {
 #build-warning {
     top: 6px;
     right: 125px;
+}
+#bg-state {
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: 100px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+}
+#bg-state > img {
+    vertical-align: text-bottom;
+}
+#bg-state .red-points, #bg-state .blue-points, #bg-state .remaining {
+    white-space: nowrap;
+    position: absolute;
+    top: 0;
+    text-shadow: 0px 0px 3px #000;
+}
+#bg-state .red-points {
+    right: 108px;
+}
+#bg-state .blue-points {
+    left: 108px;
+}
+#bg-state .remaining {
+    left: 0;
+    right: 0;
+    top: 20px;
 }
 
 #build-warning-panel {
@@ -1590,4 +1619,18 @@ input[type=number], .lot-quantity > input, .price > input {
 .lot-controlls {
     display: flex;
     flex-direction: column;
+}
+
+#bg-stats {
+    max-width: none;
+}
+#bg-stats table:first-child {
+    margin-bottom: 10px;
+}
+.red-team th, .blue-team th {
+    white-space: nowrap;
+}
+.red-team th > img, .blue-team th > img {
+    float: left;
+    margin-right: 3px;
 }

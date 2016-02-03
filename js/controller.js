@@ -965,4 +965,75 @@ module.exports = function Controller(game) {
         }
     };
 
+    var bg = {
+        el: document.getElementById("bg-state"),
+        panel: null,
+        statFields: ["Kills", "Death", "Captures", "Releases", "Dmg done", "Dmg acpt"].map(T),
+        makeStatRows: function(stats) {
+            var rows = [];
+            for (var name in stats) {
+                var row = [name];
+                for (var field in stats[name])
+                    row.push(dom.text(stats[name][field]));
+                rows.push(row);
+            }
+            return rows;
+        },
+    };
+
+    this.updateBG = function(data) {
+        if (!bg.panel) {
+            bg.panel = new Panel("bg-stats", "Battleground", []);
+            bg.el.onclick = bg.panel.toggle.bind(bg.panel);
+        }
+        if (data == "exit") {
+            dom.hide(bg.el);
+            bg.panel.hide();
+            return;
+        }
+
+        dom.show(bg.el);
+        var timer = null;
+
+        if (data.Final) {
+            var result = "draw";
+            if (data.Red.Score > data.Blue.Score)
+                result = "red team wins!";
+            else if (data.Blue > data.Red)
+                result = "blue team wins!";
+
+            controller.showAnouncement(TT("Match ended: {result}", {result: result}));
+        } else {
+            timer = dom.div("remaining", {text: util.formatTime(data.Remaining)});
+            setInterval(function() {
+                timer.textContent = util.formatTime(--data.Remaining);
+            }, 1000);
+        }
+
+        dom.setContents(bg.el, [
+            dom.wrap("red-points", (data.Red.Points || []).join(" | ")),
+            Character.flags.red.image.cloneNode(),
+            dom.span(data.Red.Score, "red-team", T("Red team score")),
+            " vs ",
+            dom.span(data.Blue.Score, "blue-team", T("Blue team score")),
+            Character.flags.blue.image.cloneNode(),
+            dom.wrap("blue-points", (data.Blue.Points || []).join(" | ")),
+            timer,
+        ]);
+
+        bg.panel.setContents([
+            dom.wrap("red-team", [
+                dom.table(
+                    [[Character.flags.red.image.cloneNode(), T("Name")]].concat(bg.statFields),
+                    bg.makeStatRows(data.Red.Stats)
+                )
+            ]),
+            dom.wrap("blue-team", [
+                dom.table(
+                    [[Character.flags.blue.image.cloneNode(), T("Name")]].concat(bg.statFields),
+                    bg.makeStatRows(data.Blue.Stats)
+                )
+            ])
+        ]);
+    };
 };

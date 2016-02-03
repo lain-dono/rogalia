@@ -260,5 +260,13 @@ var util = module.exports = new (function() { // jshint ignore:line
     this.dotimes = function(n, callback) {
         return Array.apply(null, Array(n)).map(callback);
     };
+
+    this.formatTime = function(time) {
+        var hours = Math.floor(time / 60);
+        var minutes = time % 60;
+        if (minutes < 10)
+            minutes = '0' + minutes;
+        return hours + ":" + minutes;;
+    };
 })()
 

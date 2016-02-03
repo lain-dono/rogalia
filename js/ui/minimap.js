@@ -129,7 +129,7 @@ export default {
                 if (!p) { // if not exist
                     p = { title: name, name: name, type: '', }
                 }
-                if (name == game.player.Name) {
+                if (name == game.playerName) {
                     p.id = 'player-point'
                     p.type = 'player-point'
                 } else if (ch.Karma < 0) {

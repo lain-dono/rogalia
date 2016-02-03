@@ -40,7 +40,7 @@ Character.sync = function(data, remove) {
 
 Character.spriteDir = "characters/";
 
-Character.animations = ["idle", "run", "dig", "craft", "attack", "sit"];
+Character.animations = ["idle", "run", "dig", "craft", "attack", "sit", "ride"];
 Character.clothes = ["feet", "legs", "body", "head"];
 
 Character.clothesIndex = function(name) {
@@ -80,6 +80,8 @@ Character.initSprites = function() {
 
     Character.flags.Empire = new Sprite("icons/flags/empire.png");
     Character.flags.Confederation = new Sprite("icons/flags/confederation.png");
+    Character.flags.red = new Sprite("icons/flags/red.png");
+    Character.flags.blue = new Sprite("icons/flags/blue.png");
     Character.pvpFlag = new Sprite("icons/pvp.png");
 };
 
