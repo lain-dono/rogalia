@@ -1,170 +1,165 @@
-'use strict'
-
-var config = require('./config.js').config
-var Settings = require('./ui/settings.js')
+import {config} from './config.js'
 
 //TODO: make playlist shuffle
 module.exports = function Sound() {
     /*jshint validthis:true */
 
-    var self = this;
-    var soundDir = "assets/sound/";
-    var musicDir = "assets/music/";
-    var tracksNum = 14;
-    var firstTrackId = 1;
-    var trackId = firstTrackId;
+    var soundDir = 'assets/sound/'
+    var musicDir = 'assets/music/'
+    var tracksNum = 14
+    var firstTrackId = 1
+    var trackId = firstTrackId
 
-    var lastTrackLsKey = "last-track";
+    var lastTrackLsKey = 'last-track'
     function loadLastTrack() {
-        return +localStorage.getItem(lastTrackLsKey) || firstTrackId;
+        return +localStorage.getItem(lastTrackLsKey) || firstTrackId
     }
 
     function saveLastTrack() {
-        localStorage.setItem(lastTrackLsKey, trackId);
+        localStorage.setItem(lastTrackLsKey, trackId)
     }
 
-    var volume = 0.3;
-    var currentTrack = null;
-    var nextTrack = null;
+    var volume = 0.3
+    var currentTrack = null
+    var nextTrack = null
 
-    this.track = null;
-    this.sounds = {};
+    this.track = null
+    this.sounds = {}
 
-    var sounds = ["beep", "chop", "lvl-up", "eat", "xp", "heal", "hit", "punch"];
-    sounds.forEach(function(name) {
-        var audio =  new Audio(soundDir + name + ".ogg");
-        self.sounds[name] = audio;
-    });
+    var sounds = ['beep', 'chop', 'lvl-up', 'eat', 'xp', 'heal', 'hit', 'punch']
+    sounds.forEach((name)=> {
+        var audio =  new Audio(soundDir + name + '.ogg')
+        this.sounds[name] = audio
+    })
 
-    var mute = document.getElementById("mute");
-    mute.onclick = function() {
-        Settings.toggle("settings.sound.playMusic");
-        if (!Settings.instance)
-            self.toggleMusic();
-    };
+    var mute = document.getElementById('mute')
+    mute.onclick = ()=> {
+        config.sound.playMusic = config.sound.playMusic
+        this.toggleMusic()
+    }
 
     function updateMute() {
         if (config.sound.playMusic) {
-            mute.classList.add("unmute");
+            mute.classList.add('unmute')
         } else {
-            mute.classList.remove("unmute");
+            mute.classList.remove('unmute')
         }
     }
 
     this.init = function() {
-        trackId = loadLastTrack();
-        if (document.location.hash.indexOf("mute") != -1) {
-            config.sound.playMusic = false;
-            config.sound.playSound = false;
+        trackId = loadLastTrack()
+        if (document.location.hash.indexOf('mute') != -1) {
+            config.sound.playMusic = false
+            config.sound.playSound = false
         } else {
             //TODO: remove after settings update
-            var enabled = localStorage.getItem("settings.sound.playMusic");
-            if (typeof enabled == "string")
-                config.sound.playMusic =  (enabled == "true");
+            var enabled = localStorage.getItem('settings.sound.playMusic')
+            if (typeof enabled == 'string')
+                config.sound.playMusic =  (enabled == 'true')
         }
 
-        updateMute();
+        updateMute()
 
-        this.playMusic();
-    };
+        this.playMusic()
+    }
 
     this.playMusic = function() {
         if (!config.sound.playMusic)
-            return;
-        nextTrack = loadTrack(trackId);
-        playNextTrack();
-    };
+            return
+        nextTrack = loadTrack(trackId)
+        playNextTrack()
+    }
 
     this.stopMusic = function() {
         if (currentTrack)
-            currentTrack.pause();
-    };
+            currentTrack.pause()
+    }
 
     function loadTrack(trackId) {
-        return new Audio(musicDir + trackId + ".webm");
+        return new Audio(musicDir + trackId + '.webm')
     }
 
     function playNextTrack() {
-        currentTrack = nextTrack;
-        playTrack(currentTrack);
-        loadNextTrack();
+        currentTrack = nextTrack
+        playTrack(currentTrack)
+        loadNextTrack()
     }
 
     // TODO: make user controls?
     // for cli usage
     this.playNextTrack = function() {
-        currentTrack.pause();
-        playNextTrack();
-    };
+        currentTrack.pause()
+        playNextTrack()
+    }
 
     function playTrack(track) {
-        track.volume = volume;
-        track.play();
+        track.volume = volume
+        track.play()
 
-        // track.addEventListener("ended", this.playNextTrack.bind(this));
-        //BUGGED; see https://code.google.com/p/chromium/issues/detail?id=157543
+        // track.addEventListener('ended', this.playNextTrack.bind(this))
+        //BUGGED see https://code.google.com/p/chromium/issues/detail?id=157543
 
         function next() {
             if (this.duration - this.currentTime < 1) {
-                this.removeEventListener("timeupdate", next);
-                playNextTrack();
+                this.removeEventListener('timeupdate', next)
+                playNextTrack()
             }
         }
 
-        track.addEventListener("timeupdate", next);
-        saveLastTrack();
+        track.addEventListener('timeupdate', next)
+        saveLastTrack()
     }
 
     function loadNextTrack() {
         if (++trackId > tracksNum) {
-            trackId = firstTrackId;
+            trackId = firstTrackId
         }
-        nextTrack = loadTrack(trackId);
+        nextTrack = loadTrack(trackId)
     }
 
-    this.toggleMusic = function() {
-        updateMute();
+    this.toggleMusic = ()=> {
+        updateMute()
         if (!currentTrack) {
-            self.playMusic();
-            return;
+            this.playMusic()
+            return
         }
         if (currentTrack.paused) {
-            currentTrack.play();
+            currentTrack.play()
         } else {
-            currentTrack.pause();
+            currentTrack.pause()
         }
-    };
+    }
 
     this.playSound = function(name, repeat) {
         if (!config.sound.playSound)
-            return;
-        this.stopSound(name);
-        var sound = this.sounds[name];
+            return
+        this.stopSound(name)
+        var sound = this.sounds[name]
         if (!sound) {
-            console.warn("Sound " + name + " not found");
-            return;
+            console.warn('Sound ' + name + ' not found')
+            return
         }
         sound.onloadeddata = function() {
-            sound.currentTime = 0;
-            sound.play();
-        };
-        sound.load();
-        if (repeat !== undefined) {
-            repeat = repeat || 1000;
-            sound.repeat = setTimeout(this.playSound.bind(this, name, repeat), repeat);
+            sound.currentTime = 0
+            sound.play()
         }
-    };
+        sound.load()
+        if (repeat !== undefined) {
+            repeat = repeat || 1000
+            sound.repeat = setTimeout(this.playSound.bind(this, name, repeat), repeat)
+        }
+    }
 
     this.stopSound = function(name) {
-        var sound = this.sounds[name];
+        var sound = this.sounds[name]
         if (!sound)
-            return;
-        sound.pause();
+            return
+        sound.pause()
         if (sound.repeat) {
-            clearTimeout(sound.repeat);
-            sound.repeat = null;
+            clearTimeout(sound.repeat)
+            sound.repeat = null
         }
-    };
+    }
 
-    this.init();
+    this.init()
 }
