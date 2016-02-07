@@ -1,9 +1,8 @@
-'use strict'
-
 var Stage = require('./stage.js')
 var Character = require('../character.js')
 var Entity = require('../entity.js')
-var cnf = require('../config.js')
+import {CELL_SIZE} from '../config.js'
+import {syncCharacters, syncEntities} from '../network-protocol.js'
 
 Stage.add(module, loadingStage)
 
@@ -37,10 +36,11 @@ loadingStage.prototype.sync = function(data) {
         return;
     game.setTime(data.Time);
     loader.ready(function() {
-        Entity.sync(data.Entities);
-        Character.sync(data.Players);
-        Character.sync(data.Mobs);
-        Character.sync(data.NPCs);
+        syncEntities(data.Entities)
+        syncCharacters(data.Players)
+        syncCharacters(data.Mobs)
+        syncCharacters(data.NPCs)
+
         game.map.sync(data.Location);
 
         var wait = setInterval(function() {
@@ -60,11 +60,7 @@ loadingStage.prototype.sync = function(data) {
 }
 
 loadingStage.prototype.draw = function() {
-    game.ctx.clear();
-    game.ctx.fillStyle = "#fff";
-    game.forceDrawStrokedText(
-        game.loader.status,
-        cnf.CELL_SIZE,
-        cnf.CELL_SIZE
-    );
+    game.ctx.clear()
+    game.ctx.fillStyle = '#fff'
+    game.forceDrawStrokedText(game.loader.status, CELL_SIZE, CELL_SIZE)
 }

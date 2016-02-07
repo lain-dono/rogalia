@@ -1,10 +1,5 @@
-var Stage = require('./stage.js')
-var dom = require('../dom.js')
-var cnf = require('../config.js')
-
 import Vue from 'vue'
-
-Vue.config.debug = true
+import Stage from './stage.js'
 
 Stage.add(module, createCharacterStage)
 
@@ -13,14 +8,14 @@ function createCharacterStage () {
     var creator = this.creator = new Vue(createCharacterStage.app).$mount().$appendTo(document.body)
     creator.visible = true
     creator.login = game.login
-    //panel.show(cnf.LOBBY_X + game.offset.x, cnf.LOBBY_Y + game.offset.y);
+    creator.professions = allProfs
 }
 
 createCharacterStage.prototype.sync = function(data) {
     if (data.Warning) {
-        game.alert(data.Warning);
+        game.alert(data.Warning)
     } else {
-        game.setStage('loading', data);
+        game.setStage('loading', data)
     }
 }
 createCharacterStage.prototype.end = function() {
@@ -99,7 +94,7 @@ createCharacterStage.app = {
             login: '',
             name: '',
             sex: 'male',
-            professions: allProfs,
+            professions: [],
             current: 'Farmer',
         }
     },

@@ -1,9 +1,9 @@
-'use strict'
+import Stage from './stage.js'
 
-var Stage = require('./stage.js')
 Stage.add(module, connectingStage)
+
 function connectingStage() {
-    /*jshint validthis:true */
     game.network.run()
 }
+
 connectingStage.prototype.draw = Stage.makeEllipsisDrawer()

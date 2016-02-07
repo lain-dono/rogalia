@@ -5,10 +5,10 @@ export function Point(x, y) {
     case 0: break
     case 2: break
     case 1:
-        if (x instanceof Object && 'x' in x && 'y' in x) {
+        if (x.x !== undefined && x.y !== undefined) {
             this.x = x.x
             this.y = x.y
-        } else if (x instanceof Object && 'X' in x && 'Y' in x) {
+        } else if (x.X !== undefined && x.Y !== undefined) {
             this.x = x.X
             this.y = x.Y
         } else {
@@ -36,6 +36,14 @@ var round = Math.round
 var sin = Math.sin
 var cos = Math.cos
 var hypot = Math.hypot
+
+export function intersects(p, rx, ry, w, h) {
+    var x = p.x, y = p.y
+    return x > rx &&
+           x < rx + w &&
+           y > ry &&
+           y < ry + h
+}
 
 export function toWorld(p) {
     var x = p.x

@@ -80,6 +80,13 @@ export function Map(ctx, player) {
     this.minimapC.addChild(this.minimapGraphics)
 
     //game.pixiStage.addChild(this.container)
+    this.rhombus = Sprite.fromImage('assets/bg/rhombus.png')
+    this.rhombus.anchor.x = 1
+
+    this.rhombus.x = 400
+    this.rhombus.y = 50
+
+    game.pixiStage.addChild(this.rhombus)
     game.pixiStage.addChild(this.minimapC)
 
     this.data = []
@@ -333,6 +340,7 @@ export function Map(ctx, player) {
         this.container.position.x = this.location.x - cw.x
         this.container.position.y = this.location.y - cw.y
         toScreen(this.container.position)
+        //this.rhombus.position.x = width
 
         var x, y, i, l, tile
         if (true) {
@@ -684,8 +692,8 @@ export function Map(ctx, player) {
         minimapObjectsCanvas.height = this.minimapCanvas.height
         // mctx.clearRect(0, 0, minimapObjectsCanvas.width, minimapObjectsCanvas.height)
         //
-        var mmap = this.minimapGraphics
-        mmap.clear()
+        //var mmap = this.minimapGraphics
+        //mmap.clear()
 
         var player = this.player
         var locX = player.Location.X
@@ -703,31 +711,31 @@ export function Map(ctx, player) {
             if (e instanceof Character) {
                 if (e === player) {
                     mctx.fillStyle = '#0f0'
-                    mmap.beginFill(0x00FF00)
+                    //mmap.beginFill(0x00FF00)
                     w = h = 5
                 } else if (e.Karma < 0 || e.Aggressive) {
                     mctx.fillStyle = '#f00'
-                    mmap.beginFill(0xFF0000)
+                    //mmap.beginFill(0xFF0000)
                     w = h = ((e.Lvl >= 50) ? 6 : 4)
                 } else {
                     mctx.fillStyle = 'pink'
-                    mmap.beginFill(0xFFC0CB)
+                    //mmap.beginFill(0xFFC0CB)
                     w = h = ((e.Lvl >= 50) ? 5 : 3)
                 }
             } else if (!e.inWorld()) {
                 continue
             } else if (e.Creator === playerId) {
                 mctx.fillStyle = '#9f9'
-                mmap.beginFill(0x99FF99)
+                //mmap.beginFill(0x99FF99)
             } else if (e.Creator){
                 mctx.fillStyle = '#999'
-                mmap.beginFill(0x999999)
+                //mmap.beginFill(0x999999)
             }
 
             mctx.fillRect(x, y, w, h)
 
-            mmap.drawRect(x, y, w, h)
-            mmap.endFill()
+            //mmap.drawRect(x, y, w, h)
+            //mmap.endFill()
         }
     }
 }
