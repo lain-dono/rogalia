@@ -1,0 +1,16 @@
+<panel name="lobby" title="" :has-close-button="false">
+<div class="lobby-account">{{login}}</div>
+    <hr>
+    <div>
+        <div v-for="a in avatars" @click="onAvatar(a)" class="avatar-container">
+            <div class="avatar"><img
+                 :class="{create: a.sex == 'new'}"
+                 :alt="'avatars/' + a.sex + '.png'"
+                     :src="'assets/avatars/' + a.sex + '.png'" /></div>
+            <div v-if="a.name != ''" class="avatar-name">{{a.name}}</div>
+            <div v-else class="avatar-name">{{'Create' | T}}</div>
+        </div>
+    </div>
+    <hr>
+    <button v-show="!inVK" @click="quit">{{'Quit' | T}}</button>
+</panel>

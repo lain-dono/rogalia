@@ -1,0 +1,50 @@
+#lobby, #create-character
+    text-align: center
+
+#create-character
+    width: 236px
+
+#lobby
+    width: 452px
+    .avatar-container
+        background: url('assets/bg/main-button.png') no-repeat
+        width: 105px
+        height: 86px
+        cursor: pointer
+        display: inline-block
+        margin-right: 3px
+        position: relative
+        &:hover
+            filter: brightness(120%)
+    .create
+        margin: auto
+        left: 0
+        right: 0
+        position: absolute
+    .avatar-name
+        margin-top: 8px
+    .avatar
+        width: 60px
+        height: 58px
+        overflow: hidden
+        margin: auto
+
+.lobby-account
+    background: url('assets/bg/strip/center.png') repeat-x
+    height: 32px
+    line-height: 32px
+    display: table
+    margin: auto
+    position: relative
+    text-align: center
+
+    &:before, &:after
+        position: absolute
+        top: -5px
+    &:before
+        content: url('assets/bg/strip/left.png')
+        left: -60px
+    &:after
+        content: url('assets/bg/strip/right.png')
+        right: -60px
+
