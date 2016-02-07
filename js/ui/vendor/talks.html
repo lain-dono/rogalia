@@ -1,0 +1,8 @@
+<div>
+    <p v-for="text in talks">{{text}}</p>
+    <ul>
+        <li v-for="(title, text) in actions"
+            class="talk-link"
+            @click="action(title)">{{text}}</li>
+    </ul>
+</div>

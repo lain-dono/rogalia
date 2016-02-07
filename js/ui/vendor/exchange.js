@@ -1,7 +1,5 @@
-'use strict'
-
-var dom = require('../dom.js')
-var Panel = require('../panel.js')
+var dom = require('../../dom.js')
+var Panel = require('../../panel.js')
 var Vendor = require('./vendor.js')
 
 module.exports = Exchange

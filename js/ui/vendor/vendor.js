@@ -1,9 +1,9 @@
-'use strict'
+var dom = require('../../dom.js')
+var Panel = require('../../panel.js')
+var Container = require('../../container/container.js')
+var Entity = require('../../entity.js')
 
-var dom = require('../dom.js')
-var Panel = require('../panel.js')
-var Container = require('../container/container.js')
-var Entity = require('../entity.js')
+import {syncEntities} from '../../network-protocol.js'
 
 module.exports = Vendor
 
@@ -274,9 +274,9 @@ Vendor.prototype.showInfo = function(item) {
 }
 Vendor.prototype.saveItems = function(items) {
     for (var id in items) {
-        this.items[id] = items[id];
+        this.items[id] = items[id]
     }
-    Entity.sync(items);
+    syncEntities(items)
 }
 Vendor.prototype.removeItems = function() {
     Object.keys(this.items).forEach(game.removeEntityById);

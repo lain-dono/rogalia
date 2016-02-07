@@ -1,10 +1,8 @@
-'use strict'
-
-var dom = require('../dom.js')
-var util = require('../util.js')
-var Panel = require('../panel.js')
-var Entity = require('../entity.js')
-var Container = require('../container/container.js')
+var dom = require('../../dom.js')
+var util = require('../../util.js')
+var Panel = require('../../panel.js')
+var Entity = require('../../entity.js')
+var Container = require('../../container/container.js')
 var Vendor = require('./vendor.js')
 
 module.exports = Bank
