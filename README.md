@@ -7,9 +7,9 @@ http://rogalia.ru/play
 
 ### Используемые технологии
 
-* Vue - реактивный фреймворк для ui [api](http://vuejs.org/api/) [github](https://github.com/vuejs/vue) [awesome](https://github.com/vuejs/awesome-vue)
-* PIXI - ускоренный 2D рендеринг [api](http://pixijs.github.io/docs/) [github](https://github.com/pixijs/pixi.js/)
-* fast.js - парочка оптимизированных функций взамен стандартным [github](https://github.com/codemix/fast.js)
+* Vue - реактивный фреймворк для ui ([api](http://vuejs.org/api/), [github](https://github.com/vuejs/vue), [awesome](https://github.com/vuejs/awesome-vue))
+* PIXI - ускоренный 2D рендеринг ([api](http://pixijs.github.io/docs/), [github](https://github.com/pixijs/pixi.js/))
+* fast.js - парочка оптимизированных функций взамен стандартным ([github](https://github.com/codemix/fast.js))
 
 
 ### Общая структура исходников
