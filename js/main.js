@@ -1,80 +1,30 @@
-'use strict';
+import Vue from 'vue'
+Vue.config.debug = true
 
-//require('lib/rawinflate.js')
-//require('lib/stats.min.js')
-//require('lib/sprintf.min.js')
-//require('lib/binary-search-tree.js')
-//require('lib/image-filters.js')
-//require('polyfill.js')
-//require('hashtable.js')
-//require('config.js')
-//require('dom.js')
-//require('util.js')
-//require('panel.js')
-//require('alert.js')
-//require('lang/ru/items.js')
-//require('lang/ru/dict.js')
-//require('lang/dict.js')
-//require('effects.js')
-//require('lang/ru/effects.js')
-//require('lang/talks.js')
-//require('point.js')
-//require('sprite.js')
-//require('loader.js')
-//require('sound.js')
-//require('stages/stage.js')
-//require('stages/connecting.js')
-//require('stages/create-character.js')
-//require('stages/exit.js')
-//require('stages/loading.js')
-//require('stages/lobby.js')
-//require('stages/login.js')
-//require('stages/main.js')
-//require('stages/stage.js')
-//require('ui/quests/quest.js')
-//require('ui/quests/quests.js')
-//require('ui/quests/journal.js')
-//require('ui/chat/chat.js')
-//require('ui/chat/ring.js')
-//require('ui/craft.js')
-//require('lang/ru/craft.js')
-//require('ui/minimap.js')
-//require('ui/users.js')
-//require('i/stats.js')
-//require('ui/skills.js')
-//require('ui/settings.js')
-//require('lang/ru/settings.js')
-//require('ui/wiki.js')
-//require('ui/system.js')
-//require('ui/fight.js')
-//require('controller.js')
-//require('network.js')
-//require('container/container.js')
-//require('container/slot.js')
-//require('container/equip.js')
-//require('entity.js')
-//require('entities.js')
-//require('info.js')
-//require('character.js')
-//require('characters.js')
-//require('ui/map.js')
-//require('menu.js')
-var Game = require('./game.js')
-//require('ui/vendor.js')
-//require('ui/exchange.js')
-//require('ui/bank.js')
-//require('ui/auction.js')
-//require('ui/mail.js')
-//require('ui/help.js')
-//require('new-year.js')
+require('./lang/ru/items.js')
+var dict = require('./lang/ru/dict.js')
+require('./lang/dict.js')
 
-//require('main.js')
+//TODO:FIXME: remove bool flag and use select{lang1, lang2, ...}
+function defaultLang() {
+    if (document.location.search.indexOf('en') != -1)
+        return 'en'
+    if (navigator.language.substring(0, 2) == 'en')
+        return 'en'
+    return 'ru'
+}
 
+var lang = localStorage.getItem('lang') || defaultLang()
+dict.init(lang)
+
+
+var Game = require('./game.js').default
 
 //IE detector
 if ('\v'=='v') {
-    alert("Internet Explorer не поддерживается");
-    document.location = "http://rogalia.ru/wiki/index.php/%D0%97%D0%B0%D0%BF%D1%83%D1%81%D0%BA_%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%B0_%D0%B8%D0%B3%D1%80%D1%8B";
+    alert('Internet Explorer не поддерживается');
+    document.location = 'http://rogalia.ru/wiki/index.php/%D0%97%D0%B0%D0%BF%D1%83%D1%81%D0%BA_%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D0%B0_%D0%B8%D0%B3%D1%80%D1%8B';
 } else {
     var game = new Game();
+    game.lang = lang
 }
