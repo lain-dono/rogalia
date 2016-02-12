@@ -6,6 +6,8 @@ module.exports = Exchange
 
 function Exchange() {
     game.network.send("get-exchange-info", {}, function callback(data) {
+        console.info('exchange', data)
+
         var table = document.createElement("table");
         table.id = "exchange-rates-table";
         table.innerHTML = "<tr>" +

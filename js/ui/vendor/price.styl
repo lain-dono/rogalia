@@ -1,0 +1,16 @@
+.price
+    display: inline-block
+    text-align: right
+    white-space: nowrap
+
+    &.negative
+        border-bottom: 1px dotted red;
+        .platinum:before
+            content: '- '
+    .silver
+        color: silver
+    .gold
+        color: gold
+    .platinum
+        color: white
+

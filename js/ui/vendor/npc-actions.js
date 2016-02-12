@@ -2,11 +2,11 @@ import Panel from '../../panel.js'
 import Quest from '../quests/quest.js'
 import Vendor from './vendor.js'
 import Exchange from './exchange.js'
-import Bank from './bank.js'
+//import Bank from './bank.js'
 import Auction from './auction.js'
 import dom from '../../dom.js'
 
-import {map} from 'fast.js'
+import {map, forEach} from 'fast.js'
 
 import {
     setCitizenship,
@@ -28,17 +28,19 @@ export var npcActions = {
         })
     },
     'Get claim': function() {
-        getClaim(this.Id)
+        if (confirm('оплатить клейм?')) {
+            getClaim(this.Id)
+        }
     },
-    'Get village claim': ()=> {
+    'Get village claim': function() {
         var name = prompt('Name?', '')
         if (name) {
             getVillageClaim(this.Id, name)
         }
     },
-    'Bank': ()=> {
-        new Bank()
-    },
+    //'Bank': function() {
+        //new Bank()
+    //},
     'Exchange': function() {
         new Exchange()
     },

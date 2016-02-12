@@ -1,0 +1,12 @@
+<span :class="{ price: true, negative: negative }">
+    <span v-if="!editable">
+        <span class="platinum" :tooltip="'Platinum' | T">{{p}}p</span>
+        <span class="gold"     :tooltip="'Gold'     | T">{{g}}g</span>
+        <span class="silver"   :tooltip="'Silver'   | T">{{s}}s</span>
+    </span>
+    <span v-if="editable">
+        <label class="platinum" :tooltip="'Platinum' | T"><input v-model="p"/>p</label>
+        <label class="gold"     :tooltip="'Gold'     | T"><input v-model="g"/>g</label>
+        <label class="silver"   :tooltip="'Silver'   | T"><input v-model="s"/>s</label>
+    </span>
+</span>

@@ -1,9 +1,21 @@
-<div class="tabs">
-    <div class="tabs-titles">
-        <div class="tab-title active">Купить</div>
-        <div class="tab-title">Продать</div>
-    </div>
-    <hr>
+<div>
+<tabs>
+    <tab id="buy" title="Buy">
+        <div class="lot-list">
+            <div class="lot">
+                <div class="slot lot-icon">
+                    <canvas width="34" height="27"></canvas>
+                </div>
+                <div class="lot-type">{{lot.type | TS }}</div>
+                <div class="lot-count">{{'Quantity' | T}}: {{lot.count}}</div>
+            </div>
+        </div>
+    </tab>
+    <tab id="sell" title="Sell">
+        <div class="lot-list">
+        </div>
+    </tab>
+</tab>
     <div class="tabs-contents">
         <div class="tab-content active">
             <div class="lot-list">
@@ -35,4 +47,5 @@
             </div>
         </div>
     </div>
+    </tabs>
 </div>

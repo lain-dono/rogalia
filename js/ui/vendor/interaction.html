@@ -1,0 +1,92 @@
+<panel :visible.sync="visible" name="interaction" :title="name">
+<div v-if="id != 0">
+    <!--<button v-for="title in actions">{{title | T}}</button>-->
+    <!--<button v-if="hasQuest" class="quest-button">{{'Quest' | T}}</button>-->
+
+<div v-if="type == 'talks'">
+    <p v-for="text in talks">{{text}}</p>
+
+    <ul>
+        <li v-for="(title, text) in actions"
+            class="talk-link"
+            @click="action(title)">{{text | T}}</li>
+        <li v-if="hasQuest" class="quest-button" @click="action('Quest')">{{'Quest' | T}}</li>
+    </ul>
+</div>
+<table v-if="type == 'instances'">
+    <thead>
+        <tr>
+            <th>{{'Name' | T}}</th>
+            <th>{{'Min' | T}}</th>
+            <th>{{'Max' | T}}</th>
+            <th>{{'Cost' | T}}</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr v-for="inst in instances">
+            <td>{{inst.name}}</td>
+            <td>{{inst.min}}</td>
+            <td>{{inst.max}}</td>
+            <td>
+                <price :cost="inst.cost"></price>
+            </td>
+            <td><button @click="instanceTurn(inst.name)">{{'Enter' | T}}</button></td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<div v-if="type == 'bank'">
+    <label>{{ 'Balance' | T}}: <price :cost="balance"></price></label>
+    <hr>
+    <price :cost.sync="cost" :editable="true"></price>
+    <button @click="deposit">{{ 'Deposit' | T}}</button>
+    <button @click="withdraw">{{ 'Withdraw' | T}}</button>
+    <hr>
+    <div>{{ 'Claim' | T}}
+        {{ 'Paid till' | T}}:
+        <span v-text="claim.paidTill | date">XX</span>
+    </div>
+    <div>{{ 'Rent' | T}}:
+        <price :cost="rent"></price>
+        <button @click="payClaim">{{'Pay' | T}}</button>
+    </div>
+    <hr>
+    <div>
+        <div v-for="bag in vault" @click="onVault($index)" :class="{slot:true, plus: !bag.unlocked}">
+            <img v-if="bag.unlocked" :src="getBagIcon($index)" alt=""/>
+        </div>
+    </div>
+</div>
+
+<table  v-if="type == 'exchange'" id="exchange-rates-table">
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Курс покупки</th>
+            <th>Курс продажи</th>
+            <th>Продать слитки</th>
+        </tr>
+    </thead>
+    <tr>
+        <td title="Sold: 34592931
+Bought: 34619081">Золотые ассигнации</td>
+        <td>
+            <price :cost=""></price>
+            <input type="text">
+            <button>Купить</button>
+        </td>
+        <td>
+            <price :cost=""></price>
+            <input type="text">
+            <button>Продать</button>
+        </td>
+        <td>
+            <input>
+            <button>Продать</button>
+        </td>
+    </tr>
+    <tr>
+</table>
+</panel>

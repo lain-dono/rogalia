@@ -12,6 +12,7 @@ function Auction() {
             title: T("Buy"),
             update: function(title, contents) {
                 game.network.send("auction-buy-list", {Broker: self.broker.Id}, function(data) {
+                    console.log('auction buy', data)
                     dom.setContents(contents, self.buyView(data.Lots));
                 });
             }
@@ -20,6 +21,7 @@ function Auction() {
             title: T("Sell"),
             update: function(title, contents) {
                 game.network.send("auction-sell-list", {Broker: self.broker.Id}, function(data) {
+                    console.log('auction sell', data)
                     dom.setContents(contents, self.sellView(data.Lots));
                 });
             }
@@ -40,8 +42,7 @@ Auction.prototype = {
     },
     backContents: null,
     listView: function(lots, cmd, tabIndex, callback) {
-        var self = this;
-        return dom.wrap(".lot-list", Object.keys(lots).map(function(type) {
+        return dom.wrap(".lot-list", Object.keys(lots).map((type)=> {
             var count = lots[type];
             var lot = dom.wrap(".lot", [
                 dom.wrap("slot lot-icon", [Entity.templates[type].icon()]),
@@ -50,16 +51,15 @@ Auction.prototype = {
             ]);
             lot.count = count;
             lot.onclick = function() {
-                game.network.send(cmd, {Broker: self.broker.Id, Type: type}, function(data) {
-                    var content = self.tabs[tabIndex].tab.content;
-                    self.backContents = dom.detachContents(content);
+                game.network.send(cmd, {Broker: this.broker.Id, Type: type}, function(data) {
+                    console.log(cmd, type, data)
+                    var content = this.tabs[tabIndex].tab.content;
+                    this.backContents = dom.detachContents(content);
                     dom.append(content, callback(data.Lots, type));
                 });
             };
             return lot;
-        }).sort(function(a, b) {
-            return b.count - a.count;
-        }));
+        }).sort((a, b)=> b.count - a.count));
     },
     buyView: function(lots) {
         return this.listView(lots, "auction-buy-list-find", 0, this.buyFindView.bind(this));
@@ -68,14 +68,13 @@ Auction.prototype = {
         return this.listView(lots, "auction-sell-list-find", 1, this.sellFindView.bind(this));
     },
     findView: function(lots, type, tabIndex, table) {
-        var self = this;
         return [
-            dom.button(T("Back"), "back-button", function() {
-                if (self.backContents) {
-                    dom.setContents(self.tabs[tabIndex].tab.content, self.backContents);
-                    self.backContents = null;
+            dom.button(T("Back"), "back-button", ()=> {
+                if (this.backContents) {
+                    dom.setContents(this.tabs[tabIndex].tab.content, this.backContents);
+                    this.backContents = null;
                 } else {
-                    self.tabs[tabIndex].update();
+                    this.tabs[tabIndex].update();
                 }
             }),
             dom.wrap("slot lot-icon", [Entity.templates[type].icon()]),
