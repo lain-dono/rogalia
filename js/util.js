@@ -1,4 +1,3 @@
-'use strict'
 if ( !window.requestAnimationFrame ) {
      window.requestAnimationFrame = ( function() {
          return window.webkitRequestAnimationFrame ||
@@ -63,9 +62,6 @@ var util = module.exports = new (function() { // jshint ignore:line
     };
 
     //point to rect
-    this.intersects = function(x, y, rx, ry, w, h) {
-        return x > rx && x < rx + w && y > ry && y < ry + h;
-    };
 
     this.rectIntersects = function(x1, y1, w1, h1, x2, y2, w2, h2) {
         return x2 < x1+w1 && x2+w2 > x1 && y2 < y1+h1 && y2+h2 > y1;
@@ -111,43 +107,6 @@ var util = module.exports = new (function() { // jshint ignore:line
             hash |= 0; // Convert to 32bit integer
         }
         return hash;
-    };
-
-    var re_btou = new RegExp([
-        '[\xC0-\xDF][\x80-\xBF]',
-        '[\xE0-\xEF][\x80-\xBF]{2}',
-        '[\xF0-\xF7][\x80-\xBF]{3}'
-    ].join('|'), 'g');
-    var cb_btou = function(cccc) {
-        var fromCharCode = String.fromCharCode;
-        switch(cccc.length) {
-        case 4:
-            var cp = ((0x07 & cccc.charCodeAt(0)) << 18) |
-                     ((0x3f & cccc.charCodeAt(1)) << 12) |
-                     ((0x3f & cccc.charCodeAt(2)) <<  6) |
-                     (0x3f & cccc.charCodeAt(3)),
-            offset = cp - 0x10000;
-            return (fromCharCode((offset  >>> 10) + 0xD800) +
-                    fromCharCode((offset & 0x3FF) + 0xDC00));
-        case 3:
-            return fromCharCode(
-                ((0x0f & cccc.charCodeAt(0)) << 12) |
-                     ((0x3f & cccc.charCodeAt(1)) << 6) |
-                      (0x3f & cccc.charCodeAt(2))
-            );
-        default:
-            return  fromCharCode(
-                ((0x1f & cccc.charCodeAt(0)) << 6) |
-                      (0x3f & cccc.charCodeAt(1))
-            );
-        }
-    };
-    var btou = function(b) {
-        return b.replace(re_btou, cb_btou);
-    };
-
-    this.decompress = function(data) {
-        return btou(RawDeflate.inflate(new Uint8Array(data)));
     };
 
     var merge = function(left, right, compare) {

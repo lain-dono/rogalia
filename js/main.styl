@@ -196,14 +196,14 @@ hr {
 #interface {
     display: none;
 }
-#canvas, #interface {
+#canvas, #interface, #map-canvas-x, #pixi {
     width: 100%;
     height: 100%;
     position: absolute;
     top: 0;
     left: 0;
 }
-#canvas {
+#canvas, #map-canvas-x, #pixi {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -248,7 +248,7 @@ hr {
     cursor: none!important;
 }
 
-.main-stage #canvas {
+.main-stage #map-canvas-x {
     background: url("assets/bg/space.png") repeat;
     background-color: #333;
 }
@@ -268,49 +268,6 @@ hr {
 }
 #fps-stats > #stats {
     margin: auto;
-}
-
-#effects {
-    top: 4px;
-    left: 125px;
-    position: absolute;
-    display: inline-block;
-}
-.effect {
-    margin-left: 3px;
-    border: 1px solid #c6700e;
-    border-radius: 2px;
-    background: #7b5323;
-    padding: 1px;
-    cursor: pointer;
-    float: left;
-    position: relative;
-}
-.effect-name {
-    position: relative;
-    z-index: 1;
-}
-.effect-bad {
-    color: #fd7279;
-}
-.effect-good {
-    color: #3c3;
-}
-.effect-desc, .effect-note {
-    font-size: 11px;
-    line-height: 12px;
-}
-.effect-note {
-    color: #d89f5b;
-}
-
-.effect-progress {
-    top: 0;
-    left: 0;
-    position: absolute;
-    height: 100%;
-    opacity: 0.5;
-    background: red;
 }
 
 .button {
@@ -793,67 +750,6 @@ big {
     width: 100%;
 }
 
-#avatar-container, #minimap-container {
-    position: absolute;
-    background-image: url("assets/bg/rhombus.png");
-    width: 154px;
-    height: 90px;
-}
-
-#avatar-container {
-    left: 0;
-}
-#avatar {
-    position: absolute;
-    left: 26px;
-}
-
-#strips {
-    position: absolute;
-    top: 30px;
-    left: 57%;
-    width: 65px;
-    height: 29px;
-    background: url("assets/bg/strips.png") no-repeat;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-around;
-    align-content: flex-start;
-}
-#strips div {
-    height: 7px;
-}
-#strips > div {
-    width: 59px;
-    position: relative;
-    margin-top: 2px;
-}
-#strips > div > div {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-}
-#strips #hp{
-    background: linear-gradient(to bottom,  #57130e 0%, #9e3320 100%);
-}
-#strips #hp > div:first-child{
-    background: linear-gradient(to bottom,  #5a140f 0%, #e23d23 100%);
-}
-
-#strips #fullness{
-    background: linear-gradient(to bottom,  #49440c 0%, #8c771d 100%);
-}
-#strips #fullness > div:first-child {
-    background: linear-gradient(to bottom,  #7b7000 0%, #cfb20d 100%);
-}
-
-#strips #stamina{
-    background: linear-gradient(to bottom,  #0d3550 0%, #3c6378 100%);
-}
-#strips #stamina > div:first-child {
-    background: linear-gradient(to bottom,  #155783 0%, #4690bc 100%);
-}
 
 .character-avatar-container {
     position: relative;
@@ -909,7 +805,7 @@ big {
     top: 0;
     left: 0;
 }
-input[type=number], .lot-quantity > input, .price > input {
+input[type=number], .lot-quantity > input, .price input {
     width: 25px;
     background-image: none;
     text-align: right;
@@ -1432,7 +1328,9 @@ input[type=number], .lot-quantity > input, .price > input {
 @import 'kouto-swiss'
 
 
-@import './stages/lobby.styl'
+@import './container/slot.css'
+
+@import './ui/stages/lobby.styl'
 
 @import './ui/minimap.styl'
 @import './ui/actions.styl'
@@ -1445,4 +1343,8 @@ input[type=number], .lot-quantity > input, .price > input {
 @import './ui/panel.styl'
 @import './ui/users.styl'
 @import './ui/skills.styl'
+@import './ui/avatar-stats.styl'
+@import './ui/info.styl'
+@import './ui/effects.styl'
+@import './ui/vendor/price.styl'
 

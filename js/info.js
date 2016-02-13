@@ -1,6 +1,3 @@
-'use strict'
-
-var dom = require('./dom.js')
 var Panel = require('./panel.js')
 var Entity = require('./entity.js')
 var Container = require('./container/container.js')

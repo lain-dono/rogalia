@@ -9,8 +9,8 @@ var Chat = require('./ui/chat/chat.js')
 var Journal = require('./ui/quests/journal.js')
 //var System = require('./ui/system.js')
 //var Wiki = require('./ui/wiki.js')
-var Auction = require('./ui/auction.js')
-var Vendor = require('./ui/vendor.js')
+import Auction from './ui/vendor/auction.js'
+var Vendor = require('./ui/vendor/vendor.js')
 var Mail = require('./ui/mail.js')
 
 var Help = require('./ui/help.js')
@@ -26,6 +26,7 @@ var CELL_SIZE = cnf.CELL_SIZE
 
 import {Point, toWorld} from './render'
 import * as iso from './render/iso.js'
+import {showEntityInfo, hideEntityInfo} from './ui/info.js'
 
 module.exports = function Controller(game) {
     var controller = this;
@@ -220,52 +221,6 @@ module.exports = function Controller(game) {
         },
     };
 
-    this.actionButton = {
-        handler: null,
-        action: null,
-        icon: null,
-        inProgress: false,
-        element: document.getElementById("main-action-button"),
-        active: function() {
-            return this.handler && this.icon;
-        },
-        activate: function() {
-            this.handler();
-        },
-        startProgress: function() {
-            if (!this.inProgress && this.active()) {
-                this.inProgress = true;
-                this.loadIcon(this.action + "-active");
-            }
-        },
-        stopProgress: function() {
-            if (this.inProgress && this.active()) {
-                this.inProgress = false;
-                this.loadIcon(this.action);
-            }
-        },
-        setAction: function(action, handler) {
-            this.reset();
-            this.action = action;
-            this.handler = handler;
-            this.element.onclick = handler;
-            this.loadIcon(action);
-        },
-        reset: function() {
-            this.action = null;
-            this.handler = null;
-            this.element.onclick = null;
-            dom.clear(this.element);
-            this.icon = null;
-            this.inProgress = false;
-        },
-        loadIcon: function(action) {
-            dom.clear(this.element);
-            this.icon = loader.loadImage("icons/tools/" + action + ".png");
-            this.element.appendChild(this.icon);
-        },
-    };
-
     // TODO: was controller.cursor getter; check usage and remove
     this.getCursor = function() {
         return this.world.cursor || this.cursor.firstChild;
@@ -297,11 +252,16 @@ module.exports = function Controller(game) {
             document.body.classList.remove("cursor-hidden");
 
         if (this.world.hovered) {
-            var e = Entity.get(this.world.hovered.Id);
-            if (!e) //item removed
-                this.world.hovered = null;
-            else if (e instanceof Entity && !e.inWorld())
-                this.world.hovered = null;
+            var e = Entity.get(this.world.hovered.Id)
+            if (!e) { //item removed
+                this.world.hovered = null
+            } else if (e instanceof Entity && !e.inWorld()) {
+                this.world.hovered = null
+            }
+        }
+
+        if (!this.world.hovered && this.mouse.isValid()) {
+            hideEntityInfo()
         }
 
         // XXX this.minimap.update();
@@ -488,7 +448,6 @@ module.exports = function Controller(game) {
         this.journal = new Journal();
         //this.system = new System();
         //this.wiki = new Wiki();
-        this.auction = new Auction();
         this.vendor = new Vendor();
         this.mail = new Mail();
         //this.fpsStats = this.system.fps;
@@ -667,6 +626,7 @@ module.exports = function Controller(game) {
         this.world.hovered = null;
         this.hovered = null;
         this.cursor.clear();
+        hideEntityInfo()
     };
 
     this.targetInWorld = function(target) {
@@ -831,6 +791,11 @@ module.exports = function Controller(game) {
         this.world.hovered = game.sortedEntities.findReverse(function(entity) {
             return entity.intersects(p.x, p.y);
         });
+        if (this.world.hovered && this.mouse.isValid()) {
+            if (!(this.world.hovered instanceof Character)) {
+                showEntityInfo(this.world.hovered.Id)
+            }
+        }
     };
 
     this.drawAlign = function(entity, p) {

@@ -5,16 +5,18 @@ var Entity = require('./entity.js')
 var Panel = require('./panel.js')
 var EffectDesc = require('./effects.js')
 
-var Exchange = require('./ui/exchange.js')
-var Vendor = require('./ui/vendor.js')
-
 var Info = require('./info.js')
 var util = require('./util.js')
 var dom = require('./dom.js')
-var cnf = require('./config.js')
-var config = cnf.config
-var debug = cnf.debug
+import {CELL_SIZE, FONT_SIZE, config, debug} from './config.js'
+import {
+    milk, mount, dismount,
+    catchAnimal, setDst, fishingMove,
+    follow, throwEntity, fuck
+} from './network-protocol.js'
 
+import {getTalks} from './ui/vendor/talks.js'
+import {forEach, map} from 'fast.js'
 import {imageToCanvas} from './render/'
 import * as iso from './render/iso.js'
 
@@ -24,16 +26,18 @@ import {Point} from './render'
 
 module.exports = Character
 
+window.Character = Character
+
 function Character(id) {
     this.Id = id;
-    this.name = "";
+    this.name = '';
     this.x = 0;
     this.y = 0;
 
     this.Hp = null;
     this.Invisible = false;
 
-    this.Title = "";
+    this.Title = '';
     //used to show animation of varius type, like damage deal or exp gain
     this.info = [];
     this.Messages = null;
@@ -58,7 +62,7 @@ function Character(id) {
 
     this.Dx =  0;
     this.Dy = 0;
-    this.Radius = cnf.CELL_SIZE / 4;
+    this.Radius = CELL_SIZE / 4;
     this.isMoving = false;
     this.Speed = {Current: 0};
     this.Equip = [];
@@ -91,46 +95,48 @@ function Character(id) {
     this.animation = {up: null, down: null};
 
     this.sprites = {};
-    Character.animations.forEach((animation)=> {
-        var s = new Sprite();
-        s.name = animation;
-        this.sprites[animation] = s;
+    forEach(Character.animations, (animation)=> {
+        var s = new Sprite()
+        s.name = animation
+        this.sprites[animation] = s
     })
     this.sprite = this.sprites.idle;
 
-    this._parts = "[]"; //defauls for npcs
+    this._parts = '[]'; //defauls for npcs
 
 }
 
 Object.defineProperties(Character.prototype, {
     X: {
-        get: function() { return this.x },
-        set: function(x) {
-            if (this.x == x)
-                return;
-            if (this.Dx === 0 || this.Settings.Pathfinding || Math.abs(this.x - x) > cnf.CELL_SIZE) {
-                game.sortedEntities.remove(this);
-                this.x = x;
-                game.sortedEntities.add(this);
+        get() { return this.x },
+        set(x) {
+            if (this.x == x) {
+                return
+            }
+            if (this.Dx === 0 || this.Settings.Pathfinding || Math.abs(this.x - x) > CELL_SIZE) {
+                game.sortedEntities.remove(this)
+                this.x = x
+                game.sortedEntities.add(this)
             }
         }
     },
     Y: {
-        get: function() { return this.y },
-        set: function(y) {
-            if (this.y == y)
-                return;
-            if (this.Dy === 0 || this.Settings.Pathfinding || Math.abs(this.y - y) > cnf.CELL_SIZE) {
-                game.sortedEntities.remove(this);
-                this.y = y;
-                game.sortedEntities.add(this);
+        get() { return this.y },
+        set(y) {
+            if (this.y == y) {
+                return
+            }
+            if (this.Dy === 0 || this.Settings.Pathfinding || Math.abs(this.y - y) > CELL_SIZE) {
+                game.sortedEntities.remove(this)
+                this.y = y
+                game.sortedEntities.add(this)
             }
         }
     },
 
     Name: {
-        get: function() { return this.name },
-        set: function(name) { this.name = name },
+        get() { return this.name },
+        set(name) { this.name = name },
     },
 })
 
@@ -141,84 +147,87 @@ Character.prototype.leftTopY = Entity.prototype.leftTopY
 Character.prototype.compare = Entity.prototype.compare
 
 Character.prototype.setPoint = function(p) {
-    if (this.Id && this.inWorld())
+    if (this.Id && this.inWorld()) {
         game.sortedEntities.remove(this);
+    }
 
-    this.x = p.x;
-    this.y = p.y;
+    this.x = p.x
+    this.y = p.y
 
-    if (this.Id && this.inWorld())
-        game.sortedEntities.add(this);
+    if (this.Id && this.inWorld()) {
+        game.sortedEntities.add(this)
+    }
 }
 Character.prototype.screen = function() {
     var x, y
     if (this.mount) {
-        x = this.mount.X;
-        y = this.mount.Y;
+        x = this.mount.X
+        y = this.mount.Y
     } else {
-        x = this.X;
-        y = this.Y;
+        x = this.X
+        y = this.Y
     }
-    return new Point(x, y).toScreen();
+    return new Point(x, y).toScreen()
 }
 Character.prototype.sync = function(data, init) {
-    Character.copy(this, data);
+    Character.copy(this, data)
 
-    this.burden = (this.Burden) ? Entity.get(this.Burden) : null;
-    this.plow = ("Plowing" in this.Effects) ? Entity.get(this.Effects.Plowing.Plow) : null;
+    this.burden = (this.Burden) ? Entity.get(this.Burden) : null
+    this.plow = ('Plowing' in this.Effects) ? Entity.get(this.Effects.Plowing.Plow) : null
 
-    this.syncMessages(this.Messages);
-    this.syncMessages(this.PrivateMessages);
+    this.syncMessages(this.Messages)
+    this.syncMessages(this.PrivateMessages)
 
-    if ("Path" in data) {
-        this.followPath();
+    if ('Path' in data) {
+        this.followPath()
     }
 
-    if (this.Name == "Margo") {
-        this.reloadSprite();
+    if (this.Name == 'Margo') {
+        this.reloadSprite()
     } else if (!init && JSON.stringify(this.getParts()) != this._parts) {
-        this.reloadSprite();
+        this.reloadSprite()
     }
 
 
     if (data.Dir !== undefined) {
-        this.sprite.position = data.Dir;
+        this.sprite.position = data.Dir
     }
 
-    if ("AvailableQuests" in data) {
-        this.updateActiveQuest();
+    if ('AvailableQuests' in data) {
+        this.updateActiveQuest()
     }
-    if ("Party" in data) {
-        this.updateParty(data.Party);
+    if ('Party' in data) {
+        this.updateParty(data.Party)
     }
 }
 Character.prototype.updateParty = function(members) {
-    var party = game.controller.party;
-    dom.clear(party);
-    if (!members)
-        return;
+    var party = game.controller.party
+    dom.clear(party)
+    if (!members) {
+        return
+    }
 
-    members.forEach(function(name, i) {
-        if (name == game.playerName)
-            return;
-        var member = game.characters.get(name);
+    members.forEach((name, i)=> {
+        if (name == game.playerName) {
+            return
+        }
+        var member = game.characters.get(name)
         var avatar
         if (member) {
-            avatar = loader.loadImage("avatars/" + member.sex() + ".png");
+            avatar = loader.loadImage(`avatars/${member.sex()}.png`)
         } else {
-            avatar = dom.div(".character-avatar-not-available", {text: "?"});
-            avatar.title = T("Out of sight");
-            Character.partyLoadQueue[name] = true;
+            avatar = dom.div('.character-avatar-not-available', {text: '?'})
+            avatar.title = T('Out of sight')
+            Character.partyLoadQueue[name] = true
         }
-        var cnt = dom.div(".character-avatar-container");
-        cnt.appendChild(avatar);
-        var prefix = (i === 0 && party[0] != game.playerName) ? "★" : "";
-        cnt.appendChild(dom.span(prefix + name, "party-member-name"));
-        cnt.onmousedown = function(e) {
-            return game.chat.nameMenu(e, name);
-        };
-        party.appendChild(cnt);
-    });
+
+        var cnt = dom.div('.character-avatar-container')
+        cnt.appendChild(avatar)
+        var prefix = (i === 0 && party[0] != game.playerName) ? '★' : ''
+        cnt.appendChild(dom.span(prefix + name, 'party-member-name'))
+        cnt.onmousedown = (e)=> game.chat.nameMenu(e, name)
+        party.appendChild(cnt)
+    })
 }
 Character.prototype.syncMessages = function(messages) {
     while(messages && messages.length > 0) {
@@ -233,330 +242,335 @@ Character.prototype.reloadSprite = function() {
     this.loadSprite();
 }
 Character.prototype.init = function(data) {
-    this.IsNpc = (data.Type != "man")
-    this.sync(data, true);
-    this.loadSprite();
+    this.IsNpc = (data.Type != 'man')
+    this.sync(data, true)
+    this.loadSprite()
 }
 Character.prototype.isSimpleSprite = function() { //for migration; get rid of this shit
     switch (this.Type) {
-    case "cat":
-    case "dog":
-    case "horse":
-    case "cow":
-    case "small-spider":
-    case "spider":
-    case "wolf":
-    case "wolf-fatty":
-    case "wolf-hungry":
-    case "wolf-undead":
-    case "wolf-demonic":
-    case "chicken":
-    case "goose":
-    case "rabbit":
-    case "preved-medved":
-    case "medved":
-    case "sheep":
-    case "omsk":
-    case "omich":
-    case "kitty-pahan":
-    case "kitty-cutthroat":
-    case "kitty-robber":
-    case "kitty-junkie":
-        return false;
+    case 'cat':
+    case 'dog':
+    case 'horse':
+    case 'cow':
+    case 'small-spider':
+    case 'spider':
+    case 'wolf':
+    case 'wolf-fatty':
+    case 'wolf-hungry':
+    case 'wolf-undead':
+    case 'wolf-demonic':
+    case 'chicken':
+    case 'goose':
+    case 'rabbit':
+    case 'preved-medved':
+    case 'medved':
+    case 'sheep':
+    case 'omsk':
+    case 'omich':
+    case 'kitty-pahan':
+    case 'kitty-cutthroat':
+    case 'kitty-robber':
+    case 'kitty-junkie':
+        return false
     default:
-        return this.IsNpc;
+        return this.IsNpc
     }
 }
-Character.prototype.initSprite = function() {
-    this.sprite.speed = 14000;
-    this.sprite.offset = this.Radius;
-    this.sprite.angle = Math.PI/4;
-    switch (this.Type) {
-    case "cat":
-        this.sprite.width = 90;
-        this.sprite.height = 90;
-        this.sprite.offset = 30;
-        break;
-    case "dog":
-        this.sprite.width = 100;
-        this.sprite.height = 100;
-        this.sprite.offset = 35;
-        break;
-    case "kitty-pahan":
-    case "kitty-cutthroat":
-    case "kitty-robber":
-    case "kitty-junkie":
-        this.sprite.width = 110;
-        this.sprite.height = 110;
-        this.sprite.offset = 30;
-        break;
-    case "goose":
-        this.sprite.width = 70;
-        this.sprite.height = 70;
-        this.sprite.speed = 7000;
-        break;
-    case "chicken":
-    case "rabbit":
-        this.sprite.width = 50;
-        this.sprite.height = 50;
-        this.sprite.speed = 7000;
-        break;
-    case "butterfly":
-    case "zombie":
-        this.sprite.width = 32;
-        this.sprite.height = 32;
-        this.sprite.angle = Math.PI/2;
-        this.sprite.frames = {
-            "idle": 1,
-            "run": [0, 3],
-        };
-        break;
-    case "ultra-zombie":
-        this.sprite.width = 96;
-        this.sprite.height = 96;
-        this.sprite.angle = Math.PI/2;
-        this.sprite.frames = {
-            "idle": 1,
-            "run": [0, 3],
-        };
-        break;
-    case "jesus":
-        this.sprite.width = 64;
-        this.sprite.height = 96;
-        this.sprite.frames = {
-            "idle": 4,
-            "run": 8,
-        };
-        break;
-    case "diego":
-    case "charles":
-        this.sprite.width = 73;
-        this.sprite.height = 88;
-        this.sprite.angle = Math.PI*2;
-        this.sprite.frames = {
-            "idle": 1,
-            "run": 0,
-        };
-        break;
-    case "suiseiseki":
-        this.sprite.width = 68;
-        this.sprite.height = 96;
-        this.sprite.angle = Math.PI*2;
-        this.sprite.frames = {
-            "idle": 4,
-            "run": 0,
-        };
-        break;
-    case "abu":
-        this.sprite.width = 128;
-        this.sprite.height = 128;
-        this.sprite.angle = Math.PI/2;
-        this.sprite.frames = {
-            "idle": 1,
-            "run": 3,
-        };
-        break;
-    case "senior-mocherator":
-        this.sprite.width = 80;
-        this.sprite.height = 80;
-        this.sprite.angle = Math.PI/2;
-        this.sprite.frames = {
-            "idle": 1,
-            "run": 3,
-        };
-        break;
-    case "mocherator":
-        this.sprite.width = 40;
-        this.sprite.height = 40;
-        this.sprite.angle = Math.PI/2;
-        this.sprite.frames = {
-            "idle": 1,
-            "run": 3,
-        };
-        break;
-    case "omsk":
-        this.sprite.width = 170;
-        this.sprite.height = 170;
-        break;
-    case "omich":
-        this.sprite.width = 130;
-        this.sprite.height = 130;
-        break;
-    case "ufo":
-        this.sprite.width = 64;
-        this.sprite.height = 64;
-        this.sprite.angle = Math.PI*2;
-        this.sprite.frames = {
-            "idle": 3,
-            "run": 0,
-        };
-        break;
-    case "wyvern":
-        this.sprite.width = 256;
-        this.sprite.height = 256;
-        this.sprite.frames = {
-            "idle": 4,
-            "run": 4,
-        };
-        this.sprite.speed = 20000;
-        break;
-    case "imp":
-        this.sprite.width = 107;
-        this.sprite.height = 68;
-        this.sprite.frames = {
-            "idle": 3,
-            "run": 4,
-        };
-        this.sprite.speed = 20000;
-        break;
-    case "lesser-daemon":
-        this.sprite.width = 160;
-        this.sprite.height = 102;
-        this.sprite.frames = {
-            "idle": 3,
-            "run": 4,
-        };
-        this.sprite.speed = 40000;
-        break;
-    case "higher-daemon":
-        this.sprite.width = 214;
-        this.sprite.height = 136;
-        this.sprite.frames = {
-            "idle": 3,
-            "run": 4,
-        };
-        this.sprite.speed = 50000;
-        break;
-    case "daemon":
-        this.sprite.width = 160;
-        this.sprite.height = 102;
-        this.sprite.frames = {
-            "idle": 3,
-            "run": 4,
-        };
-        this.sprite.speed = 50000;
-        break;
-    case "red-hair":
-        this.sprite.width = 64;
-        this.sprite.height = 96;
-        this.sprite.frames = {
-            "idle": 1,
-            "run": 3,
-        };
-        break;
-    case "snegurochka":
-    case "ded-moroz":
-        this.sprite.nameOffset = 100;
-        break;
-    case "vendor":
-    case "cirno":
-    case "moroz":
-    case "boris":
-    case "bertran":
-    case "bruno":
-    case "scrooge":
-    case "ahper":
-    case "cosmas":
-    case "shot":
-    case "umi":
-        this.sprite.nameOffset = 70;
-        break;
-    case "small-spider":
-        this.sprite.width = 64;
-        this.sprite.height = 64;
-        this.sprite.offset = 25;
-        this.sprite.speed = 21000;
-        break;
-    case "spider":
-        this.sprite.width = 128;
-        this.sprite.height = 128;
-        this.sprite.offset = 45;
-        this.sprite.speed = 31000;
-        break;
-    case "horse":
-    case "medved":
-        this.sprite.width = 150;
-        this.sprite.height = 150;
-        this.sprite.offset = 43;
-        break;
-    case "preved-medved":
-        this.sprite.width = 210;
-        this.sprite.height = 210;
-        this.sprite.offset = 44;
-        this.sprite.nameOffset = 150;
-        this.sprite.speed = 20000;
-        break;
-    case "cow":
-    case "wolf":
-    case "wolf-undead":
-    case "wolf-demonic":
-    case "sheep":
-        this.sprite.width = 100;
-        this.sprite.height = 100;
-        this.sprite.offset = 45;
-        break;
-    case "wolf-fatty":
-        this.sprite.width = 120;
-        this.sprite.height = 120;
-        break;
-    case "wolf-hungry":
-        this.sprite.width = 80;
-        this.sprite.height = 80;
-        break;
-    case "tractor":
-        this.sprite.width = 128;
-        this.sprite.height = 108;
-        break;
+function initCharacterSprite(sprite, type, radius) {
+    sprite.speed = 14000
+    sprite.offset = radius
+    sprite.angle = Math.PI/4
+    switch (type) {
+    case 'cat':
+        sprite.width = 90
+        sprite.height = 90
+        sprite.offset = 30
+        break
+    case 'dog':
+        sprite.width = 100
+        sprite.height = 100
+        sprite.offset = 35
+        break
+    case 'kitty-pahan':
+    case 'kitty-cutthroat':
+    case 'kitty-robber':
+    case 'kitty-junkie':
+        sprite.width = 110
+        sprite.height = 110
+        sprite.offset = 30
+        break
+    case 'goose':
+        sprite.width = 70
+        sprite.height = 70
+        sprite.speed = 7000
+        break
+    case 'chicken':
+    case 'rabbit':
+        sprite.width = 50
+        sprite.height = 50
+        sprite.speed = 7000
+        break
+    case 'butterfly':
+    case 'zombie':
+        sprite.width = 32
+        sprite.height = 32
+        sprite.angle = Math.PI/2
+        sprite.frames = {
+            'idle': 1,
+            'run': [0, 3],
+        }
+        break
+    case 'ultra-zombie':
+        sprite.width = 96
+        sprite.height = 96
+        sprite.angle = Math.PI/2
+        sprite.frames = {
+            'idle': 1,
+            'run': [0, 3],
+        }
+        break
+    case 'jesus':
+        sprite.width = 64
+        sprite.height = 96
+        sprite.frames = {
+            'idle': 4,
+            'run': 8,
+        }
+        break
+    case 'diego':
+    case 'charles':
+        sprite.width = 73
+        sprite.height = 88
+        sprite.angle = Math.PI*2
+        sprite.frames = {
+            'idle': 1,
+            'run': 0,
+        }
+        break
+    case 'suiseiseki':
+        sprite.width = 68
+        sprite.height = 96
+        sprite.angle = Math.PI*2
+        sprite.frames = {
+            'idle': 4,
+            'run': 0,
+        }
+        break
+    case 'abu':
+        sprite.width = 128
+        sprite.height = 128
+        sprite.angle = Math.PI/2
+        sprite.frames = {
+            'idle': 1,
+            'run': 3,
+        }
+        break
+    case 'senior-mocherator':
+        sprite.width = 80
+        sprite.height = 80
+        sprite.angle = Math.PI/2
+        sprite.frames = {
+            'idle': 1,
+            'run': 3,
+        }
+        break
+    case 'mocherator':
+        sprite.width = 40
+        sprite.height = 40
+        sprite.angle = Math.PI/2
+        sprite.frames = {
+            'idle': 1,
+            'run': 3,
+        }
+        break
+    case 'omsk':
+        sprite.width = 170
+        sprite.height = 170
+        break
+    case 'omich':
+        sprite.width = 130
+        sprite.height = 130
+        break
+    case 'ufo':
+        sprite.width = 64
+        sprite.height = 64
+        sprite.angle = Math.PI*2
+        sprite.frames = {
+            'idle': 3,
+            'run': 0,
+        }
+        break
+    case 'wyvern':
+        sprite.width = 256
+        sprite.height = 256
+        sprite.frames = {
+            'idle': 4,
+            'run': 4,
+        }
+        sprite.speed = 20000
+        break
+    case 'imp':
+        sprite.width = 107
+        sprite.height = 68
+        sprite.frames = {
+            'idle': 3,
+            'run': 4,
+        }
+        sprite.speed = 20000
+        break
+    case 'lesser-daemon':
+        sprite.width = 160
+        sprite.height = 102
+        sprite.frames = {
+            'idle': 3,
+            'run': 4,
+        }
+        sprite.speed = 40000
+        break
+    case 'higher-daemon':
+        sprite.width = 214
+        sprite.height = 136
+        sprite.frames = {
+            'idle': 3,
+            'run': 4,
+        }
+        sprite.speed = 50000
+        break
+    case 'daemon':
+        sprite.width = 160
+        sprite.height = 102
+        sprite.frames = {
+            'idle': 3,
+            'run': 4,
+        }
+        sprite.speed = 50000
+        break
+    case 'red-hair':
+        sprite.width = 64
+        sprite.height = 96
+        sprite.frames = {
+            'idle': 1,
+            'run': 3,
+        }
+        break
+    case 'snegurochka':
+    case 'ded-moroz':
+        sprite.nameOffset = 100
+        break
+    case 'vendor':
+    case 'cirno':
+    case 'moroz':
+    case 'boris':
+    case 'bertran':
+    case 'bruno':
+    case 'scrooge':
+    case 'ahper':
+    case 'cosmas':
+    case 'shot':
+    case 'umi':
+        sprite.nameOffset = 70
+        break
+    case 'small-spider':
+        sprite.width = 64
+        sprite.height = 64
+        sprite.offset = 25
+        sprite.speed = 21000
+        break
+    case 'spider':
+        sprite.width = 128
+        sprite.height = 128
+        sprite.offset = 45
+        sprite.speed = 31000
+        break
+    case 'horse':
+    case 'medved':
+        sprite.width = 150
+        sprite.height = 150
+        sprite.offset = 43
+        break
+    case 'preved-medved':
+        sprite.width = 210
+        sprite.height = 210
+        sprite.offset = 44
+        sprite.nameOffset = 150
+        sprite.speed = 20000
+        break
+    case 'cow':
+    case 'wolf':
+    case 'wolf-undead':
+    case 'wolf-demonic':
+    case 'sheep':
+        sprite.width = 100
+        sprite.height = 100
+        sprite.offset = 45
+        break
+    case 'wolf-fatty':
+        sprite.width = 120
+        sprite.height = 120
+        break
+    case 'wolf-hungry':
+        sprite.width = 80
+        sprite.height = 80
+        break
+    case 'tractor':
+        sprite.width = 128
+        sprite.height = 108
+        break
     default:
-        this.sprite.nameOffset = 72;
-        this.sprite.offset = 2*this.Radius;
-        this.sprite.width = 96;
-        this.sprite.height = 96;
-        //this.sprite.speed = 7000;
-        this.sprite.speed = 14000;
+        sprite.nameOffset = 72
+        sprite.offset = 2*radius
+        sprite.width = 96
+        sprite.height = 96
+        //sprite.speed = 7000
+        sprite.speed = 14000
     }
-    if (!this.sprite.nameOffset)
-        this.sprite.nameOffset = this.sprite.height;
+    if (!sprite.nameOffset) {
+        sprite.nameOffset = sprite.height
+    }
 }
 Character.prototype.loadSprite = function() {
-    var sprite = this.sprite;
-    if (sprite.loading)
-        return;
-
-    this.initSprite();
-
-    if (this.IsNpc) {
-        this.loadNpcSprite();
-        return;
+    var sprite = this.sprite
+    if (sprite.loading) {
+        return
     }
 
-    sprite.loading = true;
+    initCharacterSprite(this.sprite, this.Type, this.Radius)
 
-    var animation = sprite.name;
-    var dir = Character.spriteDir + this.Type + "/";
-    var parts = this.getParts();
-    this._parts = JSON.stringify(parts);
-    parts.forEach(function(part) {
-        var path = dir + animation + "/" + part.type + "/" + part.name + ".png";
-        part.image = loader.loadImage(path);
-    });
-    if (sprite.name == "attack") {
+    if (this.IsNpc) {
+        this.loadNpcSprite()
+        return
+    }
+
+    sprite.loading = true
+
+    var animation = sprite.name
+    var dir = Character.spriteDir + this.Type + '/'
+    var parts = this.getParts()
+    this._parts = JSON.stringify(parts)
+
+    forEach(parts, (part)=> {
+        var path = `${dir}${animation}/${part.type}/${part.name}.png`
+        part.image = loader.loadImage(path)
+    })
+
+    if (sprite.name == 'attack') {
         var weapon = Character.weaponSprites.sword;
         if (weapon)
             parts.push({image: weapon.image});
     }
 
     var name = this.Name;
-    loader.ready(function() {
-        var canvas = document.createElement("canvas");
+    loader.ready(()=> {
+        var canvas = document.createElement('canvas');
         var naked = Character.nakedSprites[animation];
         var ctx = imageToCanvas(naked.image, canvas)
-        parts.forEach(function(part, i) {
+
+        forEach(parts, (part, i)=> {
             var image = part.image;
             if (image && image.width > 0) {
                 if (part.color && part.opacity) {
-                    var worker = new Worker("js/tint.js");
-                    var tmpCanvas = document.createElement("canvas");
+                    var worker = new Worker('js/tint.js');
+                    var tmpCanvas = document.createElement('canvas');
                     var tmpCtx = imageToCanvas(image, tmpCanvas)
                     worker.onmessage = function(e) {
                         tmpCtx.putImageData(e.data, 0, 0)
@@ -590,83 +604,99 @@ Character.prototype.loadSprite = function() {
 }
 Character.prototype.loadNpcSprite = function() {
     var type = this.Type;
+
+    // XXX this is hack
+    switch (this.Name) {
+    case 'Margo':
+    case '$Margo':
+        type = 'margo'
+        break
+    case '$Umi':
+    case 'Umi':
+        type = 'umi'
+        break
+    case '$Shot':
+    case 'Shot':
+        type = 'shot'
+        break
+    }
+
     switch (type) {
-    case "margo":
-        var name = (this.Owner == game.player.Id) ? "margo-" + util.rand(0, 1) : "margo";
-        this.sprite.load(Character.spriteDir + name + ".png");
-        return;
+    case 'margo':
+        var name = (this.Owner == game.player.Id) ? 'margo-' + util.rand(0, 1) : 'margo'
+        this.sprite.load(Character.spriteDir + name + '.png')
+        return
     default:
         if (!this.isSimpleSprite()) {
-            this._loadNpcSprites();
-            return;
+            this.sprite.load(Character.spriteDir + `${this.Type}/${this.sprite.name}.png`)
+            return
         }
-        if (type == "vendor") {
-            type = "vendor-" + ([].reduce.call(this.Name, function(hash, c) {
-                return hash + c.charCodeAt(0);
-            }, 0) % 3 + 1);
-            break;
+        if (type == 'vendor') {
+            type = 'vendor-' + ([].reduce.call(this.Name,
+                    (hash, c)=> hash + c.charCodeAt(0),
+                0) % 3 + 1)
         }
     }
-    this.sprite.load(Character.spriteDir + type + ".png");
-}
-Character.prototype._loadNpcSprites = function() {
-    this.sprite.load(Character.spriteDir + this.Type + "/" + this.sprite.name + ".png");
+    this.sprite.load(Character.spriteDir + type + '.png');
 }
 Character.prototype.getActions = function() {
-    var actions = {};
+    var actions = {}
     switch (this.Type) {
-    case "cow":
+    case 'cow':
         actions = {
-            "Milk": function() {
-                game.network.send("milk", {Id: this.Id});
+            'Milk': function() {
+                milk(this.id)
             }
-        };
-        break;
-    case "rabbit":
-    case "chicken":
+        }
+        break
+    case 'rabbit':
+    case 'chicken':
         actions = {
-            "Catch": function() {
-                game.network.send("catch-animal", {Id: this.Id});
+            'Catch': function() {
+                catchAnimal(this.Id)
             }
-        };
-        break;
+        }
+        break
     default:
         if (this.Riding) {
             actions = {
-                "Mount": function() {
-                    game.network.send("mount", {Id: this.Id});
+                'Mount': function() {
+                    mount(this.Id)
                 },
-                "Dismount": function() {
-                    game.network.send("dismount");
+                'Dismount': function() {
+                    dismount()
                 },
-            };
+            }
         }
     }
 
     var common = {
         Select: game.player.setTarget.bind(game.player, this)
-    };
-    if (game.player.IsAdmin) {
-        common.Kill = function() {
-            game.chat.send("*kill " + this.Id);
-        };
-        common.ComeToMe = function() {
-            game.chat.send("*come-to-me " + this.Id);
-        };
-        if (this.Type == "vendor") {
-            common.RemoveVendor = function() {
-                game.chat.send("*remove-vendor " + this.Name);
-            };
-        }
-    }
-    if (this.isInteractive()) {
-        common.Interact =  this.interact;
     }
 
-    var list = [common, actions];
-    if (this.IsNpc)
-        return list;
-    return list.concat(game.chat.makeNameActions(this.Name));
+    if (game.player.IsAdmin) {
+        common.Kill = function() {
+            game.chat.send(`*kill ${this.Id}`)
+        }
+        common.ComeToMe = function() {
+            game.chat.send(`*come-to-me ${this.Id}`)
+        }
+        if (this.Type == 'vendor') {
+            common.RemoveVendor = function() {
+                game.chat.send(`*remove-vendor ${this.Name}`)
+            }
+        }
+    }
+
+    if (this.isInteractive()) {
+        common.Interact = this.interact
+    }
+
+    var list = [common, actions]
+    if (this.IsNpc) {
+        return list
+    }
+    return list.concat(game.chat.makeNameActions(this.Name))
 }
 Character.prototype.defaultAction = function(targetOnly) {
     if (this.isInteractive()) {
@@ -678,7 +708,7 @@ Character.prototype.defaultAction = function(targetOnly) {
             window.ui.$broadcast('actions.main')
         } else if (this != game.player) {
             var party = game.player.Party;
-            if (!party || party.indexOf(this.Name) == -1) {
+            if (party && party.indexOf(this.Name) == -1) {
                 game.player.setTarget(this);
             }
         }
@@ -690,11 +720,11 @@ Character.prototype.drawAction = function() {
         var progress = Math.min(this.action.progress, 1);
         if (this.isPlayer) {
             var ap = game.controller.actionProgress.firstChild;
-            ap.style.width = progress * 100 + "%";
+            ap.style.width = progress * 100 + '%';
         }
         //else {
             var w = 64;
-            var h = cnf.FONT_SIZE * 0.5;
+            var h = FONT_SIZE * 0.5;
             var p = this.screen();
             var x = p.x - w/2;
             var y = p.y - this.sprite.nameOffset + h + 1;
@@ -715,16 +745,19 @@ Character.prototype.drawAction = function() {
     }
 }
 Character.prototype.see = function(character) {
-    if (this == character)
-        return true;
-    var p = this.getDrawPoint();
-    var len_x = character.X - this.X;
-    var len_y = character.Y - this.Y;
-    return util.distanceLessThan(len_x, len_y, Math.hypot(game.screen.width, game.screen.height));
+    if (this == character) {
+        return true
+    }
+    var p = this.getDrawPoint()
+    var len_x = character.X - this.X
+    var len_y = character.Y - this.Y
+    return util.distanceLessThan(len_x, len_y, Math.hypot(game.screen.width, game.screen.height))
 }
 Character.prototype.setDst = function(x, y) {
-    if (this.Speed.Current <= 0 || this.Disabled)
-        return;
+    if (this.Speed.Current <= 0 || this.Disabled) {
+        return
+    }
+
     var leftBorder, rightBorder, topBorder, bottomBorder;
     leftBorder = this.Radius;
     topBorder = this.Radius;
@@ -743,18 +776,20 @@ Character.prototype.setDst = function(x, y) {
         y = bottomBorder;
     }
 
-    if (x == this.Dst.X && y == this.Dst.Y)
-        return;
+    if (x == this.Dst.X && y == this.Dst.Y) {
+        return
+    }
 
-    game.network.send("set-dst", {x: x, y: y});
+    setDst(x, y)
     game.controller.resetAction();
     this.dst.x = x;
     this.dst.y = y;
     this.dst.radius = 9;
     this.dst.time = Date.now();
 
-    if (!this.Settings.Pathfinding)
-        this._setDst(x, y);
+    if (!this.Settings.Pathfinding) {
+        this._setDst(x, y)
+    }
 }
 Character.prototype._setDst = function(x, y) {
     var len_x = x - this.X;
@@ -788,15 +823,15 @@ Character.prototype.draw = function() {
     if (true) {
         if ((true || debug.player.path) && this.Path) {
             var r = 2;
-            game.ctx.fillStyle = "#f00";
-            this.Path.forEach(function(p) {
+            game.ctx.fillStyle = '#f00';
+            forEach(this.Path, (p)=> {
                 iso.fillRect(game.ctx, p.X-r, p.Y-r, 2*r, 2*r);
-            });
+            })
         }
         if (this.dst.radius > 0) {
             var now = Date.now();
             if (this.dst.time + 33 > now) {
-                game.ctx.strokeStyle = "#fff";
+                game.ctx.strokeStyle = '#fff';
                 game.ctx.beginPath();
                 p = new Point(this.dst.x, this.dst.y).toScreen();
                 game.ctx.arc(p.x, p.y, this.dst.radius--, 0, Math.PI * 2);
@@ -863,16 +898,6 @@ Character.prototype.draw = function() {
         this.drawHovered(true);
     }
 }
-Character.prototype.drawAura = function() {
-    if (config.ui.showAttackRadius && this.sprite.name == "attack") {
-        var p = new Point(this);
-        var sector = (this.sprite.position - 1);
-        var offset = new Point(cnf.CELL_SIZE, 0).rotate(2*Math.PI - sector * Math.PI/4);
-        p.add(offset);
-        game.ctx.fillStyle = (this.isPlayer) ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 0, 0, 0.2)";
-        iso.fillCircle(game.ctx, p.x, p.y, cnf.CELL_SIZE);
-    }
-}
 Character.prototype.drawUI = function() {
     var ctx = game.ctx
 
@@ -893,24 +918,24 @@ Character.prototype.drawUI = function() {
         var height = width * marker.height / marker.width;
         var scr = this.screen();
         scr.x -= width / 2;
-        scr.y -= this.sprite.nameOffset + height + cnf.FONT_SIZE;
+        scr.y -= this.sprite.nameOffset + height + FONT_SIZE;
 
         ctx.drawImage(marker, scr.x, scr.y, width, height);
     }
 
-    if (game.debug.player.box || game.controller.hideStatic()) {
-        ctx.strokeStyle = "cyan";
+    if (debug.player.box || game.controller.hideStatic()) {
+        ctx.strokeStyle = 'cyan';
         iso.strokeRect(ctx, this.leftTopX(), this.leftTopY(), this.Width, this.Height);
         iso.strokeCircle(ctx, this.X, this.Y, this.Radius);
 
         // var scr = this.screen();
         // ctx.beginPath();
-        // ctx.fillStyle = "black";
+        // ctx.fillStyle = 'black';
         // ctx.beginPath();
         // ctx.arc(scr.x, scr.y, 5, 0, 2 * Math.PI);
         // ctx.fill();
 
-        // ctx.fillStyle = "#fff";
+        // ctx.fillStyle = '#fff';
         // ctx.beginPath();
         // ctx.arc(scr.x, scr.y, 2, 0, 2 * Math.PI);
         // ctx.fill();
@@ -921,13 +946,11 @@ Character.prototype.drawUI = function() {
         this.drawName(undefined, !!marker);
     }
 
-    this.info.forEach(function(info) {
-        info.draw();
-    });
+    forEach(this.info, (info)=> { info.draw() })
 
-    if(game.debug.player.position) {
-        ctx.fillStyle = "#fff";
-        var text = "(" + Math.floor(this.X) + " " + Math.floor(this.Y) + ")";
+    if(debug.player.position) {
+        ctx.fillStyle = '#fff';
+        var text = `(${Math.floor(this.X)} ${Math.floor(this.Y)})`;
         var x = this.X - ctx.measureText(text).width / 2;
         game.drawStrokedText(text, x, this.Y);
     }
@@ -949,7 +972,7 @@ Character.prototype.drawUI = function() {
     p.toScreen();
 
     var r = 14;
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = '#000';
     ctx.beginPath();
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
@@ -957,6 +980,7 @@ Character.prototype.drawUI = function() {
     p.y -= Character.skull.height - r;
     Character.skull.draw(p);
 }
+
 Character.prototype._qm = {
     x: 1, //quest marker current scale
     dx: 0.0033,
@@ -964,64 +988,69 @@ Character.prototype._qm = {
 
 Character.prototype.getQuestMarker = function() {
     // has owner -> vendor -> no quests
-    if (this.Owner)
-        return null;
-    // 1. yellow (?) -> has "ready" quest
-    // 2. yellow (!) -> has "available" quest
-    // 3. gray (?) -> has "active" quest
+    if (this.Owner) {
+        return null
+    }
+
+    // 1. yellow (?) -> has 'ready' quest
+    // 2. yellow (!) -> has 'available' quest
+    // 3. gray (?) -> has 'active' quest
 
     var active = false;
     for (var name in game.player.ActiveQuests) {
         var questLog = game.player.ActiveQuests[name];
         var quest = questLog.Quest;
-        if (quest.End != this.Type)
-            continue;
-        if (questLog.State == "ready")
+        if (quest.End != this.Type) {
+            continue
+        }
+        if (questLog.State == 'ready') {
             return game.questMarkers.ready;
-        active = active || questLog.State == "active";
+        }
+        active = active || questLog.State == 'active';
     }
-    if (this.getAvailableQuests().length > 0)
+    if (this.getAvailableQuests().length > 0) {
         return game.questMarkers.available;
-    if (active)
+    }
+    if (active) {
         return game.questMarkers.active;
+    }
     return null;
 }
 Character.prototype.getName = function() {
-    var name = this.Name;
-    if (this.Type == "vendor") {
-        return (this.Owner) ? name : T(name);
-        // return TT("Vendor of {name}", {name: name});
+    var name = this.Name
+    if (this.Type == 'vendor') {
+        return (this.Owner) ? name : T(name)
+        // return TT('Vendor of {name}', {name: name})
     }
     if (this.IsNpc) {
         return TS(this.Name)
     }
-
-    if (this.Title)
-        name = TT(this.Title, {name: name});
-
-    if (this.Fame == 10000) {
-        name = T("Lord") + " " + name;
+    if (this.Title) {
+        name = TT(this.Title, {name: name})
     }
-    return name;
+    if (this.Fame == 10000) {
+        name = `${T('Lord')} ${name}`
+    }
+    return name
 }
 Character.prototype.drawName = function(drawHp, drawName) {
     var name = this.getName();
 
     if (game.controller.modifier.shift) {
-        name += " | " + T("Lvl") + ": " + this.Lvl;
-        name += " | " + ["♂", "♀"][this.Sex];
+        name += ` | ${T('Lvl')}: ${this.Lvl} | ${['♂', '♀'][this.Sex]}`
     }
 
     var p = this.screen();
     var y = p.y - this.sprite.nameOffset;
-    var dy = cnf.FONT_SIZE * 0.5;
+    var dy = FONT_SIZE * 0.5;
 
-    if (this.isInteractive())
-        drawHp = false;
-    else
-        drawHp = drawHp || ((!this.IsNpc || game.config.ui.npc) && game.config.ui.hp);
+    if (this.isInteractive()) {
+        drawHp = false
+    } else {
+        drawHp = drawHp || ((!this.IsNpc || config.ui.npc) && config.ui.hp)
+    }
 
-    drawName = drawName || ((!this.IsNpc || game.config.ui.npc) && game.config.ui.name);
+    drawName = drawName || ((!this.IsNpc || config.ui.npc) && config.ui.name)
 
     if (this.PvpExpires) {
         var pvpExpires = new Date(this.PvpExpires * 1000);
@@ -1029,10 +1058,12 @@ Character.prototype.drawName = function(drawHp, drawName) {
         // blink when less then 3 sec
         if (diff > 0 && (diff > 3e3 || diff % 1000 < 500)) {
             var pdy = Character.pvpFlag.height;
-            if (drawHp)
+            if (drawHp) {
                 pdy += dy;
-            if (drawName)
+            }
+            if (drawName) {
                 pdy += dy;
+            }
 
             var pvpPoint = new Point(p.x, y);
             pvpPoint.x -= Character.pvpFlag.width/2;
@@ -1050,7 +1081,7 @@ Character.prototype.drawName = function(drawHp, drawName) {
 
     if (drawHp) {
         var w = 64;
-        var arena = ("Arena" in this.Effects) && ("Arena" in game.player.Effects);
+        var arena = ('Arena' in this.Effects) && ('Arena' in game.player.Effects);
         if (arena && this.Citizenship.Faction != game.player.Citizenship.Faction) {
             //full red rect
             ctx.fillStyle = '#000';
@@ -1075,7 +1106,7 @@ Character.prototype.drawName = function(drawHp, drawName) {
     }
     if (drawName) {
         ctx.fillStyle = (this.Karma < 0 || this.Aggressive) ?
-            "#f00" : ((this == game.player) ? "#ff0" : "#fff");
+            '#f00' : ((this == game.player) ? '#ff0' : '#fff');
         game.drawStrokedText(name, x, y - dy / 2);
         var flag = this.flag()
         if (flag) {
@@ -1095,7 +1126,7 @@ Character.prototype.idle = function() {
 }
 Character.prototype.animate = function() {
     var simpleSprite = this.isSimpleSprite();
-    var animation = "idle";
+    var animation = 'idle';
     var self = (this.mount) ? this.mount : this;
     var position = self.sprite.position;
 
@@ -1106,7 +1137,7 @@ Character.prototype.animate = function() {
     if (this.sprite.angle === 0) {
         position = 0; //omsk hack
     } else if (self.Dx || self.Dy) {
-        animation = "run";
+        animation = 'run';
         var sector = self.sprite.angle;
         var sectors = 2*Math.PI / sector;
         var angle = Math.atan2(-self.Dy, self.Dx);
@@ -1118,38 +1149,39 @@ Character.prototype.animate = function() {
     } else if (!simpleSprite) {
         var sitting = this.Effects.Sitting;
         if (sitting) {
-            animation = "sit";
+            animation = 'sit';
             var seat = Entity.get(sitting.SeatId);
             if (seat) {
                 switch (seat.Orientation) {
-                case "w":
+                case 'w':
                     position = 1; break;
-                case "s":
+                case 's':
                     position = 3; break;
-                case "e":
+                case 'e':
                     position = 5; break;
-                case "n":
+                case 'n':
                     position = 7; break;
                 }
             }
         } else {
             switch (this.Action.Name) {
-            case "attack":
-            case "dig":
+            case 'attack':
+            case 'dig':
                 animation = this.Action.Name;
                 break;
-            case "defecate":
-            case "":
-                animation = "idle";
+            case 'defecate':
+            case '':
+                animation = 'idle';
                 break;
             default:
-                animation = (this.IsNpc) ? "attack" : "craft";
+                animation = (this.IsNpc) ? 'attack' : 'craft';
             }
         }
     }
 
-    if (this.mount)
-        animation = "ride";
+    if (this.mount) {
+        animation = 'ride';
+    }
     this.sprite = this.sprites[animation];
     this.sprite.position = position;
 
@@ -1161,7 +1193,7 @@ Character.prototype.animate = function() {
     var now = Date.now();
     var speed = (this.Speed && this.Speed.Current || 100);
 
-    if (animation == "run")
+    if (animation == 'run')
         speed *= this.speedFactor;
 
     if(now - this.sprite.lastUpdate > (this.sprite.speed / speed)) {
@@ -1191,7 +1223,7 @@ Character.prototype.animate = function() {
 
     if (this.sprite.frame < start || this.sprite.frame >= end) {
         this.sprite.frame = start;
-        if (this.Type == "desu")
+        if (this.Type == 'desu')
             this.sprite.lastUpdate = now + util.rand(5, 60) * 60;
     }
 }
@@ -1209,10 +1241,10 @@ Character.prototype.toggleActionSound = function() {
 }
 Character.prototype.update = function(k) {
     this.animate();
-    if ("Plague" in this.Effects) {
+    if ('Plague' in this.Effects) {
         this.playAnimation({
             up: {
-                name: "plague",
+                name: 'plague',
                 width: 64,
                 height: 64,
                 dy: -16,
@@ -1258,62 +1290,62 @@ Character.prototype.update = function(k) {
 
     if (this.isPlayer) {
         // clear target if one is disappeared
-        if (this.target && !game.entities.has(this.target.Id))
-            this.setTarget(null);
+        if (this.target && !game.entities.has(this.target.Id)) {
+            this.setTarget(null)
+        }
 
-        this.updateBuilding();
-        this.updateCamera();
-        this.updateBar();
+        this.updateBuilding()
+        this.updateCamera()
+        this.updateBar()
     }
 
-    this.info.map(function(info) {
-        info.update(k);
-    });
+    this.info.map((info)=> { info.update(k) })
 
     if (this.ballon) {
-        this.ballon.update();
+        this.ballon.update()
     }
-
 }
+
+var abs = Math.abs
 Character.prototype.updateBuilding = function() {
     var n = false, w = false, s = false,  e = false;
-    var x = this.X;
-    var y = this.Y;
+    var x = this.x
+    var y = this.y
 
-    game.entities.forEach(function(b) {
-        if (b.Group == "wall" || b.Group == "gate") {
-            n = n || (b.Y < y && Math.abs(b.X - x) < b.Width);
-            w = w || (b.X < x && Math.abs(b.Y - y) < b.Height);
-            s = s || (b.Y > y && Math.abs(b.X - x) < b.Width);
-            e = e || (b.X > x && Math.abs(b.Y - y) < b.Height);
+    game.entities.forEach((b)=> {
+        if (b.Group == 'wall' || b.Group == 'gate') {
+            n = n || (b.y < y && abs(b.x - x) < b.Width)
+            w = w || (b.x < x && abs(b.y - y) < b.Height)
+            s = s || (b.y > y && abs(b.x - x) < b.Width)
+            e = e || (b.x > x && abs(b.y - y) < b.Height)
         }
-    });
+    })
 
-    this.inBuilding = (n && w && s && e);
+    this.inBuilding = (n && w && s && e)
 }
 Character.prototype.equipSlot = function(name) {
     return this.Equip[CharacterData.equipSlots.indexOf(name)];
 }
 Character.prototype.updateBar = function() {
-    ["Hp", "Fullness", "Stamina"].map((name)=> {
+    map(['Hp', 'Fullness', 'Stamina'], (name)=> {
         var strip = document.getElementById(util.lcfirst(name));
         var param = this[name];
         var value = Math.round(param.Current / param.Max * 100);
         strip.firstChild.style.width = Math.min(100, value) + '%';
         strip.title = name +
-            ": " + util.toFixed(this[name].Current) +
-            " / " + util.toFixed(this[name].Max);
+            ': ' + util.toFixed(this[name].Current) +
+            ' / ' + util.toFixed(this[name].Max);
         strip.lastChild.style.width = Math.max(0, value - 100) + '%';
     });
 
-    if (!this.updateActionButton("right-hand") && !this.updateActionButton("left-hand")) {
+    if (!this.updateActionButton('right-hand') && !this.updateActionButton('left-hand')) {
         window.ui.$broadcast('actions.reset')
     }
 }
 Character.prototype.updateActionButton = function(equipSlotName) {
-    var action = "";
+    var action = '';
     if (this.burden) {
-        action = "drop";
+        action = 'drop';
     } else {
         var tool = Entity.get(this.equipSlot(equipSlotName));
         if (tool) {
@@ -1328,48 +1360,49 @@ Character.prototype.updateActionButton = function(equipSlotName) {
     var callback = null;
 
     switch (action) {
-    case "drop":
-        callback = this.liftStop.bind(this);
+    case 'drop':
+        callback = this.liftStop.bind(this)
         break;
-    case "shovel":
-    case "pickaxe":
-    case "tool":
-    case "taming":
-    case "dildo":
-    case "snowball":
-    case "shit":
-    case "fishing-rod":
+    case 'shovel':
+    case 'pickaxe':
+    case 'tool':
+    case 'taming':
+    case 'dildo':
+    case 'snowball':
+    case 'shit':
+    case 'fishing-rod':
         callback = ()=> {
             var done = null;
-            var cmd = "dig";
+            var cmd = 'dig';
             switch (action) {
-            case "dildo":
-            case "snowball":
-            case "shit":
+            case 'dildo':
+            case 'snowball':
+            case 'shit':
                 game.controller.cursor.set(
                     tool,
                     game.controller.mouse.x,
                     game.controller.mouse.y
                 );
                 return;
-            case "taming":
-                cmd = "tame";
+            case 'taming':
+                cmd = 'tame';
                 break;
-            case "tool":
-                cmd = "use-tool";
+            case 'tool':
+                cmd = 'use-tool';
                 break;
-            case "fishing-rod":
-                cmd = "fish";
+            case 'fishing-rod':
+                cmd = 'fish';
                 done = this.fish.bind(this);
                 break;
             default:
-                var align = {X: cnf.CELL_SIZE, Y: cnf.CELL_SIZE};
+                var align = {X: CELL_SIZE, Y: CELL_SIZE};
             }
+
             var cursor = new Entity(tool.Type);
             cursor.initSprite();
             var icon = tool._icon || tool.icon();
-            cursor.Width = cnf.CELL_SIZE;
-            cursor.Height = cnf.CELL_SIZE;
+            cursor.Width = CELL_SIZE;
+            cursor.Height = CELL_SIZE;
             cursor.Sprite.Dx = 6;
             cursor.Sprite.Dy = 56;
             cursor.sprite.image = icon;
@@ -1387,134 +1420,63 @@ Character.prototype.updateActionButton = function(equipSlotName) {
     return true;
 }
 Character.prototype.fish = function fish(data) {
-    var repeat = fish.bind(this);
     var panel = game.panels.fishing
     if (!panel) {
-        var rating = document.createElement("div");
-        rating.className = "rating";
-        var buttons = document.createElement("div");
-        buttons.id = "fishing-buttons";
-        var actions = [">", ">>", ">>>", "<", "<<", "<<<"];
-        actions.forEach(function(action, index) {
-            var button = document.createElement("button");
+        var rating = document.createElement('div');
+        rating.className = 'rating';
+        var buttons = document.createElement('div');
+        buttons.id = 'fishing-buttons';
+        var actions = ['>', '>>', '>>>', '<', '<<', '<<<'];
+        forEach(actions, (action, index)=> {
+            var button = document.createElement('button');
             button.textContent = T(action);
             button.move = index;
-            button.style.width = "100px";
+            button.style.width = '100px';
             button.disabled = true;
             button.onclick = function() {
-                game.network.send("fishing-move", {move: this.move});
-                dom.forEach("#fishing-buttons > button", function() {
-                    this.disabled = true;
-                });
+                fishingMove(this.move)
+                dom.forEach('#fishing-buttons > button', ()=> {
+                    this.disabled = true
+                })
             };
             buttons.appendChild(button);
         });
-        var playerMeter = document.createElement("meter");
+        var playerMeter = document.createElement('meter');
         playerMeter.max = 300;
-        playerMeter.style.width = "100%";
-        playerMeter.title = T("Player");
+        playerMeter.style.width = '100%';
+        playerMeter.title = T('Player');
 
-        var fishMeter = document.createElement("meter");
+        var fishMeter = document.createElement('meter');
         fishMeter.max = 300;
-        fishMeter.style.width = "100%";
-        fishMeter.title = T("Fish");
+        fishMeter.style.width = '100%';
+        fishMeter.title = T('Fish');
 
-        panel = new Panel("fishing", "Fishing", [rating, playerMeter, fishMeter, buttons]);
+        panel = new Panel('fishing', 'Fishing', [rating, playerMeter, fishMeter, buttons]);
         panel.player = playerMeter;
         panel.fish = fishMeter;
         panel.rating = rating;
         panel.buttons = buttons;
     }
-    if ("Rating" in data) {
+    if ('Rating' in data) {
         panel.player.value = +data.Player || 0;
         panel.fish.value = +data.Fish || 0;
         panel.rating.textContent = T(data.Rating);
     }
-    if (data.Ok == "fishing-finished") {
-        dom.forEach("#fishing-buttons > button", function() {
+    if (data.Ok == 'fishing-finished') {
+        dom.forEach('#fishing-buttons > button', ()=> {
             this.disabled = true;
-        });
+        })
         panel.hide();
         return null;
     }
-    dom.forEach("#fishing-buttons > button", function() {
-        this.disabled = false;
-    });
+    dom.forEach('#fishing-buttons > button', ()=> {
+        this.disabled = false
+    })
     panel.show();
-    return repeat;
-}
-Character.prototype.updateEffect = function(name, effect) {
-    var id = "effect-" + name;
-    var efdiv = document.getElementById(id);
-    var hash = JSON.stringify(effect);
-    if (efdiv) {
-        if (efdiv.hash == hash)
-            return;
-
-        dom.clear(efdiv);
-        clearInterval(efdiv.interval);
-    } else {
-        efdiv = document.createElement("div");
-        efdiv.id = id;
-    }
-
-    efdiv.hash = hash;
-
-    var duration = effect.Duration / 1e6;
-    if (duration > 0) {
-        var progress = document.createElement("div");
-        var last = new Date(duration - (Date.now() - effect.Added*1000));
-
-        progress.className = "effect-progress";
-        progress.style.width = "100%";
-        efdiv.appendChild(progress);
-
-        var tick = 66;
-        efdiv.interval = setInterval(function() {
-            last = new Date(last.getTime() - tick);
-            var hours = last.getUTCHours();
-            var mins = last.getUTCMinutes();
-            var secs = last.getUTCSeconds();
-            efdiv.title = sprintf("%s: %02d:%02d:%02d\n", T("Duration"), hours, mins, secs);
-            progress.style.width = 100 / (duration / last) + "%";
-            if (last <= 0) {
-                clearInterval(efdiv.interval);
-            }
-        }, tick);
-    }
-
-    var title = TS(name);
-    var ename = dom.div("effect-name", {text: title});
-    if (effect.Stacks > 1)
-        ename.textContent += " x" + effect.Stacks;
-
-    efdiv.className  = "effect " + EffectDesc.className(name);
-    efdiv.name = name;
-    efdiv.onclick = function() {
-        var panel = new Panel("effect-description", title, [new EffectDesc(name)]);
-        panel.show();
-    };
-    efdiv.appendChild(ename);
-
-    var effects = document.getElementById("effects");
-    effects.appendChild(efdiv);
-    this.shownEffects[name] = efdiv;
-}
-Character.prototype.removeEffect = function(name) {
-    dom.remove(this.shownEffects[name]);
-    delete this.shownEffects[name];
+    return fish.bind(this)
 }
 Character.prototype.updateEffects = function() {
-    var name
-    for(name in this.shownEffects) {
-        if (!this.Effects[name]) {
-            this.removeEffect(name);
-        }
-    }
-
-    for (name in this.Effects) {
-        this.updateEffect(name, this.Effects[name]);
-    }
+    window.ui.$broadcast('effects.update', this.Effects)
 }
 Character.prototype.updatePosition = function(k) {
     if (this.Dx === 0 && this.Dy === 0) {
@@ -1601,46 +1563,50 @@ Character.prototype.followPath = function() {
 }
 Character.prototype.updateBurden = function() {
     if (this.burden) {
-        this.burden.setPoint(this);
+        this.burden.setPoint(this)
     }
 }
 Character.prototype.updatePlow = function() {
-    if (!this.plow)
-        return;
-    var p = new Point(this);
-    var sector = (this.sprite.position - 1);
+    if (!this.plow) {
+        return
+    }
+    var p = new Point(this)
+    var sector = (this.sprite.position - 1)
     // y = 1 used to fix rendering order
-    var offset = new Point(this.plow.Radius, 1).rotate(2*Math.PI - sector * Math.PI/4);
-    p.add(offset);
-    this.plow.setPoint(p);
-    this.plow.sprite.position = this.sprite.position;
+    var offset = new Point(this.plow.Radius, 1).rotate(2*Math.PI - sector * Math.PI/4)
+    p.add(offset)
+    this.plow.setPoint(p)
+    this.plow.sprite.position = this.sprite.position
 
-    if (this.Dx || this.Dy)
-        this.plow.sprite.animate();
+    var plowS = this.plow.sprite__
+    if (this.Dx || this.Dy) {
+        this.plow.sprite.animate()
+        plowS.texture.frame.x = this.plow.sprite.frame * plowS.texture.frame.width
+    }
+    plowS.texture.frame.y = this.sprite.position * plowS.texture.frame.height
 }
 Character.prototype.pickUp = function() {
-    var self = this;
-    var list = game.findItemsNear(this.X, this.Y).filter(function(e) {
-        return e.MoveType == Entity.MT_PORTABLE;
-    }).sort(function(a, b) {
-        return a.distanceTo(self) - b.distanceTo(self);
-    });
-    if (list.length > 0)
-        list[0].pickUp();
+    var list = game.findItemsNear(this.X, this.Y)
+        .filter((e)=> e.MoveType == Entity.MT_PORTABLE)
+        .sort((a, b)=> a.distanceTo(this) - b.distanceTo(this))
+
+    if (list.length > 0) {
+        list[0].pickUp()
+    }
 }
 Character.prototype.liftStart = function() {
-    var self = this;
-    var list = game.findItemsNear(this.X, this.Y).filter(function(e) {
-        return e.MoveType == Entity.MT_LIFTABLE;
-    }).sort(function(a, b) {
-        return a.distanceTo(self) - b.distanceTo(self);
-    });
-    if (list.length > 0)
-        list[0].lift();
+    var list = game.findItemsNear(this.X, this.Y)
+        .filter((e)=> e.MoveType == Entity.MT_LIFTABLE)
+        .sort((a, b)=> a.distanceTo(this) - b.distanceTo(this))
+
+    if (list.length > 0) {
+        list[0].lift()
+    }
 }
 Character.prototype.liftStop = function() {
-    if (this.burden)
-        game.controller.creatingCursor(this.burden, "lift-stop");
+    if (this.burden) {
+        game.controller.creatingCursor(this.burden, 'lift-stop');
+    }
 }
 
 Character.prototype.updateCamera = function() {
@@ -1663,8 +1629,9 @@ Character.prototype.stop = function() {
     this.Dy = 0;
 }
 Character.prototype.isNear = function(entity) {
-    if (entity.belongsTo(game.player))
-        return true;
+    if (entity.belongsTo(game.player)) {
+        return true
+    }
     if (entity.Width) {
         var padding = this.Radius*2;
         return util.rectIntersects(
@@ -1709,139 +1676,121 @@ Character.prototype.bag = function() {
     return Entity.get(this.Equip[0]);
 }
 Character.prototype.hasItems = function(items) {
-    var found = {};
-    var bag = this.bag();
-    if (!bag)
-        return false;
-    var equals = function(items, foundItems) {
-        for(var item in items) {
-            if (!foundItems || foundItems[item] < items[item])
-                return false;
+    var found = {}
+    var bag = this.bag()
+    if (!bag) {
+        return false
+    }
+    var equals = (items, foundItems)=> {
+        for (var item in items) {
+            if (!foundItems || foundItems[item] < items[item]) {
+                return false
+            }
         }
-        return true;
-    };
+        return true
+    }
 
-    for(var item in items)
-        found[item] = 0;
+    for(var item in items) {
+        found[item] = 0
+    }
 
     for(var i = 0, l = bag.Props.Slots.length; i < l; i++) {
-        var eid = bag.Props.Slots[i];
-        if (!eid)
-            continue;
-        var entity = Entity.get(eid);
-        if (!entity) {
-            game.sendErrorf("hasItems: cannot find %d", eid);
-            continue;
+        var eid = bag.Props.Slots[i]
+        if (!eid) {
+            continue
         }
+
+        var entity = Entity.get(eid)
+        if (!entity) {
+            game.sendErrorf('hasItems: cannot find %d', eid);
+            continue
+        }
+
         if (items[entity.Group]) {
-            found[entity.Group]++;
-            if (equals(items, found))
-                return true;
+            found[entity.Group] += 1
+            if (equals(items, found)) {
+                return true
+            }
         }
     }
-    return false;
+    return false
 }
 Character.prototype.equippedWith = function(group) {
-    return this.Equip.filter(function(eid) {
-        return (eid !== 0);
-    }).map(function(eid) {
-        return Entity.get(eid);
-    }).filter(function(item) {
-        return (item.Group == group);
-    }).length;
+    return this.Equip
+        .filter((eid)=> eid !== 0)
+        .map((eid)=> Entity.get(eid))
+        .filter((item)=> item.Group == group)
+        .length
 }
 Character.prototype.icon = function() {
-    if (!this._icon)
-        this._icon = this.sprite.icon();
-    return this._icon;
+    if (!this._icon) {
+        this._icon = this.sprite.icon()
+    }
+    return this._icon
 }
 Character.prototype.getParts = function() {
     var parts = [];
-    Character.clothes.forEach((type, i)=> {
-        if (type == "head" && this.Style && this.Style.HideHelmet)
-            return;
+    forEach(Character.clothes, (type, i)=> {
+        if (type == 'head' && this.Style && this.Style.HideHelmet) {
+            return
+        }
         var name = this.Clothes[i];
-        if (name && name != "naked")
-            parts.push({type: type, name: name});
-    });
+        if (name && name != 'naked') {
+            parts.push({type: type, name: name})
+        }
+    })
 
     if (this.Style && this.Style.Hair) {
-        var hairStyle = this.Style.Hair.split("#");
+        var hairStyle = this.Style.Hair.split('#');
         var hair = {
-            type: "hair",
+            type: 'hair',
             name: hairStyle[0],
             color: hairStyle[1],
             opacity: hairStyle[2],
         };
         parts.unshift(hair);
     }
-    return parts;
+    return parts
 }
 Character.prototype.interact = function() {
-    var self = this;
-    game.player.interactTarget = this;
-    game.network.send("follow", {Id: this.Id}, function interact() {
+    game.player.interactTarget = this
+    follow(this.Id, ()=> {
         // TODO: remove margo hack
-        if (self.Type == "vendor" && self.Owner !== 0 && self.Name != "Margo") {
-            game.controller.vendor.open(self);
-            return;
+        if (this.Type == 'vendor' && this.Owner != 0 && this.Name != 'Margo') {
+            game.controller.vendor.open(this)
+            return
         }
 
-        var actions = ["Talk"];
-
-        if (self.getQuests().length > 0)
-            actions.push("Quest");
-
-        actions = actions.concat(Object.keys(self.getTalks().actions));
-
-        var panel = new Panel(
-            "interraction",
-            self.Name,
-            actions.map(function(title) {
-                var cls = (title == "Quest") ? "quest-button" : "";
-                return dom.button(T(title), cls, function() {
-                    panel.close();
-                    Character.npcActions[title].call(self);
-                });
-            })
-        );
-        panel.entity = self;
-        panel.show();
-    });
+        Character.openInteraction(this.Name, this)
+    })
 }
-Character.prototype.getTalks = function() {
-    return game.talks.get(
-        this.Type,
-        game.player.Citizenship.Faction.toLowerCase(),
-        game.player.sex()
-    );
-}
+
 Character.prototype.sex = function() {
     return Character.sex(this.Sex);
 }
 Character.prototype.isInteractive = function() {
-    return (this.Type.toLowerCase() in game.talks.npcs) || (this.Type == "vendor");
+    return (this.Type.toLowerCase() in game.talks.npcs) || (this.Type == 'vendor');
 }
 Character.prototype.use = function(entity) {
     switch (entity.Group) {
-    case "shit":
-    case "snowball":
-        game.network.send("throw", {Id: this.Id, Item: entity.Id});
+    case 'shit':
+    case 'snowball':
+        throwEntity(this.Id, entity.Id)
         return true;
-    case "dildo":
-        game.network.send("fuck", {Id: this.Id});
+    case 'dildo':
+        fuck(this.Id)
         return true;
     }
     return false;
 }
 Character.prototype.canUse = function(entity) {
     if (entity instanceof Character)
-        return this.distanceTo(entity) < 2*cnf.CELL_SIZE;
+        return this.distanceTo(entity) < 2*CELL_SIZE;
 
     switch (entity.Group) {
-    case "shit":
-    case "dildo":
-    case "snowball":
+    case 'shit':
+    case 'dildo':
+    case 'snowball':
         return true;
     }
 
@@ -1857,10 +1806,10 @@ Character.prototype.canUse = function(entity) {
 }
 Character.prototype.updateActionAnimation = function() {
     switch (this.Action.Name) {
-    case "cast":
+    case 'cast':
         this.playAnimation({
             down: {
-                name: "cast",
+                name: 'cast',
                 width: 100,
                 height: 60,
             }
@@ -1877,7 +1826,7 @@ Character.prototype.playAnimation = function(anims) {
 }
 Character.prototype.loadAnimation = function(type, anim) {
     var sprt = new Sprite(
-        "animations/" + anim.name + "-" + type + ".png",
+        `animations/${anim.name}-${type}.png`,
         anim.width,
         anim.height,
         (anim.speed || 80)
@@ -1891,20 +1840,16 @@ Character.prototype.distanceTo = function(e) {
     return Math.hypot(this.X - e.X, this.Y - e.Y);
 }
 Character.prototype.selectNextTarget = function() {
-    var self = this;
-    var list = game.findCharsNear(this.X, this.Y, 5*cnf.CELL_SIZE).filter(function(c) {
-        if (c == self)
-            return false;
-        if (c == self.target)
-            return false;
-        if (c.Team && c.Team == self.Team)
-            return false;
-        return party.indexOf(c.Name) == -1;
-    }).sort(function(a, b) {
-        return a.distanceTo(self) - b.distanceTo(self);
-    });
-    if (list.length > 0)
+    var list = game.findCharsNear(this.X, this.Y, 5*CELL_SIZE).filter((c)=> {
+        if (c == this || c == this.target || (c.Team && c.Team == this.Team)) {
+            return false
+        }
+        return party && party.indexOf && party.indexOf(c.Name) == -1
+    }).sort((a, b)=> a.distanceTo(this) - b.distanceTo(this))
+
+    if (list.length > 0) {
         this.setTarget(list[0]);
+    }
 }
 Character.prototype.setTarget = function(target) {
     this.target = target;
@@ -1918,8 +1863,8 @@ Character.prototype.setTarget = function(target) {
     if (cnt.dataset.targetId == target.Id)
         return;
 
-    var name = document.createElement("div");
-    name.id = "target-name";
+    var name = document.createElement('div');
+    name.id = 'target-name';
     name.textContent = target.getName();
 
     cnt.dataset.targetId = target.Id;

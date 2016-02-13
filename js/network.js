@@ -164,7 +164,9 @@ Network.prototype.syncCharacters = function(add, remove) {
     add = add || []
 
     if (remove) {
-        game.removeCharacterById(remove)
+        for (var i = 0, l = remove.length; i < l; i++) {
+            game.removeCharacterById(remove[i])
+        }
     }
 
     for (var id in add) {
@@ -192,7 +194,7 @@ Network.prototype.syncEntities = function(add, remove) {
     add = add || []
     if (remove) {
         for (var i = 0, l = remove.length; i < l; i++) {
-            game.removeEntityById(remove)
+            game.removeEntityById(remove[i])
         }
     }
 

@@ -1,8 +1,10 @@
+import {Point} from './point.js'
 import {rectIntersects, msort} from '../util.js'
 import {config, debug, CELL_SIZE} from '../config.js'
 import {syncCharacters, syncEntities, logon} from '../network-protocol.js'
 import {Snow} from './new-year.js'
 import {fillClaim, strokeClaim} from './entity.js'
+import * as iso from './iso.js'
 
 var graphics = config.graphics
 
@@ -59,34 +61,41 @@ function drawObject(t) {
 Render.prototype.draw = function(ctx) {
     this.drawGlobalEffects()
 
-    ctx.clear()
-
     var cam = this.camera
     var scr = this.screen
 
-    // XXX
+    ctx.clear()
     ctx.save()
     ctx.translate(-cam.x, -cam.y)
 
-    ctx.save()
+    game.mapCtx.globalAlpha = 1
+    game.mapCtx.setTransform(1, 0, 0, 1, 0, 0)
+    game.mapCtx.translate(-cam.x, -cam.y)
+    //game.mapCtx.translate(-cam.x, -cam.y)
     game.map.draw(scr.width, scr.height, cam)
+
     //if (debug.map.grid) {
         //map.drawGrid()
     //}
     game.map.drawMinimap(game.entities.array)
-    ctx.restore()
 
-    //ctx.save()
-    //ctx.translate(cam.x, cam.y)
-    //game.renderer.render(game.pixiStage)
-    //ctx.restore()
 
     var characters = game.characters.array
 
-    for (var i = 0, l = characters.length; i < l; i++) {
-        var t = characters[i]
-        if (isVisibleGame(t)) {
-            t.drawAura()
+    if (config.ui.showAttackRadius) {
+        for (var i = 0, l = characters.length; i < l; i++) {
+            var t = characters[i]
+            if (isVisibleGame(t)) {
+                var sprite = t.sprite
+                if (sprite.name == 'attack' || game.controller.modifier.shift) {
+                    var p = new Point(t)
+                    var sector = (sprite.position - 1)
+                    var offset = new Point(CELL_SIZE, 0).rotate(2*Math.PI - sector * Math.PI/4)
+                    p.add(offset)
+                    ctx.fillStyle = (t.isPlayer) ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 0, 0, 0.2)'
+                    iso.fillCircle(ctx, p.x, p.y, CELL_SIZE)
+                }
+            }
         }
     }
 
